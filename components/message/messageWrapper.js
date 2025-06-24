@@ -95,7 +95,7 @@ export default function MessageWrapper({
     setPrevTemplatePopup(false);
   };
 
-//  comment add
+  //  comment add
   const handleCheckboxChange = (contact) => {
     setContactsError(false);
 
@@ -252,10 +252,6 @@ export default function MessageWrapper({
                   {prevTemlateHeading}
                 </span>
               </button>
-              {/* <button
-                type="button"
-                className={`md:hidden border border-amber-500 text-amber-600 font-bold px-4 py-2 hover:bg-amber-400 hover:text-amber-50 hover:border-amber-600 cursor-pointer transition-colors duration-200 rounded-full`}
-              ></button> */}
             </div>
             <textarea
               name="message"
