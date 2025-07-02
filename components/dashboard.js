@@ -152,6 +152,8 @@ const Dashboard = () => {
         modalTitle={isEdit ? "Edit Document" : "Add New Document"}
         modalOpen={reminderModal}
         setModalOpen={setReminderModal}
+        modalSize={"w-11/12 md:w-3/6"}
+
       >
         <AddDocumentForm
           setReminderModal={setReminderModal}

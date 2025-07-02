@@ -166,7 +166,7 @@ export default function DocumentsSection({
         modalTitle={"Delete Document"}
         modalOpen={deletePopup}
         setModalOpen={setDeletePopup}
-        className={""}
+        modalSize={"w-11/12 md:w-4/6"}
       >
         <div className={modalStyle.deleteModal}>
           <p className={modalStyle.conformationMsg}>

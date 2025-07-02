@@ -32,7 +32,7 @@ export default function CommonModal({
       {modalOpen && (
         <div
           id="backdrop"
-          className={`fixed inset-0 z-[101] flex items-center justify-center bg-black bg-opacity-50`}
+          className={`fixed inset-0 z-[101] flex items-center justify-center  backdrop-blur-sm  bg-gray-900/30 p-5`}
           onClick={handleBackdropClick}
         >
           <div

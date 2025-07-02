@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import "@/styles/formStyles.module.scss";
 import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
 import { faMicrophone, faPlusCircle } from "@fortawesome/free-solid-svg-icons";
 import { Tooltip } from "@mui/material";
@@ -57,7 +56,7 @@ export const InputWithVoice = ({ label, note, setNote }) => {
         {label}
       </label>
 
-      <div className={`${styles.inputGroup} d-flex align-items-center`}>
+      <div className={`${styles.inputGroup} flex items-center`}>
         <input
           type="text"
           value={note}
@@ -66,7 +65,7 @@ export const InputWithVoice = ({ label, note, setNote }) => {
           placeholder={
             isListening ? "Listening..." : "Type or speak your note here..."
           }
-          className={`${styles.input} form-control`}
+          className={`${styles.input} form-control  flex-1`}
         />
         <Tooltip
           title={isListening ? "Listening..." : "Start voice input"}
@@ -77,7 +76,6 @@ export const InputWithVoice = ({ label, note, setNote }) => {
             onClick={handleSpeechRecognition}
             disabled={isListening}
             className={`${styles.voiceButton} btn`}
-            
           >
             <span
               className={styles.svgIcon}

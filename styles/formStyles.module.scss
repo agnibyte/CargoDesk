@@ -2,14 +2,10 @@ $form-bg: #f9f9f9;
 $form-border: #ced4da;
 $form-focus: #80bdff;
 $form-invalid: #dc3545;
+$mediumRed: #ff5f5f;
 
-.form-container {
-  max-width: 600px;
-  margin: 2rem auto;
+.formContainer {
   padding: 1.5rem;
-  background: $form-bg;
-  border-radius: 10px;
-  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
 
   @media (max-width: 768px) {
     padding: 1rem;
@@ -54,28 +50,37 @@ $form-invalid: #dc3545;
     }
   }
 
-  .form-actions {
+  .formActions {
     display: flex;
     justify-content: flex-end;
     gap: 1rem;
+    margin-top: 1.5rem;
 
     .btn {
       padding: 0.5rem 1.5rem;
       border-radius: 5px;
       font-size: 1rem;
       cursor: pointer;
+      border:  1px solid red;
 
-      &.btn-primary {
-        background-color: #100452;
+      &.btnPrimary {
+        background-color: #130468;
         color: #fff;
         border: none;
 
         &:hover {
           // background-color: darken(#100452, 10%);
         }
+        &:active {
+          background-color: #080033;
+        }
+        &:disabled {
+          background-color: #ccc;
+          cursor: not-allowed;
+        }
       }
 
-      &.btn-warning {
+      &.btnWarning {
         background-color: #ffc107;
         color: #212529;
         border: none;
@@ -122,3 +127,8 @@ $form-invalid: #dc3545;
     }
   }
 }
+
+	.errorMsg {
+		color: $mediumRed !important;
+		font-size: 13px;
+	}

@@ -6,9 +6,9 @@ import commonStyle from "@/styles/common/common.module.scss";
 import { DOCUMENTS_TYPE_LIST, vehicleNoListArr } from "@/utilities/dummyData";
 import CustomSearch from "../common/customSearch";
 import moment from "moment";
-import "../../styles/formStyles.module.scss";
 import { InputWithVoice } from "../common/inputWithVoice";
 import { getConstant } from "@/utilities/utils";
+import styles from "@/styles/formStyles.module.scss";
 
 export default function AddDocumentForm({
   addReminderData,
@@ -107,7 +107,7 @@ export default function AddDocumentForm({
   return (
     <form
       onSubmit={handleSubmit(onClickSubmit)}
-      className="form-container"
+      className={styles.formContainer}
     >
       {/* <div className="form-group">
         <label
@@ -164,7 +164,7 @@ export default function AddDocumentForm({
           )}
         />
         {errors.vehicleNo && (
-          <div className="text-danger">{errors.vehicleNo.message}</div>
+          <div className={styles.errorMsg}>{errors.vehicleNo.message}</div>
         )}
       </div>
 
@@ -195,7 +195,7 @@ export default function AddDocumentForm({
           )}
         />
         {errors.documentType && (
-          <div className="text-danger">{errors.documentType.message}</div>
+          <div className={styles.errorMsg}>{errors.documentType.message}</div>
         )}
       </div>
 
@@ -205,20 +205,25 @@ export default function AddDocumentForm({
           className="form-label"
         >
           Select Expiry Date
-        </label>
-        <CustomDatePicker
-          value={expiryDate ? moment(expiryDate) : null}
-          onChange={onChangeExpiryDate}
-        />
+        </label>{" "}
+        <br />
+        <div className="mt-2">
+          <CustomDatePicker
+            value={expiryDate ? moment(expiryDate) : null}
+            onChange={onChangeExpiryDate}
+          />
+        </div>
         {expiryDateError && (
-          <div className="text-danger">{expiryDateError}</div>
+          <div className={styles.errorMsg}>{expiryDateError}</div>
         )}
       </div>
 
-      <div className="form-actions mt-3">
+      <div className={`${styles.formActions}`}>
         <button
           type="submit"
-          className={`btn ${isEdit ? "btn-warning" : "btn-primary"}`}
+          className={` ${styles.btn} ${
+            isEdit ? styles.btnWarning : styles.btnPrimary
+          }`}
         >
           {isLoading
             ? getConstant("LOADING_TEXT")
