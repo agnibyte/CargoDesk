@@ -1,0 +1,36 @@
+{
+    "menu": [
+      {
+        "label": "Home",
+        "url": "/",
+        "subMenu": [
+          { "label": "Dashboard", "url": "/dashboard" },
+          {
+            "label": "Vehicles",
+            "url": "/vehicles",
+            "subMenu": [
+              { "label": "View All Vehicles", "url": "/vehicles/view-all" },
+              { "label": "Add New Vehicles", "url": "/vehicles/add-new" }
+            ]
+          }
+        ]
+      },
+      {
+        "label": "About",
+        "url": "/about"
+      },
+      {
+        "label": "Services",
+        "url": "/services",
+        "subMenu": [
+          { "label": "Design", "url": "/services/design" },
+          { "label": "Development", "url": "/services/development" }
+        ]
+      },
+      {
+        "label": "Contact",
+        "url": "/contact"
+      }
+    ]
+  }
+  

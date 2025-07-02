@@ -1,0 +1,124 @@
+$form-bg: #f9f9f9;
+$form-border: #ced4da;
+$form-focus: #80bdff;
+$form-invalid: #dc3545;
+
+.form-container {
+  max-width: 600px;
+  margin: 2rem auto;
+  padding: 1.5rem;
+  background: $form-bg;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+
+  @media (max-width: 768px) {
+    padding: 1rem;
+  }
+
+  @media (max-width: 480px) {
+    margin: 1rem;
+  }
+
+  .form-group {
+    margin-bottom: 1.5rem;
+
+    .form-label {
+      font-weight: bold;
+      color: #333;
+      margin-bottom: 0.5rem;
+      display: block;
+    }
+
+    .form-control {
+      width: 100%;
+      border: 1px solid $form-border;
+      padding: 0.5rem;
+      border-radius: 5px;
+      font-size: 1rem;
+
+      &:focus {
+        outline: none;
+        border-color: $form-focus;
+        box-shadow: 0 0 5px rgba($form-focus, 0.5);
+      }
+
+      &.is-invalid {
+        border-color: $form-invalid;
+        box-shadow: none;
+      }
+    }
+
+    .invalid-feedback {
+      color: $form-invalid;
+      font-size: 0.875rem;
+    }
+  }
+
+  .form-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: 1rem;
+
+    .btn {
+      padding: 0.5rem 1.5rem;
+      border-radius: 5px;
+      font-size: 1rem;
+      cursor: pointer;
+
+      &.btn-primary {
+        background-color: #100452;
+        color: #fff;
+        border: none;
+
+        &:hover {
+          background-color: darken(#100452, 10%);
+        }
+      }
+
+      &.btn-warning {
+        background-color: #ffc107;
+        color: #212529;
+        border: none;
+
+        &:hover {
+          background-color: darken(#ffc107, 10%);
+        }
+      }
+    }
+  }
+}
+
+.voiceButton {
+  width: 48px; // Ensure consistent size
+  height: 48px;
+  background-color: #e0f7fa;
+  border: none;
+  border-radius: 50%;
+  padding: 10px; // Reduced padding for better alignment
+  cursor: pointer;
+  box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin-left: 10px;
+
+  &:disabled {
+    cursor: not-allowed;
+  }
+  &:hover {
+    background-color: #e0f7fa;
+  }
+}
+
+.svgIcon {
+  svg {
+    font-size: 20px;
+    display: block;
+    margin: auto; // Center the SVG within the button
+    fill: #05001b; // Customize color
+    transition: transform 0.3s;
+    &:hover {
+      // transform: scale(1.2); // Zoom effect on hover
+    }
+  }
+}
