@@ -1,4 +1,4 @@
-@import "../variable.scss";
+@use "../_variable.scss" as *;
 
 .tabs {
   div {

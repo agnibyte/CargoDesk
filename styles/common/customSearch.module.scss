@@ -1,4 +1,4 @@
-@import "../_variable.scss";
+@use "../_variable.scss" as *;
 .rotate_arrow {
 	svg {
 		transform: rotate(180deg);

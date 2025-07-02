@@ -82,6 +82,7 @@ const Dashboard = () => {
   };
 
   const onClickAddReminder = () => {
+    console.log('onclickkk', )
     setIsEdit(false);
     setReminderModal(true);
   };

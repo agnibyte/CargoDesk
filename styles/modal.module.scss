@@ -1,5 +1,5 @@
-@import "./_variable.scss";
-@import "./_mixin.scss";
+@use "./_variable.scss" as *;
+@use "./_mixin.scss" as *;
 .modal-small {
   width: 388px;
   @media (max-width: 540px) {
