@@ -54,7 +54,7 @@ export default function CommonModal({
                 {!backDrop && (
                   <button
                     onClick={toggleModal}
-                    className="text-gray-600 hover:text-gray-900"
+                    className="text-gray-600 hover:text-gray-900 cursor-pointer"
                   >
                     &#10005; {/* Close Icon */}
                   </button>
