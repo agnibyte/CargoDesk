@@ -1,0 +1,10 @@
+@import "./_variable.scss";
+@import "./_mixin.scss";
+
+.mainTabel{
+  background-color: $color-circle;
+}
+.dashboardContainer{
+  width: 90%;
+  margin: 0 auto;
+}

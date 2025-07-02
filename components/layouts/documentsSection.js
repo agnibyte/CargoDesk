@@ -4,7 +4,7 @@ import { checkExpiryCounts, getConstant } from "@/utilities/utils";
 import { DOCUMENTS_TYPE_LIST } from "@/utilities/dummyData";
 import DocumentTable from "../tabels/documentTable";
 import { docTableHeadCells } from "@/utilities/masterData";
-import { FaEdit, FaTrashAlt } from "react-icons/fa";
+import { FaEdit, FaPlusCircle, FaTrashAlt } from "react-icons/fa";
 import docSecStyle from "@/styles/docSec.module.scss";
 import CommonModal from "../common/commonModal";
 import modalStyle from "@/styles/modal.module.scss";
@@ -18,6 +18,7 @@ export default function DocumentsSection({
   setIsEdit,
   tableData,
   setTableData,
+  onClickAddDocument = () => {},
 }) {
   const [documentsTypeList, setDocumentsTypeList] = useState([]);
   const [deletePopup, setDeletePopup] = useState(false);
@@ -88,7 +89,7 @@ export default function DocumentsSection({
 
   return (
     <div>
-      <div className="row mx-1">
+      <div className="flex flex-wrap w-full">
         {documentsTypeList.map((item) => (
           <DocumentsFilterCard
             key={item.id}
@@ -118,14 +119,22 @@ export default function DocumentsSection({
               ))}
           </div>
         ) : (
-          <h5>All Records</h5>
+          <div className="flex justify-between items-center">
+            <h5>All Records</h5>
+            <button
+              onClick={onClickAddDocument}
+              className={"flex items-center " + docSecStyle.addButton}
+            >
+              <FaPlusCircle className="mr-3" />
+              Add Document
+            </button>
+          </div>
         )}
       </div>
 
       <DocumentTable
         rows={appliedFilter.length > 0 ? filteredData : tableData}
         headCells={docTableHeadCells}
-        // title="All Records"
         onClickEdit={onClickEdit}
         selected={selected}
         setSelected={setSelected}

@@ -1,5 +1,4 @@
 import React, { useEffect, useState } from "react";
-import "bootstrap/dist/css/bootstrap.min.css";
 import { DocValidation } from "@/utilities/formValidation";
 import { Controller, useForm } from "react-hook-form";
 import CustomDatePicker from "../common/customDatePicker";

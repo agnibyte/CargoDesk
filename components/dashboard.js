@@ -82,7 +82,7 @@ const Dashboard = () => {
   };
 
   const onClickAddReminder = () => {
-    console.log('onclickkk', )
+    console.log("onclickkk");
     setIsEdit(false);
     setReminderModal(true);
   };
@@ -105,12 +105,12 @@ const Dashboard = () => {
   }, []);
 
   return (
-    <div className="dashboard-container">
+    <div className={dashboardStyle.dashboardContainer}>
       <div className="m-5">
-        <div className="card shadow-lg rounded-lg">
-          <div className="card-header bg-gradient d-flex justify-content-between align-items-center p-2">
-            <h1 className="h4 text-white mb-0">Dashboard</h1>
-            <button
+        <div className="flex flex-col shadow-lg rounded-lg">
+          <div className="card-header flex justify-between items-center p-2">
+            <h2 className="text-white my-1.5">Dashboard</h2>
+            {/* <button
               onClick={onClickAddReminder}
               className="d-flex align-items-center addButton btn btn-primary"
             >
@@ -119,7 +119,7 @@ const Dashboard = () => {
                 className="me-2"
               />
               Add Reminder
-            </button>
+            </button> */}
           </div>
           <div className={dashboardStyle["mainTabel"]}>
             <TabComponent
@@ -129,26 +129,6 @@ const Dashboard = () => {
             />
           </div>
 
-          {/* <Tabs
-            defaultActiveKey={dashboardTabs[0].value}
-            transition={false}
-            id="noanim-tab-example"
-            className="mb-3"
-            style={{ border: "none" }}
-            activeKey={selectedTab}
-            onSelect={(key) => onClickDashboardTab(key)}
-          >
-            {dashboardTabs.map((tab, index) => (
-              <Tab
-                key={index}
-                eventKey={tab.value}
-                title={tab.label}
-                className="text-center"
-              >
-                {tab.component}
-              </Tab>
-            ))}
-          </Tabs> */}
           <div className="mb-3">
             {selectedTab == "document" ? (
               <DocumentsSection
@@ -157,6 +137,7 @@ const Dashboard = () => {
                 setIsEdit={setIsEdit}
                 tableData={documentTableData}
                 setTableData={setDocumentTableData}
+                onClickAddDocument={onClickAddReminder}
               />
             ) : selectedTab == "emi" ? (
               <EmiSection />
@@ -171,7 +152,6 @@ const Dashboard = () => {
         modalTitle={isEdit ? "Edit Document" : "Add New Document"}
         modalOpen={reminderModal}
         setModalOpen={setReminderModal}
-        className={""}
       >
         <AddDocumentForm
           setReminderModal={setReminderModal}

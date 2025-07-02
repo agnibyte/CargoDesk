@@ -5,7 +5,7 @@ const DocumentsFilterCard = ({ item, onFilterClick, isSelected }) => {
 // check change
   return (
     <button
-      className={`${docSecStyle.documentCard} col-12 col-md text-center ${
+      className={`${docSecStyle.documentCard} flex-1 text-center ${
         isSelected ? docSecStyle.selected : ""
       }`}
       onClick={() => onFilterClick(item.value)}
