@@ -12,7 +12,7 @@
     padding: 10px 40px;
     text-decoration: none;
     color: $color-primary;
-    background: $color-circle;
+    background: $colorCircle;
     -webkit-border-top-left-radius: 15px;
     -webkit-border-top-right-radius: 15px;
     -moz-border-radius-topleft: 15px;
@@ -68,7 +68,7 @@
 
   div:before,
   div:after {
-    background: $color-circle;
+    background: $colorCircle;
     width: 10px;
     height: 10px;
   }
@@ -88,18 +88,18 @@
     -webkit-border-radius: 10px;
     -moz-border-radius: 10px;
     border-radius: 10px;
-    background: $color-circle;
+    background: $colorCircle;
     z-index: 2;
   }
 
   .active .tabsLabel:after,
   .active .tabsLabel:before {
-    background:  $color-circle;
+    background:  $colorCircle;
   }
 
   div:first-child.active .tabsLabel:before,
   div:last-child.active .tabsLabel:after {
-    background: $color-circle;
+    background: $colorCircle;
   }
 
   div .tabsLabel:before {

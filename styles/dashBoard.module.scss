@@ -1,10 +1,10 @@
-@import "./_variable.scss";
-@import "./_mixin.scss";
+@use "./_variable.scss" as variables;
 
-.mainTabel{
-  background-color: $color-circle;
+.mainTabel {
+  background-color: variables.$colorCircle;
 }
-.dashboardContainer{
+
+.dashboardContainer {
   width: 90%;
   margin: 0 auto;
 }
