@@ -1,14 +1,11 @@
 import React, { useEffect, useState } from "react";
-import AddReminderForm from "./molecules/addReminderForm";
 import CommonModal from "./common/commonModal";
 import DocumentsSection from "./layouts/documentsSection";
 import EmiSection from "./layouts/emiSection";
-import AddDocumentForm from "./molecules/addDocumentForm";
 import { postApiData } from "@/utilities/services/apiService";
-import { FontAwesomeIcon } from "@fortawesome/react-fontawesome";
-import { faPlusCircle } from "@fortawesome/free-solid-svg-icons";
 import TabComponent from "./common/tabComponent";
 import dashboardStyle from "@/styles/dashBoard.module.scss";
+import AddDocumentForm from "./common/molecules/addDocumentForm";
 
 const Dashboard = () => {
   const [reminderModal, setReminderModal] = useState(false);
@@ -153,7 +150,6 @@ const Dashboard = () => {
         modalOpen={reminderModal}
         setModalOpen={setReminderModal}
         modalSize={"w-11/12 md:w-3/6"}
-
       >
         <AddDocumentForm
           setReminderModal={setReminderModal}

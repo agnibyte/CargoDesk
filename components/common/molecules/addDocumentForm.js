@@ -1,14 +1,14 @@
 import React, { useEffect, useState } from "react";
 import { DocValidation } from "@/utilities/formValidation";
 import { Controller, useForm } from "react-hook-form";
-import CustomDatePicker from "../common/customDatePicker";
 import commonStyle from "@/styles/common/common.module.scss";
 import { DOCUMENTS_TYPE_LIST, vehicleNoListArr } from "@/utilities/dummyData";
-import CustomSearch from "../common/customSearch";
 import moment from "moment";
-import { InputWithVoice } from "../common/inputWithVoice";
 import { getConstant } from "@/utilities/utils";
 import styles from "@/styles/formStyles.module.scss";
+import CustomDatePicker from "../customDatePicker";
+import CustomSearch from "../customSearch";
+import { InputWithVoice } from "../inputWithVoice";
 
 export default function AddDocumentForm({
   addReminderData,
