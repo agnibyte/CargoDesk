@@ -28,3 +28,20 @@ body {
 	color: white;
 	border-radius: 16px 16px 0 0;
 }
+
+@keyframes slide-down {
+	0% {
+		transform: translateY(-10px);
+		opacity: 0;
+	}
+
+	100% {
+		transform: translateY(0);
+		opacity: 1;
+	}
+}
+
+.animate-slide-down {
+	animation: slide-down 0.2s ease-out forwards;
+}
+

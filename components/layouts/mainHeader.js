@@ -1,120 +1,137 @@
-import React, { useState } from "react";
+"use client";
 import headerStyle from "@/styles/header.module.scss";
-import Image from "next/image";
-import { menuItems } from "@/utilities/masterData";
+import React, { useState } from "react";
 import Link from "next/link";
+import Image from "next/image";
+import { menuItems } from "@/utilities/masterData"; // assumes structure with children array
 
 export default function MainHeader() {
+  const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeMenu, setActiveMenu] = useState(null);
-  const [activeSubMenu, setActiveSubMenu] = useState(null);
 
-  const toggleMenu = (index) => {
+  const toggleSubMenu = (index) => {
     setActiveMenu(activeMenu === index ? null : index);
-    setActiveSubMenu(null);
   };
 
   return (
-    <div className={headerStyle["navbar"]}>
-      <Image
-        src="/logo.png"
-        alt="Logo"
-        width={50}
-        height={50}
-        className={headerStyle["logo"]}
-      />
-      <div className={headerStyle.menuOptions}>
-        {menuItems.map((item, index) => (
-          <React.Fragment key={item.id}>
-            {item.url && item.url != "" ? (
+    <header className="bg-white shadow-md p-3 relative z-50">
+      <div className="flex items-center justify-around mx-auto px-5 gap-4 md:gap-8 w-[80%]">
+        <div className="flex items-center">
+          <Image
+            src="/logo.png"
+            alt="Logo"
+            width={40}
+            height={40}
+          />
+          {/* <h1 className="text-lg font-semibold hidden sm:block">Dashboard</h1> */}
+        </div>
+
+        {/* Desktop Menu */}
+        <nav className="hidden md:flex gap-6 items-center">
+          {menuItems.map((item, idx) =>
+            item.url ? (
               <Link
+                key={idx}
                 href={item.url}
-                className={headerStyle["menu-button"]}
-                key={item.id}
+                className="text-sm font-medium hover:underline"
               >
                 {item.title}
               </Link>
             ) : (
               <div
-                className={headerStyle["menu-item"]}
-                key={item.id}
-                // onMouseLeave={() => {
-                //   setActiveMenu(null);
-                //   setActiveSubMenu(null);
-                // }}
-
-                onMouseEnter={() => toggleMenu(index)}
-                onMouseLeave={() => toggleMenu(null)}
+                className="relative group"
+                key={idx}
               >
-                <button
-                  className={headerStyle["menu-button"]}
-                  // onClick={() => toggleMenu(index)}
-                >
-                  {/* {item.icon} */}
+                <button className="text-sm font-medium flex items-center gap-1">
                   {item.title}
                   {item.children.length > 0 && (
-                    <svg
-                      style={{ marginLeft: "6px" }}
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="12"
-                      height="12"
-                      fill="currentColor"
-                      viewBox="0 0 320 512"
-                    >
-                      <path d="M143 352.3l-135.1-135C2.7 211.7 0 206.9 0 201.6c0-5.3 2.7-10.1 7.9-15.1l22.6-22.6c5-5.3 10-7.9 15.3-7.9s10.1 2.6 15.1 7.9l104 104 104-104c5-5.3 10-7.9 15.3-7.9s10.1 2.6 15.1 7.9l22.6 22.6c5 5 7.6 9.8 7.6 15.1s-2.6 10.1-7.9 15.1L177 352.3c-4.2 4.2-9.2 6.3-15 6.3s-10.9-2.1-15-6.3z" />
-                    </svg>
+                    <div className={headerStyle.arrow}></div>
                   )}
                 </button>
-
-                {item.children.length > 0 && activeMenu === index && (
-                  <div className={headerStyle["dropdown"]}>
+                {item.children?.length > 0 && (
+                  <div className="absolute left-0 mt-2 bg-white shadow-md border rounded-md w-48 hidden group-hover:block z-50">
                     {item.children.map((child, cidx) => (
                       <div
-                        className={`${headerStyle["dropdown-item"]} ${headerStyle["menu-item"]}`}
                         key={cidx}
-                        onMouseEnter={() => setActiveSubMenu(cidx)}
-                        onMouseLeave={() => setActiveSubMenu(null)}
+                        className="px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer"
                       >
                         {child.title}
-                        {child.children?.length > 0 && (
-                          <svg
-                            style={{
-                              marginLeft: "6px",
-                              transform: "rotate(270deg)",
-                            }}
-                            xmlns="http://www.w3.org/2000/svg"
-                            width="12"
-                            height="12"
-                            fill="currentColor"
-                            viewBox="0 0 320 512"
-                          >
-                            <path d="M143 352.3l-135.1-135C2.7 211.7 0 206.9 0 201.6c0-5.3 2.7-10.1 7.9-15.1l22.6-22.6c5-5.3 10-7.9 15.3-7.9s10.1 2.6 15.1 7.9l104 104 104-104c5-5.3 10-7.9 15.3-7.9s10.1 2.6 15.1 7.9l22.6 22.6c5 5 7.6 9.8 7.6 15.1s-2.6 10.1-7.9 15.1L177 352.3c-4.2 4.2-9.2 6.3-15 6.3s-10.9-2.1-15-6.3z" />
-                          </svg>
-                        )}
-
-                        {child.children?.length > 0 &&
-                          activeSubMenu === cidx && (
-                            <div className={headerStyle["submenu"]}>
-                              {child.children.map((sub, sidx) => (
-                                <div
-                                  className={headerStyle["dropdown-item"]}
-                                  key={sidx}
-                                >
-                                  {sub.title}
-                                </div>
-                              ))}
-                            </div>
-                          )}
                       </div>
                     ))}
                   </div>
                 )}
               </div>
-            )}
-          </React.Fragment>
-        ))}
+            )
+          )}
+        </nav>
+        <div className="text-sm font-semibold text-red-500">My Account</div>
+
+        {/* Hamburger Icon */}
+        <button
+          onClick={() => setMobileMenuOpen(!isMobileMenuOpen)}
+          className="md:hidden border border-blue-400 p-2 rounded"
+        >
+          <svg
+            className="w-5 h-5 text-blue-500"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2"
+            viewBox="0 0 24 24"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M4 6h16M4 12h16M4 18h16"
+            />
+          </svg>
+        </button>
       </div>
 
-      <div className={headerStyle["user-profile"]}>My Account</div>
-    </div>
+      {/* Mobile Menu */}
+      {isMobileMenuOpen && (
+        <div className="md:hidden mt-3 bg-white shadow-md rounded-md p-4 animate-slide-down">
+          {menuItems.map((item, idx) => (
+            <div
+              key={idx}
+              className="mb-2"
+            >
+              {item.url ? (
+                <Link
+                  href={item.url}
+                  className="block text-sm font-semibold text-gray-700 py-2"
+                  onClick={() => setMobileMenuOpen(false)}
+                >
+                  {item.title}
+                </Link>
+              ) : (
+                <div>
+                  <button
+                    onClick={() => toggleSubMenu(idx)}
+                    className="w-full text-left flex justify-between items-center text-sm font-semibold text-red-600 py-2"
+                  >
+                    {item.title}
+                    {item.children?.length > 0 && (
+                      <span>{activeMenu === idx ? "▲" : "▼"}</span>
+                    )}
+                  </button>
+                  {activeMenu === idx &&
+                    item.children?.map((child, cidx) => (
+                      <div
+                        key={cidx}
+                        className="ml-4 py-1 text-sm text-gray-700 border-l pl-2"
+                      >
+                        {child.title}
+                      </div>
+                    ))}
+                </div>
+              )}
+            </div>
+          ))}
+          <div className="text-sm font-semibold text-red-500 mt-4">
+            Hello, kiranlogin
+          </div>
+        </div>
+      )}
+    </header>
   );
 }
