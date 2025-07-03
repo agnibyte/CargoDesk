@@ -65,6 +65,8 @@
   padding: 8px 12px;
   cursor: pointer;
   white-space: nowrap;
+  display: flex;
+  align-items: center;
 }
 
 .dropdown-item:hover {

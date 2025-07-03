@@ -57,14 +57,14 @@ export const menuItems = [
     url: "/messager",
   },
   {
-    title: "UI Elements",
-    id: "UI Elements",
+    title: "Invoice",
+    id: "invoice",
     icon: "🎨",
     children: [
       {
-        title: "Basic Elements",
-        id: "Basic Elements",
-        children: [],
+        title: "New Invoice",
+        id: "newInvoice",
+        url: "/invoice/new",
       },
       {
         title: "Advanced Elements",
@@ -89,10 +89,11 @@ export const menuItems = [
     ],
   },
   {
-    title: "Pages",
-    id: "Pages",
+    title: "DailyOrders",
+    id: "dailyorders",
     icon: "🌍",
     children: [],
+    url: "/dailyorders",
   },
   {
     title: "Apps",
