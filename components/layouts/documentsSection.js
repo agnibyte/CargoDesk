@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import moment from "moment";
 import { checkExpiryCounts, getConstant } from "@/utilities/utils";
 import { DOCUMENTS_TYPE_LIST } from "@/utilities/dummyData";
-import DocumentTable from "../tabels/documentTable";
+import DocumentTable from "../common/tabels/documentTable";
 import { docTableHeadCells } from "@/utilities/masterData";
 import { FaEdit, FaPlusCircle, FaTrashAlt } from "react-icons/fa";
 import docSecStyle from "@/styles/docSec.module.scss";
@@ -10,7 +10,7 @@ import CommonModal from "../common/commonModal";
 import modalStyle from "@/styles/modal.module.scss";
 import { postApiData } from "@/utilities/services/apiService";
 import commonStyle from "@/styles/common/common.module.scss";
-import DocumentsFilterCard from "../items/documentsFilterCard";
+import DocumentsFilterCard from "../common/items/documentsFilterCard";
 
 export default function DocumentsSection({
   setReminderData,
