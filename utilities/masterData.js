@@ -51,6 +51,13 @@ export const menuItems = [
     children: [],
   },
   {
+    title: "Documents",
+    id: "documents",
+    icon: "🌐",
+    children: [],
+    url: "/documents",
+  },
+  {
     title: "Messager",
     id: "Messager",
     icon: "📦",
@@ -89,7 +96,7 @@ export const menuItems = [
     ],
   },
   {
-    title: "DailyOrders",
+    title: "Daily Orders",
     id: "dailyorders",
     icon: "🌍",
     children: [],
