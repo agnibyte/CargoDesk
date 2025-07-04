@@ -1,0 +1,21 @@
+// import { getUserProfileDetails } from "@/backend/controllers/usersController";
+
+export default function handler(req, res) {
+  return new Promise((resolve, reject) => {
+    const request = req.body;
+    const response = {
+      status: false,
+    };
+
+    resolve();
+    // getUserProfileDetails(request)
+    //   .then((result) => {
+    //     res.status(200).json(result);
+    //   })
+    //   .catch((error) => {
+    //     response.error = error;
+    //     res.status(200).json(response);
+    //     resolve();
+    //   });
+  });
+}
