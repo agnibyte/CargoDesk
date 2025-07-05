@@ -1,19 +1,37 @@
 import "../styles/globals.css";
 import CommonLayout from "@/layout/commonLayout";
+import LoginLayout from "@/layout/loginLayout";
 import {
   checkBotUserAgent,
   checkUserDeviceTypeByUserAgent,
 } from "@/utilities/utils";
 
 export default function MyApp({ Component, pageProps, isBotAgent, isMobile }) {
+  const selectLayout = (component) => {
+    if (typeof Component.layoutName !== "undefined") {
+      if (Component.layoutName == "login") {
+        return <LoginLayout>{component}</LoginLayout>;
+      }
+    }
+
+    return <CommonLayout>{component}</CommonLayout>;
+  };
+
   return (
-    <CommonLayout>
-      <Component
-        isMobile={isMobile}
-        isBotAgent={isBotAgent}
-        {...pageProps}
-      />
-    </CommonLayout>
+    <>
+      {/* <Head>
+				<FontLoad />
+			</Head> */}
+      <>
+        {selectLayout(
+          <Component
+            isMobile={isMobile}
+            isBotAgent={isBotAgent}
+            {...pageProps}
+          />
+        )}
+      </>
+    </>
   );
 }
 
