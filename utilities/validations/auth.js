@@ -1,4 +1,8 @@
-import { validateEmailPattern, validationForFullName, validationMobilePattern } from "./patterns";
+import {
+  validateEmailPattern,
+  validationForFullName,
+  validationMobilePattern,
+} from "./patterns";
 
 export const loginValidation = {
   mobile_no: {
@@ -28,5 +32,23 @@ export const loginValidation = {
       value: validateEmailPattern(),
       message: "Please enter valid email",
     },
+  },
+  email_id: {
+    required: "Please enter email",
+    pattern: {
+      value: validateEmailPattern(),
+      message: "Please enter valid email",
+    },
+  },
+  password: {
+    required: "Please enter password",
+    // minLength: {
+    //   value: 6,
+    //   message: "Password must be at least 6 characters",
+    // },
+    // maxLength: {
+    //   value: 20,
+    //   message: "Password must not exceed 20 characters",
+    // },
   },
 };
