@@ -47,19 +47,7 @@ export default function LoginWrapper() {
               autoComplete="false"
               {...register("email", { required: "Email is required" })}
             />
-            <label
-              className="absolute left-0 top-2 text-white/70 text-sm transition-all
-    peer-placeholder-shown:top-2.5 
-    peer-placeholder-shown:text-base 
-    peer-placeholder-shown:text-white/50 
-    peer-focus:top-[-20px] 
-    peer-focus:text-sm 
-    peer-focus:text-white 
-    peer-valid:top-[-20px] 
-    peer-valid:text-sm 
-    peer-valid:text-white"
-    placeholder="Email"
-            >
+            <label className="absolute left-0 top-2 text-white/70 text-sm transition-all peer-placeholder-shown:top-2.5  peer-placeholder-shown:text-base  peer-placeholder-shown:text-white/50  peer-focus:top-[-20px]  peer-focus:text-sm  peer-focus:text-white  peer-valid:top-[-20px]  peer-valid:text-sm  peer-valid:text-white">
               Email
             </label>
             {errors.email && (
@@ -69,15 +57,33 @@ export default function LoginWrapper() {
             )}
           </div>
 
-          {/* Password */}
           <div className="relative border-b-2 border-white/30">
             <input
               type="password"
-              placeholder="Password"
+              placeholder=" "
+              required
+              className="w-full bg-transparent outline-none text-white placeholder-transparent peer h-10"
+              autoComplete="false"
+              {...register("password", { required: "Password is required" })}
+            />
+            <label className="absolute left-0 top-2 text-white/70 text-sm transition-all peer-placeholder-shown:top-2.5  peer-placeholder-shown:text-base  peer-placeholder-shown:text-white/50  peer-focus:top-[-20px]  peer-focus:text-sm  peer-focus:text-white  peer-valid:top-[-20px]  peer-valid:text-sm  peer-valid:text-white">
+              Password
+            </label>
+            {errors.email && (
+              <p className="text-red-400 text-xs mt-1">
+                {errors.password.message}
+              </p>
+            )}
+          </div>
+
+          {/* <div className="relative border-b-2 border-white/30">
+            <input
+              type=""
+              placeholder=" "
               className="w-full bg-transparent outline-none text-white placeholder-transparent peer h-10"
               {...register("password", { required: "Password is required" })}
             />
-            <label className="absolute left-0 top-2 text-white/70 text-sm transition-all peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-base peer-placeholder-shown:text-white/50 peer-focus:top-[-20px] peer-focus:text-sm peer-focus:text-white peer-valid:top-[-20px] ">
+            <label className="absolute left-0 top-2 text-white/70 text-sm transition-all peer-placeholder-shown:top-2.5  peer-placeholder-shown:text-base  peer-placeholder-shown:text-white/50  peer-focus:top-[-20px]  peer-focus:text-sm  peer-focus:text-white  peer-valid:top-[-20px]  peer-valid:text-sm  peer-valid:text-white">
               Password
             </label>
             {errors.password && (
@@ -85,17 +91,17 @@ export default function LoginWrapper() {
                 {errors.password.message}
               </p>
             )}
-          </div>
+          </div> */}
 
           {/* Remember Me & Forgot */}
           <div className="flex items-center justify-between text-sm text-white/80">
-            <label className="flex items-center space-x-2">
+            {/* <label className="flex items-center space-x-2">
               <input
                 type="checkbox"
                 className="accent-white"
               />
               <span>Remember me</span>
-            </label>
+            </label> */}
             <a
               href="#"
               className="hover:underline"
@@ -121,12 +127,7 @@ export default function LoginWrapper() {
           {/* Register */}
           <p className="text-center text-white/80 text-sm mt-6">
             Don&apos;t have an account?{" "}
-            <a
-              href="#"
-              className="underline hover:text-white"
-            >
-              Register
-            </a>
+            <button className="underline hover:text-white">Register</button>
           </p>
         </form>
       </div>
