@@ -6,19 +6,40 @@ export default function LoginWrapper() {
   const {
     register,
     handleSubmit,
+    setValue,
     formState: { errors },
   } = useForm();
+
+  const [formData, setFormData] = useState({
+    email: "",
+    password: "",
+    rememberMe: false,
+  });
+
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState("");
+  const [section, setSection] = useState("login"); // for future register toggle
 
-  const onSubmit = async (data) => {
+  const handleChange = (e) => {
+    const { name, value, type, checked } = e.target;
+    const newValue = type === "checkbox" ? checked : value;
+
+    setFormData((prev) => ({
+      ...prev,
+      [name]: newValue,
+    }));
+
+    setValue(name, newValue, { shouldValidate: true });
+  };
+
+  const onSubmit = async () => {
     setLoading(true);
     setApiError("");
 
     try {
-      const response = await axios.post("/api/login", data);
+      const response = await axios.post("/api/login", formData);
       console.log("Login success:", response.data);
-      // redirect or set auth token here
+      // handle auth token or redirect
     } catch (err) {
       setApiError("Invalid email or password");
     } finally {
@@ -27,8 +48,8 @@ export default function LoginWrapper() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center relative px-4 ">
-      <div class="background-image"></div>
+    <div className="min-h-screen flex items-center justify-center relative px-4">
+      <div className="background-image"></div>
 
       <div className="max-w-sm w-full bg-white/20 backdrop-blur-lg border border-white/30 rounded-xl p-8 text-white">
         <h2 className="text-2xl font-bold mb-6 text-center">Login</h2>
@@ -41,13 +62,16 @@ export default function LoginWrapper() {
           <div className="relative border-b-2 border-white/30">
             <input
               type="email"
+              name="email"
+              value={formData.email}
+              onChange={handleChange}
               placeholder=" "
               required
+              autoComplete="email"
               className="w-full bg-transparent outline-none text-white placeholder-transparent peer h-10"
-              autoComplete="false"
               {...register("email", { required: "Email is required" })}
             />
-            <label className="absolute left-0 top-2 text-white/70 text-sm transition-all peer-placeholder-shown:top-2.5  peer-placeholder-shown:text-base  peer-placeholder-shown:text-white/50  peer-focus:top-[-20px]  peer-focus:text-sm  peer-focus:text-white  peer-valid:top-[-20px]  peer-valid:text-sm  peer-valid:text-white">
+            <label className="absolute left-0 top-2 text-white/70 text-sm transition-all peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-base peer-placeholder-shown:text-white/50 peer-focus:top-[-20px] peer-focus:text-sm peer-focus:text-white peer-valid:top-[-20px] peer-valid:text-sm peer-valid:text-white">
               Email
             </label>
             {errors.email && (
@@ -57,14 +81,18 @@ export default function LoginWrapper() {
             )}
           </div>
 
+          {/* Password */}
           <div className="relative border-b-2 border-white/30">
             <input
               type="password"
-              placeholder=" "
+              placeholder="Password"
               required
               className="w-full bg-transparent outline-none text-white placeholder-transparent peer h-10"
               autoComplete="false"
               {...register("password", { required: "Password is required" })}
+              name="password"
+              value={formData.password}
+              onChange={handleChange}
             />
             <label className="absolute left-0 top-2 text-white/70 text-sm transition-all peer-placeholder-shown:top-2.5  peer-placeholder-shown:text-base  peer-placeholder-shown:text-white/50  peer-focus:top-[-20px]  peer-focus:text-sm  peer-focus:text-white  peer-valid:top-[-20px]  peer-valid:text-sm  peer-valid:text-white">
               Password
@@ -76,28 +104,14 @@ export default function LoginWrapper() {
             )}
           </div>
 
-          {/* <div className="relative border-b-2 border-white/30">
-            <input
-              type=""
-              placeholder=" "
-              className="w-full bg-transparent outline-none text-white placeholder-transparent peer h-10"
-              {...register("password", { required: "Password is required" })}
-            />
-            <label className="absolute left-0 top-2 text-white/70 text-sm transition-all peer-placeholder-shown:top-2.5  peer-placeholder-shown:text-base  peer-placeholder-shown:text-white/50  peer-focus:top-[-20px]  peer-focus:text-sm  peer-focus:text-white  peer-valid:top-[-20px]  peer-valid:text-sm  peer-valid:text-white">
-              Password
-            </label>
-            {errors.password && (
-              <p className="text-red-400 text-xs mt-1">
-                {errors.password.message}
-              </p>
-            )}
-          </div> */}
-
           {/* Remember Me & Forgot */}
           <div className="flex items-center justify-between text-sm text-white/80">
             {/* <label className="flex items-center space-x-2">
               <input
                 type="checkbox"
+                name="rememberMe"
+                checked={formData.rememberMe}
+                onChange={handleChange}
                 className="accent-white"
               />
               <span>Remember me</span>
@@ -124,10 +138,15 @@ export default function LoginWrapper() {
             {loading ? "Logging in..." : "Log In"}
           </button>
 
-          {/* Register */}
+          {/* Register Link */}
           <p className="text-center text-white/80 text-sm mt-6">
             Don&apos;t have an account?{" "}
-            <button className="underline hover:text-white">Register</button>
+            <button
+              className="underline hover:text-white"
+              onClick={() => setSection("register")}
+            >
+              Register
+            </button>
           </p>
         </form>
       </div>
