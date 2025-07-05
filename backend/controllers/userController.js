@@ -5,6 +5,7 @@ export function addNeUserController(request) {
     const response = {
       status: false,
     };
+
     addNewUserModel(request)
       .then((result) => {
         if (result.status) {

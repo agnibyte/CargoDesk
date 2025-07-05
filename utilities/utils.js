@@ -1,6 +1,7 @@
 import { constantsList } from "@/constants";
 import moment from "moment";
 import { DOCUMENTS_TYPE_LIST } from "./dummyData";
+const crypto = require("crypto");
 
 export const getUniqueKey = (length = 12) => {
   let result = "";
@@ -111,4 +112,48 @@ export const checkExpiryCounts = (data) => {
   });
 
   return result;
+};
+export const hashWithSHA256 = (input) => {
+  return crypto.createHash("sha256").update(input).digest("hex");
+};
+
+export function setCookie(name, value, expiry = null) {
+  let cookie = "; path=/";
+  if (expiry != null) {
+    let date = new Date();
+    date.setTime(date.getTime() + expiry * 60 * 1000);
+    const expires = "; expires=" + date.toUTCString();
+    cookie = expires + "; path=/";
+  }
+
+  document.cookie = name + "=" + (value || "") + cookie;
+}
+
+export const getCookie = (name) => {
+  if (typeof document == "undefined") return null;
+
+  const nameEQ = name + "=";
+  const ca = document.cookie.split(";");
+  for (var i = 0; i < ca.length; i++) {
+    let c = ca[i];
+    while (c.charAt(0) == " ") c = c.substring(1, c.length);
+    if (c.indexOf(nameEQ) == 0) return c.substring(nameEQ.length, c.length);
+  }
+  return null;
+};
+
+export function deleteCookie(name) {
+  document.cookie = name + "=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT;";
+}
+
+export const convertFirstLetterCapital = (text) => {
+  if (typeof text == "undefined" || typeof text == "null" || text == null)
+    return "";
+
+  try {
+    return text.charAt(0).toUpperCase() + text.slice(1);
+  } catch (error) {
+    console.log("catch", error);
+    return "";
+  }
 };

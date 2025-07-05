@@ -7,4 +7,12 @@ export const internalList = {
   // node api
   SEND_SMS: "/api/sendSms",
   SEND_MESSAGE: "/api/sendMessage",
+
+  // login api
+  VERIFY_USER: "/api/user/verify-user",
+  LOGOUT_USER: "/api/user/logout-user",
+  GET_USER_PROFILE: "/api/user/get-user-profile",
+  
+  // add new user
+  ADD_NEW_USER: "/api/user/add-new-user",
 };

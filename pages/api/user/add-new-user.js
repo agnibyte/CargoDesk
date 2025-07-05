@@ -1,7 +1,4 @@
-import {
-  addNeUserController,
-  getCustomers,
-} from "@/backend/controllers/usersController";
+import { addNeUserController } from "@/backend/controllers/userController";
 
 export default function handler(req, res) {
   return new Promise((resolve, reject) => {
@@ -9,7 +6,6 @@ export default function handler(req, res) {
     const response = {
       status: false,
     };
-
 
     addNeUserController(request)
       .then((result) => {

@@ -1,4 +1,9 @@
-import { hashWithSHA256 } from "./utils"; // replace with your actual hash util
+import executeQuery from "@/helpers/dbConnection";
+
+const response = {
+  status: false,
+  message: "",
+};
 
 export function addNewUserModel(data) {
   return new Promise((resolve, reject) => {
@@ -8,7 +13,8 @@ export function addNewUserModel(data) {
     executeQuery(checkQuery, [data.email, data.phone])
       .then((existing) => {
         if (existing.length > 0) {
-          return resolve({ status: false, message: "Email or Phone already exists" });
+          response.message = "Email or Phone already exists";
+          return resolve(response);
         }
 
         const newUser = {
@@ -17,25 +23,27 @@ export function addNewUserModel(data) {
           email: data.email,
           phone: data.phone,
           role: data.role || "user",
-          password: hashWithSHA256(data.password),
+          password: data.password,
         };
 
         return executeQuery(insertQuery, newUser);
       })
       .then((insertResult) => {
         if (insertResult.affectedRows > 0) {
-          resolve({ status: true, message: "User added successfully" });
+          response.status = true;
+          response.message = "User added successfully";
+          resolve(response);
         } else {
-          resolve({ status: false, message: "User creation failed" });
+          response.message = "Failed to add user";
+          resolve(response);
         }
       })
       .catch((error) => {
         console.error("Error adding user:", error);
-        reject({ status: false, message: "Error occurred while adding user" });
+        reject(response);
       });
   });
 }
-
 
 export function verifyUserModel(email, password) {
   return new Promise((resolve, reject) => {
