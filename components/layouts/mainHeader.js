@@ -80,11 +80,11 @@ export default function MainHeader({ pageData = {} }) {
                   )}
                 </button>
                 {item.children?.length > 0 && (
-                  <div className="absolute left-0 mt-2 bg-white shadow-md border rounded-md w-48 hidden group-hover:block z-50">
+                  <div className="absolute group-hover:block z-50 hidden w-48 bg-white border border-gray-200 rounded-xl shadow-lg opacity-100">
                     {item.children.map((child, cidx) => (
                       <div
                         key={cidx}
-                        className="px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer"
+                        className="px-4 py-2 text-sm hover:bg-gray-100 cursor-pointer group"
                       >
                         {child.title}
                       </div>
@@ -95,11 +95,11 @@ export default function MainHeader({ pageData = {} }) {
             )
           )}
         </nav>
-        <div className="text-sm font-semibold text-red-500">{`Hello, ${convertFirstLetterCapital(
+        {/* <div className="text-sm font-semibold text-red-500">{`Hello, ${convertFirstLetterCapital(
           pageData?.user?.firstName
-        )}`}</div>
+        )}`}</div> */}
         <ProfileButton
-          username={convertFirstLetterCapital(pageData?.user?.firstName)}
+          username={pageData?.user?.firstName}
           onclickLogOut={handleLogout}
         />
 
