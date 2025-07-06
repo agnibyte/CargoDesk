@@ -22,7 +22,8 @@
     cursor: pointer;
     font-weight: 500;
 
-  } 
+  }
+
   // .tabsLabel:hover {
   //   background-color: #fdfdfd;
   //   border-radius: 10px;
@@ -94,7 +95,7 @@
 
   .active .tabsLabel:after,
   .active .tabsLabel:before {
-    background:  $colorCircle;
+    background: $colorCircle;
   }
 
   div:first-child.active .tabsLabel:before,
@@ -109,4 +110,29 @@
   div .tabsLabel:after {
     right: -20px;
   }
+
+  @media screen and (max-width: 768px) {
+    .tabsLabel {
+      padding: 10px 20px;
+      font-size: 14px;
+    }
+
+    div .tabsLabel:before,
+    div .tabsLabel:after {
+      width: 15px;
+      height: 15px;
+      -webkit-border-radius: 7.5px;
+      -moz-border-radius: 7.5px;
+      border-radius: 7.5px;
+    }
+
+    div .tabsLabel:before {
+      left: -15px;
+    }
+
+    div .tabsLabel:after {
+      right: -15px;
+    }
+  }
+
 }

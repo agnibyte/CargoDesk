@@ -75,18 +75,23 @@
 
 /* Responsive Design */
 @media (max-width: 767px) {
+
   .documentCard {
-    padding: 0 !important;
-    align-items: flex-start;
+    width: 100%;
+    padding: 0.5rem;
+    margin-bottom: 3px; // Add some space between cards
+  }
 
-    .labelWrap {
-      display: flex;
-      flex-direction: row;
-    }
+  .label {
+    font-size: 16px; // Slightly smaller font size on mobile
+  }
 
-    .label {
-      margin-left: 5px;
-    }
+  .h5 {
+    font-size: 1.1rem; // Adjust heading size for mobile
+  }
+
+  .display-6 {
+    font-size: 1.5rem; // Adjust display size for mobile
   }
 }
 
@@ -146,9 +151,24 @@
     box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
     padding-right: 30px;
   }
+
   &:active {
     // transform: translateX(1px);
   }
 }
 
+.labelWrap {
+  display: flex;
+  justify-content: center;
+  flex-direction: column;
+  width: 100%;
+  height: 100%;
+  text-align: center;
+}
 
+@media (max-width: 768px) {
+  .labelWrap {
+    flex-direction: row;
+    text-align: center;
+  }
+}
