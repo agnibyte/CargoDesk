@@ -98,7 +98,6 @@ export async function getServerSideProps(context) {
   };
 
   pageData.user = userData;
-  console.log("pageData====", pageData);
 
   return {
     props: {

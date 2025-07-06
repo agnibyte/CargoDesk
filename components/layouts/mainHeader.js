@@ -4,16 +4,46 @@ import React, { useState } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { menuItems } from "@/utilities/masterData"; // assumes structure with children array
+import { convertFirstLetterCapital } from "@/utilities/utils";
+import ProfileButton from "../common/items/profileButton";
+import { postApiData } from "@/utilities/services/apiService";
+import { useRouter } from "next/router";
 
 export default function MainHeader({ pageData = {} }) {
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeMenu, setActiveMenu] = useState(null);
+
+  const router = useRouter();
 
   const toggleSubMenu = (index) => {
     setActiveMenu(activeMenu === index ? null : index);
   };
   console.log("pageData", pageData);
 
+  const a = {
+    user: {
+      userId: 1,
+      firstName: "ss",
+      lastName: "dd",
+      email: "agb",
+      role: "user",
+      status: "1",
+    },
+  };
+
+  const handleLogout = async () => {
+    try {
+      const response = await postApiData("LOGOUT_USER");
+
+      if (response.status) {
+        setTimeout(() => {
+          router.reload();
+        }, 200);
+      }
+    } catch (error) {
+      console.error("Logout failed:", error);
+    }
+  };
   return (
     <header className="bg-white shadow-md p-3 relative z-50">
       <div className="flex items-center justify-around mx-auto px-5 gap-4 md:gap-8 w-[80%]">
@@ -65,7 +95,13 @@ export default function MainHeader({ pageData = {} }) {
             )
           )}
         </nav>
-        <div className="text-sm font-semibold text-red-500">My Account</div>
+        <div className="text-sm font-semibold text-red-500">{`Hello, ${convertFirstLetterCapital(
+          pageData?.user?.firstName
+        )}`}</div>
+        <ProfileButton
+          username={convertFirstLetterCapital(pageData?.user?.firstName)}
+          onclickLogOut={handleLogout}
+        />
 
         {/* Hamburger Icon */}
         <button

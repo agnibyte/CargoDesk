@@ -1,7 +1,6 @@
-import { convertFirstLetterCapital } from "@/utils/utils";
 import { useState, useRef, useEffect } from "react";
-import CommonModal from "./commonModal";
-import ResetConfirmation from "./resetConfirmation";
+import { convertFirstLetterCapital } from "@/utilities/utils";
+import CommonModal from "../commonModal";
 
 const ProfileButton = ({ username, onclickLogOut }) => {
   const [dropdownVisible, setDropdownVisible] = useState(false);
@@ -72,7 +71,7 @@ const ProfileButton = ({ username, onclickLogOut }) => {
         setModalOpen={setConfirmationPopUp}
         backDrop={false}
       >
-        <ResetConfirmation
+        {/* <ResetConfirmation
           title={"Are You Sure Want To Log Out?"}
           onConfirm={() => {
             onclickLogOut();
@@ -80,7 +79,7 @@ const ProfileButton = ({ username, onclickLogOut }) => {
           onCancel={() => {
             setConfirmationPopUp(false);
           }}
-        />
+        /> */}
       </CommonModal>
     </div>
   );
