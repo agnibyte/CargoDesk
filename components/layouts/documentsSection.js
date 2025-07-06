@@ -89,7 +89,7 @@ export default function DocumentsSection({
 
   return (
     <div>
-      <div className="flex flex-wrap w-full">
+      <div className="flex flex-wrap w-full flex-col md:flex-row">
         {documentsTypeList.map((item) => (
           <DocumentsFilterCard
             key={item.id}

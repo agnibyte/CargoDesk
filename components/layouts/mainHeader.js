@@ -95,14 +95,6 @@ export default function MainHeader({ pageData = {} }) {
             )
           )}
         </nav>
-        {/* <div className="text-sm font-semibold text-red-500">{`Hello, ${convertFirstLetterCapital(
-          pageData?.user?.firstName
-        )}`}</div> */}
-        <ProfileButton
-          username={pageData?.user?.firstName}
-          onclickLogOut={handleLogout}
-        />
-
         {/* Hamburger Icon */}
         <button
           onClick={() => setMobileMenuOpen(!isMobileMenuOpen)}
@@ -122,6 +114,14 @@ export default function MainHeader({ pageData = {} }) {
             />
           </svg>
         </button>
+
+        {/* <div className="text-sm font-semibold text-red-500">{`Hello, ${convertFirstLetterCapital(
+          pageData?.user?.firstName
+        )}`}</div> */}
+        <ProfileButton
+          username={pageData?.user?.firstName}
+          onclickLogOut={handleLogout}
+        />
       </div>
 
       {/* Mobile Menu */}

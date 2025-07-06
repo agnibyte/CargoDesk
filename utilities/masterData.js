@@ -76,12 +76,12 @@ export const menuItems = [
       {
         title: "Advanced Elements",
         id: "Advanced Elements",
-        children: [],
+        subChildren: [],
       },
       {
         title: "Forms & Tables",
         id: "Forms & Tables",
-        children: [
+        subChildren: [
           { title: "Form Elements", id: "FormElements" },
           { title: "Advanced Forms", id: "AdvancedForms" },
           { title: "Basic Tables", id: "BasicTables" },
