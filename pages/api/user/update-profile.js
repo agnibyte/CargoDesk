@@ -1,4 +1,4 @@
-import { updateUserDetailsById } from "@/backend/controllers/usersController";
+// import { updateUserDetailsById } from "@/backend/controllers/usersController";
 
 export default function handler(req, res) {
   return new Promise((resolve, reject) => {
