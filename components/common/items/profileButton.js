@@ -1,6 +1,7 @@
 import { useState, useRef, useEffect } from "react";
 import { convertFirstLetterCapital } from "@/utilities/utils";
 import CommonModal from "../commonModal";
+import ResetConfirmation from "./resetConfirmation";
 
 const ProfileButton = ({ username, onclickLogOut }) => {
   const [dropdownVisible, setDropdownVisible] = useState(false);
@@ -12,6 +13,7 @@ const ProfileButton = ({ username, onclickLogOut }) => {
 
   // Function to toggle dropdown visibility
   const toggleDropdown = () => {
+    console.log("clickkkk");
     setDropdownVisible(!dropdownVisible);
   };
 
@@ -51,15 +53,13 @@ const ProfileButton = ({ username, onclickLogOut }) => {
       {dropdownVisible && (
         <div
           ref={dropdownRef}
-          className="absolute right-0 mt-3 w-48 bg-white border border-gray-200 rounded-xl shadow-lg transition-all transform scale-95 opacity-0 animate-dropdown"
+          className="absolute right-0 mt-1 w-48 bg-white border border-gray-200 rounded-xl shadow-lg transition-all transform scale-95 opacity-100 animate-dropdown"
         >
-          <div className="px-6 py-3 text-gray-800 font-semibold text-lg">
-            {convetedUserName}
-          </div>
-          <div className="border-t border-gray-200">
+          <div className="p-3 text-gray-800 ">{convetedUserName}</div>
+          <div className="">
             <button
               onClick={() => setConfirmationPopUp(true)}
-              className="w-full text-left px-6 py-3 text-red-600 font-semibold transition-all"
+              className="w-full text-left p-3 text-red-600 font-semibold transition-all cursor-pointer"
             >
               Logout
             </button>
@@ -71,7 +71,7 @@ const ProfileButton = ({ username, onclickLogOut }) => {
         setModalOpen={setConfirmationPopUp}
         backDrop={false}
       >
-        {/* <ResetConfirmation
+        <ResetConfirmation
           title={"Are You Sure Want To Log Out?"}
           onConfirm={() => {
             onclickLogOut();
@@ -79,7 +79,7 @@ const ProfileButton = ({ username, onclickLogOut }) => {
           onCancel={() => {
             setConfirmationPopUp(false);
           }}
-        /> */}
+        />
       </CommonModal>
     </div>
   );
