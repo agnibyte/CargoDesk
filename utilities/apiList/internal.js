@@ -12,7 +12,8 @@ export const internalList = {
   VERIFY_USER: "/api/user/verify-user",
   LOGOUT_USER: "/api/user/logout-user",
   GET_USER_PROFILE: "/api/user/get-user-profile",
-  
+
   // add new user
   ADD_NEW_USER: "/api/user/add-new-user",
+  VERIFY_USER_LOGIN: "/api/user/verify-user",
 };

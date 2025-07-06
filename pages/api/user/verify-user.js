@@ -4,11 +4,11 @@ import jwt from "jsonwebtoken"; // Import JWT library
 
 export default async function handler(req, res) {
   if (req.method === "POST") {
-    const { email, password } = req.body;
+    const { email_id, password } = req.body;
 
     try {
       // Verify user credentials
-      const response = await verifyUserModel(email, password);
+      const response = await verifyUserModel(email_id, password);
 
       if (response.status) {
         // Successful login

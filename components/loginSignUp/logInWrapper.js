@@ -1,7 +1,8 @@
 import React, { useEffect, useState } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import axios from "axios";
 import { loginValidation } from "@/utilities/validations/auth";
+import { postApiData } from "@/utilities/services/apiService";
 
 export default function LoginWrapper() {
   const {
@@ -9,18 +10,20 @@ export default function LoginWrapper() {
     handleSubmit,
     setValue,
     formState: { errors },
+    control,
   } = useForm();
 
-  const [formData, setFormData] = useState({
+  const initialFormData = {
     email_id: "",
     password: "",
-    rememberMe: false,
-  });
+  };
+  const [formData, setFormData] = useState(initialFormData);
 
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState("");
   const [section, setSection] = useState("login"); // for future register toggle
   const [validation, setValidation] = useState({});
+  const [successMsg, setSuccessMsg] = useState("");
 
   useEffect(() => {
     const temp = {
@@ -31,16 +34,11 @@ export default function LoginWrapper() {
     setValidation(temp);
   }, []);
 
-  const handleChange = (e) => {
-    const { name, value, type, checked } = e.target;
-    const newValue = type === "checkbox" ? checked : value;
-
+  const updateSelectedForm = (field, value) => {
     setFormData((prev) => ({
       ...prev,
-      [name]: newValue,
+      [field]: value,
     }));
-
-    setValue(name, newValue, { shouldValidate: true });
   };
 
   const onSubmit = async () => {
@@ -48,9 +46,14 @@ export default function LoginWrapper() {
     setApiError("");
 
     try {
-      const response = await axios.post("/api/login", formData);
-      console.log("Login success:", response.data);
+      const response = await postApiData("VERIFY_USER_LOGIN", formData);
       // handle auth token or redirect
+      console.log("response", response);
+      if (response.status) {
+        setSuccessMsg(response.message);
+      } else {
+        setApiError(response.message);
+      }
     } catch (err) {
       setApiError("Invalid email_id or password");
     } finally {
@@ -58,72 +61,105 @@ export default function LoginWrapper() {
     }
   };
 
+  const sectionTitle = {
+    login: "Login",
+    register: "Register",
+    forgotPassword: "Forgot Password",
+  };
+
+  console.log(formData, errors);
+
   return (
     <div className="min-h-screen flex items-center justify-center relative px-4">
       <div className="background-image"></div>
 
       <div className="max-w-sm w-full bg-white/20 backdrop-blur-lg border border-white/30 rounded-xl p-8 text-white">
         <h2 className="text-2xl font-bold mb-6 text-center">
-          {section == "login" ? "Login" : "Register"}
+          {Object.hasOwn(sectionTitle, section) ? sectionTitle[section] : ""}
         </h2>
 
         {section == "login" ? (
           <form
             onSubmit={handleSubmit(onSubmit)}
-            className="space-y-6"
+            className=""
           >
             {/* Email */}
             <div className="relative border-b-2 border-white/30">
-              <input
-                {...validation.email_id}
-                type="text"
+              <Controller
+                control={control}
                 name="email_id"
-                id="email_id"
-                value={formData.email_id}
-                onChange={handleChange}
-                placeholder=" "
-                // required
-                autoComplete="email_id"
-                className="w-full bg-transparent outline-none text-white placeholder-transparent peer h-10"
-                // {...register("email_id", { required: "Email is required" })}
+                rules={{ required: "Email is required" }}
+                render={({ field }) => (
+                  <input
+                    {...field}
+                    placeholder=""
+                    className="w-full bg-transparent outline-none text-white peer h-10"
+                    onChange={(e) => {
+                      field.onChange(e);
+                      updateSelectedForm("email_id", e.target.value);
+                    }}
+                  />
+                )}
               />
-              <label className="absolute left-0 top-2 text-white/70 text-sm transition-all peer-placeholder-shown:top-2.5 peer-placeholder-shown:text-base peer-placeholder-shown:text-white/50 peer-focus:top-[-20px] peer-focus:text-sm peer-focus:text-white peer-valid:top-[-20px] peer-valid:text-sm peer-valid:text-white">
+
+              <label
+                className="absolute left-0 top-2 text-white/70 text-sm transition-all
+                         peer-placeholder-shown:top-2.5 
+                         peer-placeholder-shown:text-base 
+                         peer-placeholder-shown:text-white/50 
+                         peer-focus:top-[-20px] 
+                         peer-focus:text-sm 
+                         peer-focus:text-white 
+                         peer-[&:not(:placeholder-shown)]:top-[-20px] 
+                         peer-[&:not(:placeholder-shown)]:text-sm 
+                         peer-[&:not(:placeholder-shown)]:text-white"
+              >
                 Email
               </label>
-              {errors.email_id && (
-                <p className="text-red-400 text-xs mt-1">
-                  {errors.email_id.message}
-                </p>
-              )}
             </div>
+            {errors.email_id && (
+              <p className="text-red-400 mt-1">{errors.email_id.message}</p>
+            )}
 
             {/* Password */}
-            <div className="relative border-b-2 border-white/30">
-              <input
-                {...validation.password}
-                id="password"
+            <div className="relative border-b-2 border-white/30 mt-9">
+              <Controller
+                control={control}
                 name="password"
-                type="text"
-                placeholder="Password"
-                // required
-                className="w-full bg-transparent outline-none text-white placeholder-transparent peer h-10"
-                autoComplete="false"
-                {...register("password", { required: "Password is required" })}
-                value={formData.password}
-                onChange={handleChange}
+                rules={{ required: "Password is required" }}
+                render={({ field }) => (
+                  <input
+                    {...field}
+                    placeholder=""
+                    className="w-full bg-transparent outline-none text-white peer h-10"
+                    onChange={(e) => {
+                      field.onChange(e);
+                      updateSelectedForm("password", e.target.value);
+                    }}
+                  />
+                )}
               />
-              <label className="absolute left-0 top-2 text-white/70 text-sm transition-all peer-placeholder-shown:top-2.5  peer-placeholder-shown:text-base  peer-placeholder-shown:text-white/50  peer-focus:top-[-20px]  peer-focus:text-sm  peer-focus:text-white  peer-valid:top-[-20px]  peer-valid:text-sm  peer-valid:text-white">
+              <label
+                className="absolute left-0 top-2 text-white/70 text-sm transition-all
+                      peer-placeholder-shown:top-2.5 
+                      peer-placeholder-shown:text-base 
+                      peer-placeholder-shown:text-white/50 
+                      peer-focus:top-[-20px] 
+                      peer-focus:text-sm 
+                      peer-focus:text-white 
+                      peer-[&:not(:placeholder-shown)]:top-[-20px] 
+                      peer-[&:not(:placeholder-shown)]:text-sm 
+                      peer-[&:not(:placeholder-shown)]:text-white"
+              >
                 Password
               </label>
-              {errors.email_id && (
-                <p className="text-red-400 text-xs mt-1">
-                  {errors.password.message}
-                </p>
-              )}
             </div>
+            {errors.password && (
+              <p className="text-red-500 mt-1">{errors.password.message}</p>
+            )}
 
             {/* Remember Me & Forgot */}
-            <div className="flex items-center justify-between text-sm text-white/80">
+            <div className="flex items-center justify-between text-sm text-white/80 mt-6 mb-3">
               {/* <label className="flex items-center space-x-2">
               <input
                 type="checkbox"
@@ -134,27 +170,31 @@ export default function LoginWrapper() {
               />
               <span>Remember me</span>
             </label> */}
-              <a
-                href="#"
+              <button
                 className="hover:underline"
+                onClick={() => setSection("forgotPassword")}
               >
                 Forgot password?
-              </a>
+              </button>
             </div>
 
             {/* API Error */}
             {apiError && (
-              <p className="text-red-400 text-center text-sm">{apiError}</p>
+              <p className="text-red-400 text-center mt-6">{apiError}</p>
             )}
 
             {/* Submit Button */}
             <button
               type="submit"
-              className="w-full bg-white text-black font-semibold py-2 rounded hover:bg-opacity-80 transition cursor-pointer"
+              className="w-full bg-white text-black font-semibold py-2 rounded hover:bg-opacity-80 transition cursor-pointer mt-3"
               disabled={loading}
             >
               {loading ? "Logging in..." : "Log In"}
             </button>
+            {/* Success Message */}
+            {successMsg && (
+              <p className="text-green-500 text-center mt-4">{successMsg}</p>
+            )}
 
             {/* Register Link */}
             <p className="text-center text-white/80 text-sm mt-6 cursor-default">
@@ -167,6 +207,19 @@ export default function LoginWrapper() {
               </button>
             </p>
           </form>
+        ) : section === "forgotPassword" ? (
+          <div>
+            <h3 className="text-lg font-semibold mb-4 cursor-default">
+              Please contact Administrator.
+            </h3>
+
+            <button
+              className="w-full bg-white text-black font-semibold py-2 rounded hover:bg-opacity-80 transition"
+              onClick={() => setSection("login")}
+            >
+              Back to Login
+            </button>
+          </div>
         ) : (
           <div>
             <h3 className="text-lg font-semibold mb-4 cursor-default">
