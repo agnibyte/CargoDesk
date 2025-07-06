@@ -1,4 +1,4 @@
-import { getCustomers } from "@/backend/controllers/usersController";
+// import { getCustomers } from "@/backend/controllers/usersController";
 
 export default function handler(req, res) {
   return new Promise((resolve, reject) => {
@@ -7,15 +7,15 @@ export default function handler(req, res) {
       status: false,
     };
 
-    getCustomers(request)
-      .then((result) => {
-        res.status(200).json(result);
-        resolve();
-      })
-      .catch((error) => {
-        response.error = error;
-        res.status(200).json(response);
-        resolve();
-      });
+    resolve();
+    // getCustomers(request)
+    //   .then((result) => {
+    //     res.status(200).json(result);
+    //   })
+    //   .catch((error) => {
+    //     response.error = error;
+    //     res.status(200).json(response);
+    //     resolve();
+    //   });
   });
 }
