@@ -3,6 +3,7 @@ import { Controller, useForm } from "react-hook-form";
 import axios from "axios";
 import { loginValidation } from "@/utilities/validations/auth";
 import { postApiData } from "@/utilities/services/apiService";
+import { useRouter } from "next/router";
 
 export default function LoginWrapper() {
   const {
@@ -12,6 +13,8 @@ export default function LoginWrapper() {
     formState: { errors },
     control,
   } = useForm();
+
+  const router = useRouter();
 
   const initialFormData = {
     email_id: "",
@@ -51,6 +54,7 @@ export default function LoginWrapper() {
       console.log("response", response);
       if (response.status) {
         setSuccessMsg(response.message);
+        router.push("/"); // Redirect to home page after successful login
       } else {
         setApiError(response.message);
       }
@@ -66,8 +70,6 @@ export default function LoginWrapper() {
     register: "Register",
     forgotPassword: "Forgot Password",
   };
-
-  console.log(formData, errors);
 
   return (
     <div className="min-h-screen flex items-center justify-center relative px-4">

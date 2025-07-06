@@ -11,8 +11,16 @@ export default async function handler(req, res) {
       const response = await verifyUserModel(email_id, password);
 
       if (response.status) {
+        const user = response.user; // Get the user role or any other user data you want to store in the token
+        console.log("login data", {
+          userId: user.userId,
+          role: user.role,
+          firstName: user.firstName,
+          lastName: user.lastName,
+          email: user.email,
+          phone: user.phone,
+        });
         // Successful login
-        const user = response; // Get the user role or any other user data you want to store in the token
         const token = jwt.sign(
           {
             userId: user.userId,

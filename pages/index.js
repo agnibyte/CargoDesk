@@ -1,5 +1,9 @@
 import Head from "next/head";
 import Dashboard from "@/components/dashboard";
+import { NextSeo } from "next-seo";
+import { getCurrentToken } from "@/utilities/utils";
+import { getUserDetailsById } from "@/backend/controllers/userController";
+import { parseCookies } from "nookies";
 
 export default function Home() {
   return (
@@ -18,4 +22,55 @@ export default function Home() {
       <Dashboard />
     </div>
   );
+}
+
+export async function getServerSideProps(context) {
+  const cookies = parseCookies(context);
+  const token = cookies.auth_token;
+
+  const pageData = {};
+  const userData = {};
+
+  // Verify JWT Token
+  if (token) {
+    try {
+      const decoded = getCurrentToken(token);
+      console.log("Decoded Token:", decoded);
+      const DecodedTokenlog = {
+        userId: 1,
+        role: "user",
+        firstName: "ss",
+        lastName: "dd",
+        email: "agb",
+        phone: "3333333333333",
+        iat: 1751806200,
+        exp: 1751892600,
+      };
+      userData.userId = decoded.userId;
+    } catch (error) {
+      console.error("Invalid token:", error);
+    }
+  }
+
+  const [userDetails] = await Promise.all([
+    getUserDetailsById(userData.userId),
+  ]);
+  console.log("userDetails====", userDetails);
+  const userDetailsLog = {
+    status: true,
+    data: {
+      userId: 1,
+      firstName: "ss",
+      LastName: "dd",
+      email: "agb",
+      role: "user",
+      status: "1",
+    },
+  };
+
+  return {
+    props: {
+      pageData: pageData,
+    },
+  };
 }

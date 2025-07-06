@@ -35,10 +35,10 @@ export const loginValidation = {
   },
   email_id: {
     required: "Please enter email",
-    pattern: {
-      value: validateEmailPattern(),
-      message: "Please enter valid email",
-    },
+    // pattern: {
+    //   value: validateEmailPattern(),
+    //   message: "Please enter valid email",
+    // },
   },
   password: {
     required: "Please enter password",

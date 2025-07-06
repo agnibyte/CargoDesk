@@ -2,6 +2,8 @@ import { constantsList } from "@/constants";
 import moment from "moment";
 import { DOCUMENTS_TYPE_LIST } from "./dummyData";
 const crypto = require("crypto");
+import jwt from "jsonwebtoken";
+import { parseCookies } from "nookies";
 
 export const getUniqueKey = (length = 12) => {
   let result = "";
@@ -157,3 +159,54 @@ export const convertFirstLetterCapital = (text) => {
     return "";
   }
 };
+// ✅ Decode and verify token using SECRET_KEY
+export function getCurrentToken(token) {
+  if (!token) return null;
+
+  const secret = process.env.SECRET_KEY;
+
+  if (!secret) {
+    console.error("❌ SECRET_KEY is not defined in your environment");
+    return null;
+  }
+
+  try {
+    const decoded = jwt.verify(token, secret); // Verifies signature and expiry
+    return decoded;
+  } catch (err) {
+    console.error("❌ Invalid or expired token:", err.message);
+    return null;
+  }
+}
+
+// ✅ Middleware-like helper for getServerSideProps
+export async function requireAuth(context, callback) {
+  const cookies = parseCookies(context);
+  const token = cookies.auth_token;
+
+  // If no token, redirect to login
+  if (!token) {
+    return {
+      redirect: {
+        destination: "/login",
+        permanent: false,
+      },
+    };
+  }
+
+  // Decode and verify token
+  const decoded = getCurrentToken(token);
+
+  if (!decoded) {
+    // If token invalid or expired, redirect to login
+    return {
+      redirect: {
+        destination: "/login",
+        permanent: false,
+      },
+    };
+  }
+
+  // ✅ Token is valid, proceed with the callback
+  return await callback(decoded);
+}
