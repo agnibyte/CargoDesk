@@ -12,14 +12,6 @@ export default async function handler(req, res) {
 
       if (response.status) {
         const user = response.user; // Get the user role or any other user data you want to store in the token
-        console.log("login data", {
-          userId: user.userId,
-          role: user.role,
-          firstName: user.firstName,
-          lastName: user.lastName,
-          email: user.email,
-          phone: user.phone,
-        });
         // Successful login
         const token = jwt.sign(
           {

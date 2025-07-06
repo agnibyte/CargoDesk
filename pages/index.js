@@ -5,7 +5,7 @@ import { getCurrentToken } from "@/utilities/utils";
 import { getUserDetailsById } from "@/backend/controllers/userController";
 import { parseCookies } from "nookies";
 
-export default function Home() {
+export default function Home({ pageData }) {
   return (
     <div>
       <Head>
@@ -19,7 +19,7 @@ export default function Home() {
           href="/favicon.ico"
         />
       </Head>
-      <Dashboard />
+      <Dashboard pageData={pageData} />
     </div>
   );
 }
@@ -29,48 +29,80 @@ export async function getServerSideProps(context) {
   const token = cookies.auth_token;
 
   const pageData = {};
-  const userData = {};
+  const res = context.res;
 
-  // Verify JWT Token
+  let decoded;
   if (token) {
-    try {
-      const decoded = getCurrentToken(token);
-      console.log("Decoded Token:", decoded);
-      const DecodedTokenlog = {
-        userId: 1,
-        role: "user",
-        firstName: "ss",
-        lastName: "dd",
-        email: "agb",
-        phone: "3333333333333",
-        iat: 1751806200,
-        exp: 1751892600,
+    decoded = getCurrentToken(token);
+
+    if (!decoded || !decoded.userId) {
+      // Token invalid or doesn't contain userId → clear cookie & redirect
+      res.setHeader(
+        "Set-Cookie",
+        serialize("auth_token", "", {
+          path: "/",
+          expires: new Date(0),
+          httpOnly: true,
+          sameSite: "lax",
+        })
+      );
+
+      return {
+        redirect: {
+          destination: "/login",
+          permanent: false,
+        },
       };
-      userData.userId = decoded.userId;
-    } catch (error) {
-      console.error("Invalid token:", error);
     }
+  } else {
+    // No token → redirect
+    return {
+      redirect: {
+        destination: "/login",
+        permanent: false,
+      },
+    };
   }
 
-  const [userDetails] = await Promise.all([
-    getUserDetailsById(userData.userId),
-  ]);
-  console.log("userDetails====", userDetails);
-  const userDetailsLog = {
-    status: true,
-    data: {
-      userId: 1,
-      firstName: "ss",
-      LastName: "dd",
-      email: "agb",
-      role: "user",
-      status: "1",
-    },
+  // Token is valid → fetch user details from DB
+  const [userDetails] = await Promise.all([getUserDetailsById(decoded.userId)]);
+
+  if (!userDetails?.status || !userDetails.data) {
+    // User not found → clear cookie & redirect
+    res.setHeader(
+      "Set-Cookie",
+      serialize("auth_token", "", {
+        path: "/",
+        expires: new Date(0),
+        httpOnly: true,
+        sameSite: "lax",
+      })
+    );
+
+    return {
+      redirect: {
+        destination: "/login",
+        permanent: false,
+      },
+    };
+  }
+
+  // Prepare structured user data
+  const userData = {
+    userId: userDetails.data.userId,
+    firstName: userDetails.data.firstName || "",
+    lastName: userDetails.data.lastName || "",
+    email: userDetails.data.email || "",
+    role: userDetails.data.role || "",
+    status: userDetails.data.status || "",
   };
+
+  pageData.user = userData;
+  console.log("pageData====", pageData);
 
   return {
     props: {
-      pageData: pageData,
+      pageData,
     },
   };
 }

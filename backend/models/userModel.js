@@ -74,11 +74,10 @@ export function verifyUserModel(email, password) {
 
 export function getUserDetailsByIdModel(id) {
   return new Promise((resolve, reject) => {
-    const getSql = `SELECT userId,  firstName, LastName,email, role, status FROM users where userId = ? AND  status = 1`;
+    const getSql = `SELECT userId,  firstName, lastName, email, role, status FROM users where userId = ? AND  status = 1`;
 
     executeQuery(getSql, [id])
       .then((result) => {
-        console.log("result", result);
         if (result.length > 0) {
           resolve(result[0]);
         } else {

@@ -7,7 +7,7 @@ import TabComponent from "./common/tabComponent";
 import dashboardStyle from "@/styles/dashBoard.module.scss";
 import AddDocumentForm from "./common/molecules/addDocumentForm";
 
-const Dashboard = () => {
+const Dashboard = ({ pageData }) => {
   const [reminderModal, setReminderModal] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [updateLoading, setUpdateLoading] = useState(false);

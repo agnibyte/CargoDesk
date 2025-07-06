@@ -5,13 +5,14 @@ import Link from "next/link";
 import Image from "next/image";
 import { menuItems } from "@/utilities/masterData"; // assumes structure with children array
 
-export default function MainHeader() {
+export default function MainHeader({ pageData = {} }) {
   const [isMobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [activeMenu, setActiveMenu] = useState(null);
 
   const toggleSubMenu = (index) => {
     setActiveMenu(activeMenu === index ? null : index);
   };
+  console.log("pageData", pageData);
 
   return (
     <header className="bg-white shadow-md p-3 relative z-50">

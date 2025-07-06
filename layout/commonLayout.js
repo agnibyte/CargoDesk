@@ -2,11 +2,11 @@
 import MainHeader from "@/components/layouts/mainHeader";
 // import TopHeader from "@/components/layouts/topHeader";
 
-export default function CommonLayout({ children }) {
+export default function CommonLayout({ children, pageProps = {} }) {
   return (
     <>
       {/* <TopHeader /> */}
-      <MainHeader />
+      <MainHeader pageData={pageProps.pageData} />
       {/* <MainHeader isMobile={children.props.isMobile} /> */}
       {children}
       {/* {process.env.NEXT_PUBLIC_BRAND_NAME == "fastrack" ? (

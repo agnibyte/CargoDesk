@@ -14,7 +14,7 @@ export default function MyApp({ Component, pageProps, isBotAgent, isMobile }) {
       }
     }
 
-    return <CommonLayout>{component}</CommonLayout>;
+    return <CommonLayout pageProps={pageProps}>{component}</CommonLayout>;
   };
 
   return (
