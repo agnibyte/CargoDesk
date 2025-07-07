@@ -10,7 +10,7 @@ export const internalList = {
 
   // login api
   VERIFY_USER: "/api/user/verify-user",
-  LOGOUT_USER: "/api/user/logout-user",
+  LOGOUT_USER: "/api/user/logout",
   GET_USER_PROFILE: "/api/user/get-user-profile",
 
   // add new user
