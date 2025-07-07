@@ -124,7 +124,7 @@ export default function LoginWrapper() {
             )}
 
             {/* Password */}
-            <div className="relative border-b-2 border-white/30 mt-9">
+            <div className="relative border-b-2 border-white/30 mt-9 mb-6">
               <Controller
                 control={control}
                 name="password"
@@ -156,53 +156,47 @@ export default function LoginWrapper() {
                 Password
               </label>
             </div>
+            {/* Password Error */}
             {errors.password && (
               <p className="text-red-500 mt-1">{errors.password.message}</p>
             )}
 
-            {/* Remember Me & Forgot */}
-            <div className="flex items-center justify-between text-sm text-white/80 mt-6 mb-3">
-              {/* <label className="flex items-center space-x-2">
-              <input
-                type="checkbox"
-                name="rememberMe"
-                checked={formData.rememberMe}
-                onChange={handleChange}
-                className="accent-white"
-              />
-              <span>Remember me</span>
-            </label> */}
+            {/* API Error */}
+            {apiError && (
+              <p className="text-red-400 text-center mb-3">{apiError}</p>
+            )}
+
+            {/* Submit Button */}
+            <button
+              type="submit"
+              className="w-full bg-white text-black font-semibold py-2 rounded hover:bg-opacity-80 transition cursor-pointer mb-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2"
+              disabled={loading}
+            >
+              {loading ? "Logging in..." : "Log In"}
+            </button>
+
+            {/* Success Message */}
+            {successMsg && (
+              <p className="text-green-500 text-center mb-3">{successMsg}</p>
+            )}
+
+            {/* Forgot Password Link */}
+            <div
+              className={`flex items-center justify-between text-sm text-white/80 hover:text-white mt-3`}
+            >
               <button
-                className="hover:underline"
+                className="underline focus-visible:no-underline focus-visible:outline-none focus-visible:border-b-2 focus-visible:border-blue-500/50"
                 onClick={() => setSection("forgotPassword")}
               >
                 Forgot password?
               </button>
             </div>
 
-            {/* API Error */}
-            {apiError && (
-              <p className="text-red-400 text-center mt-6">{apiError}</p>
-            )}
-
-            {/* Submit Button */}
-            <button
-              type="submit"
-              className="w-full bg-white text-black font-semibold py-2 rounded hover:bg-opacity-80 transition cursor-pointer mt-3"
-              disabled={loading}
-            >
-              {loading ? "Logging in..." : "Log In"}
-            </button>
-            {/* Success Message */}
-            {successMsg && (
-              <p className="text-green-500 text-center mt-4">{successMsg}</p>
-            )}
-
             {/* Register Link */}
             <p className="text-center text-white/80 text-sm mt-6 cursor-default">
               Don&apos;t have an account?{" "}
               <button
-                className="underline hover:text-white cursor-pointer"
+                className="underline hover:text-white cursor-pointer focus-visible:no-underline focus-visible:outline-none focus-visible:border-b-2 focus-visible:border-blue-500/50"
                 onClick={() => setSection("register")}
               >
                 Register
