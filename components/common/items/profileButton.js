@@ -42,7 +42,7 @@ const ProfileButton = ({ username, onclickLogOut }) => {
       <button
         ref={buttonRef}
         onClick={toggleDropdown}
-        className="w-10 h-10 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center text-white font-semibold"
+        className="w-8 h-8 md:w-10 md:h-10 rounded-full bg-gradient-to-r from-indigo-500 to-purple-600 flex items-center justify-center text-white font-semibold"
       >
         {/* Use initial letter or profile image */}
         <span className="text-lg">{convetedUserName[0]}</span>
