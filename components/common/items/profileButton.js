@@ -13,7 +13,6 @@ const ProfileButton = ({ username, onclickLogOut }) => {
 
   // Function to toggle dropdown visibility
   const toggleDropdown = () => {
-    console.log("clickkkk");
     setDropdownVisible(!dropdownVisible);
   };
 
