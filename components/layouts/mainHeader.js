@@ -45,8 +45,8 @@ export default function MainHeader({ pageData = {} }) {
     }
   };
   return (
-    <header className="bg-white shadow-md p-3 relative z-50">
-      <div className="flex items-center justify-around mx-auto px-5 gap-4 md:gap-8 w-[80%]">
+    <header className="bg-white shadow-md py-3 md:p-3 relative z-50">
+      <div className="flex items-center justify-between md:justify-around mx-auto px-5 gap-4 md:gap-8 w-full md:w-[80%]  mb-1">
         <div className="flex items-center">
           <Image
             src="/logo.png"
@@ -94,11 +94,11 @@ export default function MainHeader({ pageData = {} }) {
               </div>
             )
           )}
-        </nav>
+        </nav>   
         {/* Hamburger Icon */}
         <button
           onClick={() => setMobileMenuOpen(!isMobileMenuOpen)}
-          className="md:hidden border border-blue-400 p-2 rounded"
+          className="md:hidden border border-blue-400 p-2 rounded "
         >
           <svg
             className="w-5 h-5 text-blue-500"
@@ -126,7 +126,7 @@ export default function MainHeader({ pageData = {} }) {
 
       {/* Mobile Menu */}
       {isMobileMenuOpen && (
-        <div className="md:hidden mt-3 bg-white shadow-md rounded-md p-4 animate-slide-down">
+        <div className="md:hidden rounded-md p-4 animate-slide-down">
           {menuItems.map((item, idx) => (
             <div
               key={idx}
