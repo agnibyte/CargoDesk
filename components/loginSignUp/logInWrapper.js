@@ -100,6 +100,7 @@ export default function LoginWrapper() {
                       field.onChange(e);
                       updateSelectedForm("email_id", e.target.value);
                     }}
+                    autoComplete="email"
                   />
                 )}
               />
