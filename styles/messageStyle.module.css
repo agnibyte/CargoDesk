@@ -6,7 +6,10 @@
   border-radius: 12px;
   max-width: 80vw;
   margin: auto;
-  /* box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05); */
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+  border: 1px solid #ccc;
+  margin-top: 1rem;
+
 }
 
 /* LEFT SECTION */
@@ -21,7 +24,6 @@
   background: #fff;
   padding: 16px;
   border-radius: 12px;
-  border: 1px solid #ccc;
 }
 
 .heading {
@@ -51,7 +53,9 @@
   cursor: pointer;
   font-weight: 500;
   float: inline-end;
+  margin-top: 2rem;
 }
+
 .sendButton:disabled {
   background: #ccc;
   cursor: not-allowed;
@@ -102,6 +106,7 @@
   display: flex;
   justify-content: space-between;
   margin-bottom: 12px;
+  gap: 1rem
 }
 
 .tab {
@@ -124,11 +129,153 @@
   display: flex;
   flex-direction: column;
   gap: 10px;
+  overflow-y: scroll;
+  /* height: 50%; */
+  height: 300px;
+  padding-right: 8px;
 }
 
+.contactList {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+/* Base contact item */
 .contactItem {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 12px;
   font-size: 0.95rem;
+  padding: 6px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+  border: 1px solid transparent;
+  background: #f8f8f8;
+  color: #333;
+  font-weight: 500;
+  position: relative;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+  transition: all 0.25s ease;
+}
+
+.contactItem:hover {
+  background: #f0f0f0;
+  border-color: #ccc;
+}
+
+/* Hide native checkbox */
+.hiddenCheckbox {
+  display: none;
+}
+
+/* Custom checkbox */
+.customCheckbox {
+  width: 18px;
+  height: 18px;
+  border-radius: 4px;
+  border: 2px solid #ccc;
+  background: white;
+  flex-shrink: 0;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.contactItem input:checked+.customCheckbox {
+  background: #1d4ed8;
+  border-color: #1d4ed8;
+}
+
+.contactItem input:checked+.customCheckbox::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 6px;
+  width: 4px;
+  height: 8px;
+  border: solid white;
+  border-width: 0 2px 2px 0;
+  transform: rotate(45deg);
+}
+
+/* Text sections */
+.contactName {
+  flex: 1;
+  color: #222;
+}
+
+.contactNo {
+  font-size: 0.85rem;
+  color: #666;
+}
+
+/* Selected state */
+.selected {
+  background: #1d4ed8;
+  border-color: #1d4ed8;
+  color: white;
+}
+
+.selected .contactName,
+.selected .contactNo {
+  color: white;
+}
+.toggleContainer {
+  position: relative;
+  display: flex;
+  background-color: #e4e4e4;
+  border-radius: 9999px;
+  width: 100%;
+  margin-bottom: 0.5rem;
+  overflow: hidden;
+}
+
+.toggleSlider {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 50%;
+  background: linear-gradient(50deg, rgb(1, 15, 219), rgb(0, 6, 94));
+  border-radius: 9999px;
+  transition: transform 0.3s ease;
+  z-index: 1;
+}
+
+.toggleBtn {
+  flex: 1;
+  position: relative;
+  z-index: 2;
+  border: none;
+  outline: none;
+  background: transparent;
+  color: #636363;
+  padding: 10px 20px;
+  border-radius: 9999px;
+  cursor: pointer;
+  font-weight: 550;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.3s ease;
+
+  .icon {
+    font-size: 1.2rem;
+  }
+
+  &:hover {
+    color: #1f1f1f;
+  }
+}
+
+.active {
+  color: white !important;
+  font-weight: 600;
+
+  .icon {
+    background-color: white;
+    color: orange;
+    border-radius: 9999px;
+    padding: 4px;
+  }
 }

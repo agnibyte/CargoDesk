@@ -49,6 +49,7 @@ export const menuItems = [
     id: "Dashboard",
     icon: "🌐",
     children: [],
+    url: "/",
   },
   {
     title: "Documents",
