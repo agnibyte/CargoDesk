@@ -64,7 +64,7 @@ export default function MainHeader({ pageData = {} }) {
   }, [isMobileMenuOpen]);
 
   return (
-    <header className="w-full px-4 md:px-14 py-2 flex items-center justify-between shadow-md bg-white z-50 top-0 fixed">
+    <header className="w-full px-4 md:px-14 py-2 flex items-center justify-between shadow-md bg-white z-50 top-0 sticky">
       {/* Hamburger Icon */}
       <button
         className="md:hidden"
