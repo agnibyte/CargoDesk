@@ -18,7 +18,6 @@ export default function MainHeader({ pageData = {} }) {
   const toggleSubMenu = (index) => {
     setActiveMenu(activeMenu === index ? null : index);
   };
-  console.log("pageData", pageData);
 
   const a = {
     user: {
