@@ -153,15 +153,21 @@ export default function MainHeader({ pageData = {} }) {
           <div className="flex flex-col p-4">
             {menuItems.map((item, idx) => (
               <div key={idx}>
-                <button
-                  onClick={() => toggleMain(idx)}
+                <Link
+                  onClick={() => {
+                    toggleMain(idx);
+                    if (item.url) {
+                      setMobileMenuOpen(false);
+                    }
+                  }}
+                  href={item.url || "/"}
                   className="w-full flex justify-between items-center px-4 py-3 text-left text-sm font-semibold text-gray-700 hover:bg-gray-100"
                 >
                   {item.title}
                   {item.children && item.children.length > 0 && (
                     <span>{activeMain === idx ? "▲" : "▼"}</span>
                   )}
-                </button>
+                </Link>
 
                 {/* Submenu */}
                 {activeMain === idx && item?.children?.length > 0 && (
