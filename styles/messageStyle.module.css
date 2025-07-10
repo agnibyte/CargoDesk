@@ -22,7 +22,7 @@
 
 .messageWrapper {
   background: #fff;
-  padding: 16px;
+  /* padding: 16px; */
   border-radius: 12px;
 }
 
@@ -88,6 +88,18 @@
   border: 1px solid #ccc;
   border-radius: 12px;
   padding: 16px;
+}
+@media screen and (max-width: 768px) {
+  .container {
+    flex-direction: column;
+    max-width: 100%;
+    border: none;
+  }
+
+  .contactSection {
+    width: 100%;
+  }
+  
 }
 
 .importButton {
