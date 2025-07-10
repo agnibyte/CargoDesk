@@ -135,7 +135,6 @@ export default function MessageWrapper() {
     // onChange && onChange(type); // pass to parent if needed
   };
 
-  console.log("formData", errors);
   return (
     <>
       <form
@@ -252,7 +251,7 @@ export default function MessageWrapper() {
                       )}
                     />
                     <span className={styles.customCheckbox}></span>
-                    <div className="flex justify-between items-start md:w-sm">
+                    <div className="flex justify-between items-start w-56 md:w-sm">
                       <span className={styles.contactName}>{contact.name}</span>
                       <span className={styles.contactNo}>
                         {contact.contactNo}
