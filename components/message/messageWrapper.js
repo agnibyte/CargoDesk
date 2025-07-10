@@ -1,6 +1,7 @@
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import styles from "@/styles/messageStyle.module.css";
+import commonStyle from "@/styles/common/common.module.scss";
 import { postApiData } from "@/utilities/services/apiService";
 
 export default function MessageWrapper() {
@@ -68,6 +69,7 @@ export default function MessageWrapper() {
     register,
     handleSubmit,
     formState: { errors },
+    setValue,
   } = useForm();
 
   const [formData, setFormData] = useState({
@@ -77,13 +79,21 @@ export default function MessageWrapper() {
   const [loading, setLoading] = useState(false);
   const [contactsError, setContactsError] = useState(false);
   const [selectedTab, setSelectedTab] = useState("contacts");
+  const [validations, setValidations] = useState({});
+
+  useEffect(() => {
+    register("message", {
+      required: "Please enter a message",
+      maxLength: {
+        value: 500,
+        message: "Message cannot exceed 500 characters",
+      },
+    });
+  }, [register]);
 
   const handleChange = (field, value) => {
-    console.log("field, value", field, value);
-    setFormData((prev) => ({
-      ...prev,
-      [field]: value,
-    }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
+    setValue(field, value, { shouldValidate: true });
 
     if (field === "contacts" && value.length > 0) setContactsError(false);
   };
@@ -110,8 +120,6 @@ export default function MessageWrapper() {
       message: formData.message,
       contacts: formData.contacts.map((c) => c.contactNo), // Assuming contactNo is the identifier
     };
-    console.log("payload", payload);
-    return;
 
     try {
       await postApiData("SEND_MESSAGE", payload);
@@ -127,7 +135,7 @@ export default function MessageWrapper() {
     // onChange && onChange(type); // pass to parent if needed
   };
 
-  console.log("formData", formData.contacts);
+  console.log("formData", errors);
   return (
     <>
       <form
@@ -145,11 +153,10 @@ export default function MessageWrapper() {
               value={formData.message}
               onChange={(e) => handleChange("message", e.target.value)}
               style={errors.message ? { borderColor: "red" } : {}}
-              {...register("message", { required: true })}
             />
             {errors.message && (
-              <span style={{ color: "red", fontSize: "0.9rem" }}>
-                Message is required.
+              <span className={commonStyle.errorMsg}>
+                {errors.message.message}
               </span>
             )}
           </div>
@@ -245,7 +252,7 @@ export default function MessageWrapper() {
                       )}
                     />
                     <span className={styles.customCheckbox}></span>
-                    <div className="flex justify-between items-start w-sm">
+                    <div className="flex justify-between items-start md:w-sm">
                       <span className={styles.contactName}>{contact.name}</span>
                       <span className={styles.contactNo}>
                         {contact.contactNo}
