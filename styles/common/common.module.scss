@@ -1,5 +1,10 @@
-// @use "../_variable.scss" as *;
+@use "../_variable.scss" as variable;
 // @use "../_mixin.scss" as *;
+
+.errorMsg {
+    color: variable.$mediumRed !important;
+    font-size: 13px;
+}
 
 // .events-none {
 // 	pointer-events: none;
