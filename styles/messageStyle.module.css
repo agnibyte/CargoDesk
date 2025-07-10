@@ -83,7 +83,7 @@
 
 /* RIGHT SECTION */
 .contactSection {
-  width: 260px;
+  width: 400px;
   background: #fff;
   border: 1px solid #ccc;
   border-radius: 12px;
@@ -144,6 +144,7 @@
 /* Base contact item */
 .contactItem {
   display: flex;
+  flex-direction: row;
   align-items: center;
   gap: 12px;
   font-size: 0.95rem;
