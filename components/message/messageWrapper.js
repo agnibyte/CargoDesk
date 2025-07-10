@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import styles from "@/styles/messageStyle.module.css";
 import commonStyle from "@/styles/common/common.module.scss";
+import { LuCopy, LuCopyCheck } from "react-icons/lu";
 import { postApiData } from "@/utilities/services/apiService";
 
 export default function MessageWrapper() {
@@ -80,6 +81,7 @@ export default function MessageWrapper() {
   const [contactsError, setContactsError] = useState(false);
   const [selectedTab, setSelectedTab] = useState("contacts");
   const [validations, setValidations] = useState({});
+  const [copied, setCopied] = useState(false);
 
   useEffect(() => {
     register("message", {
@@ -135,6 +137,21 @@ export default function MessageWrapper() {
     // onChange && onChange(type); // pass to parent if needed
   };
 
+  const templates = [
+    { id: "01", msg: "Hello! Just checking in with you." },
+    { id: "02", msg: "Don't forget our meeting at 3 PM." },
+    { id: "03", msg: "Here's the update you requested." },
+    { id: "04", msg: "Let me know your availability." },
+  ];
+
+  const handleCopy = (item) => {
+    navigator.clipboard.writeText(item.msg);
+    setCopied(item.id);
+    setTimeout(() => {
+      setCopied(false);
+    }, 2000);
+  };
+
   return (
     <>
       <form
@@ -161,10 +178,72 @@ export default function MessageWrapper() {
           </div>
 
           <div className="prevMessagesWrapper">
-            <h4 className={styles.subHeading}>Prev messages</h4>
+            {/*  <h4 className={styles.subHeading}>Prev messages</h4>
             <div className={styles.prevMessages}>
-              <div className={styles.prevBubble} />
-              <div className={styles.prevBubble} />
+              {templates.map((msg, i) => (
+                <div
+                  key={i}
+                  className={styles.prevBubble}
+                >
+                  <div className={styles.bubbleHeader}>
+                    <button
+                      onClick={() => handleUseTemplate(msg)}
+                      className={styles.useBtn}
+                    >
+                      Use
+                    </button>
+                    <button
+                      onClick={() => handleCopy(msg)}
+                      className={styles.copyBtn}
+                    >
+                      Copy
+                    </button>
+                  </div>
+                  <p className={styles.bubbleText}>{msg}</p>
+                </div>
+              ))}
+            </div> */}
+
+            <div className="mb-6">
+              <h4 className="text-lg font-semibold mb-4">Previous Templates</h4>
+
+              <div className="flex flex-wrap gap-4">
+                {templates.map((item, i) => (
+                  <div
+                    key={i}
+                    className="relative w-full sm:w-[48%] bg-white shadow-md rounded-lg p-4 border border-gray-200"
+                  >
+                    {/* Buttons */}
+                    <div className="absolute top-2 right-2 flex gap-2">
+                      <button
+                        onClick={() => handleChange("message", item.msg)}
+                        className="text-xs bg-violet-900 text-white px-2 py-1 rounded hover:bg-slate-800 cursor-pointer"
+                      >
+                        Use
+                      </button>
+                      <button
+                        onClick={() => handleCopy(item)}
+                        className="text-xs bg-blue-200 text-gray-800 px-2 py-1 rounded hover:bg-gray-300 cursor-copy"
+                        type="button"
+                      >
+                        <span className="flex items-center gap-1">
+                          {copied == item.id ? (
+                            <LuCopyCheck className="text-green-500" />
+                          ) : (
+                            <LuCopy className="text-yellow-800" />
+                          )}
+                          {copied == item.id ? " Copied" : " Copy"}
+                        </span>
+                      </button>
+                    </div>
+
+                    {/* Message Content */}
+                    <p className="text-gray-800 text-sm whitespace-pre-wrap mt-6">
+                      {item.msg}
+                    </p>
+                  </div>
+                ))}
+              </div>
             </div>
           </div>
         </div>
