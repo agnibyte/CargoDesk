@@ -5,12 +5,56 @@ import { postApiData } from "@/utilities/services/apiService";
 
 export default function MessageWrapper() {
   const contactsList = [
-    { id: "01", contactNo: "+917039529129", name: "Suraj Sangale" },
-    { id: "02", contactNo: "+919702392028", name: "Dnyandev Sangale" },
-    { id: "02", contactNo: "+919702392028", name: "Dnyandev Sangale" },
-    { id: "02", contactNo: "+919702392028", name: "Dnyandev Sangale" },
-    { id: "02", contactNo: "+919702392028", name: "Dnyandev Sangale" },
-    { id: "03", contactNo: "+917039997894", name: "Dnyaneshwar Shekade" },
+    {
+      id: "01",
+      contactNo: "+917039529129",
+      name: "Suraj Sangale",
+    },
+    {
+      id: "02",
+      contactNo: "+917039529129",
+      name: "Suraj Sangale",
+    },
+    {
+      id: "03",
+      contactNo: "+917039529129",
+      name: "Suraj Sangale",
+    },
+    {
+      id: "04",
+      contactNo: "+917039529129",
+      name: "Suraj Sangale",
+    },
+    {
+      id: "05",
+      contactNo: "+917039529129",
+      name: "Suraj Sangale",
+    },
+    {
+      id: "06",
+      contactNo: "+917039529129",
+      name: "Suraj Sangale",
+    },
+    {
+      id: "07",
+      contactNo: "+917039529129",
+      name: "Suraj Sangale",
+    },
+    {
+      id: "08",
+      contactNo: "+917039529129",
+      name: "Suraj Sangale",
+    },
+    {
+      id: "09",
+      contactNo: "+917039529129",
+      name: "Suraj Sangale",
+    },
+    {
+      id: "10",
+      contactNo: "+917039529129",
+      name: "Suraj Sangale",
+    },
   ];
   const groupsList = [
     {
@@ -33,22 +77,23 @@ export default function MessageWrapper() {
   const [loading, setLoading] = useState(false);
   const [contactsError, setContactsError] = useState(false);
   const [selectedTab, setSelectedTab] = useState("contacts");
-  console.log({selectedTab})
 
   const handleChange = (field, value) => {
+    console.log("field, value", field, value);
     setFormData((prev) => ({
       ...prev,
       [field]: value,
     }));
+
     if (field === "contacts" && value.length > 0) setContactsError(false);
   };
 
-  const handleCheckboxChange = (contactNo) => {
+  const handleCheckboxChange = (item) => {
     let updatedContacts = [...formData.contacts];
-    if (updatedContacts.includes(contactNo)) {
-      updatedContacts = updatedContacts.filter((c) => c !== contactNo);
+    if (updatedContacts.find((c) => c.id === item.id)) {
+      updatedContacts = updatedContacts.filter((c) => c.id !== item.id);
     } else {
-      updatedContacts.push(contactNo);
+      updatedContacts.push(item);
     }
     handleChange("contacts", updatedContacts);
   };
@@ -63,8 +108,10 @@ export default function MessageWrapper() {
 
     const payload = {
       message: formData.message,
-      contacts: formData.contacts,
+      contacts: formData.contacts.map((c) => c.contactNo), // Assuming contactNo is the identifier
     };
+    console.log("payload", payload);
+    return;
 
     try {
       await postApiData("SEND_MESSAGE", payload);
@@ -80,6 +127,7 @@ export default function MessageWrapper() {
     // onChange && onChange(type); // pass to parent if needed
   };
 
+  console.log("formData", formData.contacts);
   return (
     <>
       <form
@@ -190,12 +238,14 @@ export default function MessageWrapper() {
                     <input
                       type="checkbox"
                       value={contact.contactNo}
-                      checked={formData.contacts.includes(contact.contactNo)}
-                      onChange={() => handleCheckboxChange(contact.contactNo)}
+                      onChange={() => handleCheckboxChange(contact)}
                       className={styles.hiddenCheckbox}
+                      checked={formData.contacts.find(
+                        (c) => c.id === contact.id
+                      )}
                     />
                     <span className={styles.customCheckbox}></span>
-                    <div className="flex flex-col items-start">
+                    <div className="flex justify-between items-start w-sm">
                       <span className={styles.contactName}>{contact.name}</span>
                       <span className={styles.contactNo}>
                         {contact.contactNo}
