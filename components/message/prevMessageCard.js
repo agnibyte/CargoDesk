@@ -2,7 +2,7 @@ import React from "react";
 import { LuCopy, LuCopyCheck } from "react-icons/lu";
 import commonStyle from "@/styles/common/common.module.scss";
 import msgStyles from "@/styles/messageStyle.module.scss";
-
+import { BsPlusCircle } from "react-icons/bs";
 
 export default function PrevMessageCard({
   handleChange,
@@ -18,11 +18,12 @@ export default function PrevMessageCard({
           onClick={() => handleChange("message", item.msg)}
           className={msgStyles.useBtn}
         >
+          <BsPlusCircle className="text-gray-100" />
           Use
         </div>
         <div
           onClick={() => handleCopy(item)}
-          className="text-xs bg-blue-200 text-gray-800 px-2 py-1 rounded hover:bg-gray-300 cursor-pointer "
+          className="text-xs bg-blue-200 text-gray-800 px-2 py-1 rounded hover:bg-blue-300 cursor-pointer "
           type="button"
         >
           <span className="flex items-center gap-1">

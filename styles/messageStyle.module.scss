@@ -90,16 +90,22 @@
   margin-bottom: 8px;
 }
 
-.useBtn,
-.copyBtn {
+.useBtn {
   background: #1d4ed8;
   color: white;
   border: none;
-  padding: 4px 8px;
+  padding: 0.2rem 0.5rem;
   font-size: 0.75rem;
   border-radius: 6px;
   cursor: pointer;
   transition: background 0.2s;
+  display: flex;
+  gap: 4px;
+  align-items: center;
+
+  &:hover {
+    background-color: rgb(35, 0, 105);
+  }
 }
 
 .useBtn:hover,
@@ -123,18 +129,6 @@
   padding: 16px;
 }
 
-@media screen and (max-width: 768px) {
-  .container {
-    flex-direction: column;
-    max-width: 100%;
-    border: none;
-  }
-
-  .contactSection {
-    width: 100%;
-  }
-
-}
 
 .importButton {
   padding: 8px 14px;
@@ -190,6 +184,7 @@
 /* Base contact item */
 .contactItem {
   display: flex;
+
   flex-direction: row;
   align-items: center;
   gap: 12px;
@@ -328,15 +323,22 @@
   }
 }
 
-.useBtn {
-  cursor: pointer;
-  border-radius: 0.25rem;
-  background-color: rgb(30, 0, 99);
-  padding: 0.25rem 0.5rem;
-  font-size: 0.75rem;
-  line-height: 1rem;
 
-  &:hover {
-    background-color: rgb(35, 0, 105);
+
+@media screen and (max-width: 768px) {
+  .container {
+    flex-direction: column;
+    max-width: 100%;
+    border: none;
   }
+
+  .contactSection {
+    width: 100%;
+  }
+
+  .contactItem {
+    justify-content: space-around;
+
+  }
+
 }
