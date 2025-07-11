@@ -100,14 +100,21 @@ export default function MessageWrapper() {
     if (field === "contacts" && value.length > 0) setContactsError(false);
   };
 
-  const handleCheckboxChange = (item) => {
-    let updatedContacts = [...formData.contacts];
-    if (updatedContacts.find((c) => c.id === item.id)) {
-      updatedContacts = updatedContacts.filter((c) => c.id !== item.id);
-    } else {
-      updatedContacts.push(item);
-    }
-    handleChange("contacts", updatedContacts);
+  const handleCheckboxChange = (contact) => {
+    setFormData((prev) => {
+      const exists = prev.contacts.find((c) => c.id === contact.id);
+      if (exists) {
+        return {
+          ...prev,
+          contacts: prev.contacts.filter((c) => c.id !== contact.id),
+        };
+      } else {
+        return {
+          ...prev,
+          contacts: [...prev.contacts, contact],
+        };
+      }
+    });
   };
 
   const onSubmit = async () => {
@@ -178,31 +185,7 @@ export default function MessageWrapper() {
           </div>
 
           <div className="prevMessagesWrapper">
-            {/*  <h4 className={styles.subHeading}>Prev messages</h4>
-            <div className={styles.prevMessages}>
-              {templates.map((msg, i) => (
-                <div
-                  key={i}
-                  className={styles.prevBubble}
-                >
-                  <div className={styles.bubbleHeader}>
-                    <button
-                      onClick={() => handleUseTemplate(msg)}
-                      className={styles.useBtn}
-                    >
-                      Use
-                    </button>
-                    <button
-                      onClick={() => handleCopy(msg)}
-                      className={styles.copyBtn}
-                    >
-                      Copy
-                    </button>
-                  </div>
-                  <p className={styles.bubbleText}>{msg}</p>
-                </div>
-              ))}
-            </div> */}
+            <h4 className={styles.subHeading}>Prev messages</h4>
 
             <div className="mb-6">
               <h4 className="text-lg font-semibold mb-4">Previous Templates</h4>
@@ -297,15 +280,14 @@ export default function MessageWrapper() {
                   >
                     <input
                       type="checkbox"
-                      value={contact.contactNo}
-                      onChange={() => handleCheckboxChange(contact)}
                       className={styles.hiddenCheckbox}
-                      checked={formData.contacts.find(
-                        (c) => c.id === contact.id
-                      )}
+                      checked={
+                        !!formData.contacts.find((c) => c.id === contact.id)
+                      }
+                      onChange={() => handleCheckboxChange(contact)}
                     />
-                    <span className={styles.customCheckbox}></span>
-                    <div className="flex justify-between items-start w-56 md:w-sm">
+
+                    <div className="flex justify-between items-start w-full">
                       <span className={styles.contactName}>{contact.name}</span>
                       <span className={styles.contactNo}>
                         {contact.contactNo}
