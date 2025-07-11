@@ -185,8 +185,6 @@ export default function MessageWrapper() {
           </div>
 
           <div className="prevMessagesWrapper">
-            <h4 className={styles.subHeading}>Prev messages</h4>
-
             <div className="mb-6">
               <h4 className="text-lg font-semibold mb-4">Previous Templates</h4>
 
