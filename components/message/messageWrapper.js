@@ -4,6 +4,7 @@ import styles from "@/styles/messageStyle.module.scss";
 import commonStyle from "@/styles/common/common.module.scss";
 import { postApiData } from "@/utilities/services/apiService";
 import PrevMessageCard from "./prevMessageCard";
+import CommonModal from "../common/commonModal";
 
 export default function MessageWrapper() {
   const contactsList = [
@@ -82,6 +83,9 @@ export default function MessageWrapper() {
   const [selectedTab, setSelectedTab] = useState("contacts");
   const [validations, setValidations] = useState({});
   const [copied, setCopied] = useState(false);
+  const [prevTemplatePoup, setPrevTemplatePopup] = useState(false);
+
+  const prevTemlateHeading = "Previous Templates";
 
   useEffect(() => {
     register("message", {
@@ -148,6 +152,15 @@ export default function MessageWrapper() {
     { id: "01", msg: "Hello! Just checking in with you." },
     { id: "02", msg: "Don't forget our meeting at 3 PM." },
     { id: "03", msg: "Here's the update you requested." },
+    { id: "03", msg: "Here's the update you requested." },
+    { id: "03", msg: "Here's the update you requested." },
+    { id: "03", msg: "Here's the update you requested." },
+    { id: "03", msg: "Here's the update you requested." },
+    { id: "03", msg: "Here's the update you requested." },
+    { id: "04", msg: "Let me know your availability." },
+    { id: "04", msg: "Let me know your availability." },
+    { id: "04", msg: "Let me know your availability." },
+    { id: "04", msg: "Let me know your availability." },
     { id: "04", msg: "Let me know your availability." },
   ];
 
@@ -167,7 +180,16 @@ export default function MessageWrapper() {
       >
         <div className={styles.messageSection}>
           <div className={styles.messageWrapper}>
-            <h3 className={styles.heading}>Message</h3>
+            <div className=" flex items-center justify-between mb-4">
+              <h3 className={styles.heading}>Message</h3>
+              <button
+                type="button"
+                className={`md:hidden border border-amber-500 text-amber-600 font-bold px-4 py-2 hover:bg-amber-400 hover:text-amber-50 hover:border-amber-600 cursor-pointer transition-colors duration-200 rounded-full`}
+                onClick={() => setPrevTemplatePopup(true)}
+              >
+                {prevTemlateHeading}
+              </button>
+            </div>
             <textarea
               name="message"
               rows="4"
@@ -184,9 +206,11 @@ export default function MessageWrapper() {
             )}
           </div>
 
-          <div className="prevMessagesWrapper">
+          <div className="prevMessagesWrapper hidden sm:block">
             <div className="mb-6">
-              <h4 className="text-lg font-semibold mb-4">Previous Templates</h4>
+              <h4 className="text-lg font-semibold mb-4">
+                {prevTemlateHeading}
+              </h4>
 
               <div className="flex flex-wrap gap-4">
                 {templates.map((item, i) => (
@@ -310,6 +334,27 @@ export default function MessageWrapper() {
           </button>
         </div>
       </form>
+      <CommonModal
+        modalOpen={prevTemplatePoup}
+        setModalOpen={setPrevTemplatePopup}
+        backDrop={false}
+        modalTitle={prevTemlateHeading}
+        modalSize="w-11/12 md:w-[50%] h-[75vh]"
+      >
+        <div className="p-4">
+          <div className="flex flex-wrap gap-4 mt-1 h-[65vh] md:h-[60vh] overflow-y-auto">
+            {templates.map((item, i) => (
+              <PrevMessageCard
+                key={i}
+                item={item}
+                handleChange={handleChange}
+                copied={copied}
+                handleCopy={handleCopy}
+              />
+            ))}
+          </div>
+        </div>
+      </CommonModal>
     </>
   );
 }
