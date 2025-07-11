@@ -215,7 +215,6 @@ export default function MessageWrapper() {
               Import
             </button>
             <div className={styles.toggleContainer}>
-              {/* Sliding Background */}
               <div
                 className={styles.toggleSlider}
                 style={{
@@ -226,7 +225,6 @@ export default function MessageWrapper() {
                 }}
               />
 
-              {/* Buttons */}
               <button
                 className={`${styles.toggleBtn} ${
                   selectedTab === "contacts" ? styles.active : ""
@@ -246,26 +244,6 @@ export default function MessageWrapper() {
                 Groungs
               </button>
             </div>
-            {/* <div className={styles.tabs}>
-              <button
-                type="button"
-                className={`${styles.tab} ${
-                  selectedTab === "contacts" && styles.active
-                }`}
-                onClick={() => setSelectedTab("contacts")}
-              >
-                Contacts
-              </button>
-              <button
-                type="button"
-                className={`${styles.tab} ${
-                  selectedTab === "groups" && styles.active
-                }`}
-                onClick={() => setSelectedTab("groups")}
-              >
-                Groups
-              </button>
-            </div> */}
 
             {selectedTab === "contacts" ? (
               <div className={styles.contactList}>
