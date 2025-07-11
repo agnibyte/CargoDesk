@@ -290,7 +290,7 @@ export default function MessageWrapper() {
                   <label
                     key={contact.id}
                     className={`${styles.contactItem} ${
-                      formData.contacts.includes(contact.contactNo)
+                      formData.contacts.find((c) => c.id === contact.id)
                         ? styles.selected
                         : ""
                     }`}

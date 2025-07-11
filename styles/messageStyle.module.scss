@@ -192,18 +192,20 @@
   padding: 6px 10px;
   border-radius: 8px;
   cursor: pointer;
-  border: 1px solid transparent;
+  // border: 1px solid transparent;
+  border: 0.5px #cccbcb solid;
   background: #f8f8f8;
   color: #333;
   font-weight: 500;
   position: relative;
   box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
   transition: all 0.25s ease;
+
 }
 
 .contactItem:hover {
-  background: #f0f0f0;
-  border-color: #ccc;
+  // background: #e0e0e0;
+  border-color: #969595;
 }
 
 /* Hide native checkbox */
@@ -253,14 +255,13 @@
 
 /* Selected state */
 .selected {
-  background: #1d4ed8;
-  border-color: #1d4ed8;
-  color: white;
+  background: #dddddd;
+  border-color: #9c9c9c;
 }
 
 .selected .contactName,
 .selected .contactNo {
-  color: white;
+  color: #000;
 }
 
 .toggleContainer {
@@ -309,19 +310,21 @@
   &:hover {
     color: #1f1f1f;
   }
-}
 
-.active {
-  color: white !important;
-  font-weight: 600;
+  &.active {
+    color: white;
+    font-weight: 600;
 
-  .icon {
-    background-color: white;
-    color: orange;
-    border-radius: 9999px;
-    padding: 4px;
+    .icon {
+      background-color: white;
+      color: orange;
+      border-radius: 9999px;
+      padding: 4px;
+    }
   }
 }
+
+
 
 
 
