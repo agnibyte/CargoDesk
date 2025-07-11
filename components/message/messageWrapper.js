@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
-import styles from "@/styles/messageStyle.module.css";
+import styles from "@/styles/messageStyle.module.scss";
 import commonStyle from "@/styles/common/common.module.scss";
-import { LuCopy, LuCopyCheck } from "react-icons/lu";
 import { postApiData } from "@/utilities/services/apiService";
+import PrevMessageCard from "./prevMessageCard";
 
 export default function MessageWrapper() {
   const contactsList = [
@@ -209,39 +209,14 @@ export default function MessageWrapper() {
 
               <div className="flex flex-wrap gap-4">
                 {templates.map((item, i) => (
-                  <div
-                    key={i}
-                    className="relative w-full sm:w-[48%] bg-white shadow-md rounded-lg p-4 border border-gray-200"
-                  >
-                    {/* Buttons */}
-                    <div className="absolute top-2 right-2 flex gap-2">
-                      <button
-                        onClick={() => handleChange("message", item.msg)}
-                        className="text-xs bg-violet-900 text-white px-2 py-1 rounded hover:bg-slate-800 cursor-pointer"
-                      >
-                        Use
-                      </button>
-                      <button
-                        onClick={() => handleCopy(item)}
-                        className="text-xs bg-blue-200 text-gray-800 px-2 py-1 rounded hover:bg-gray-300 cursor-copy"
-                        type="button"
-                      >
-                        <span className="flex items-center gap-1">
-                          {copied == item.id ? (
-                            <LuCopyCheck className="text-green-500" />
-                          ) : (
-                            <LuCopy className="text-yellow-800" />
-                          )}
-                          {copied == item.id ? " Copied" : " Copy"}
-                        </span>
-                      </button>
-                    </div>
-
-                    {/* Message Content */}
-                    <p className="text-gray-800 text-sm whitespace-pre-wrap mt-6">
-                      {item.msg}
-                    </p>
-                  </div>
+                  <React.Fragment key={i}>
+                    <PrevMessageCard
+                      item={item}
+                      handleChange={handleChange}
+                      copied={copied}
+                      handleCopy={handleCopy}
+                    />
+                  </React.Fragment>
                 ))}
               </div>
             </div>
