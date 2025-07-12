@@ -17,6 +17,7 @@
     "@mui/x-date-pickers": "^7.11.1",
     "@zxing/library": "^0.21.3",
     "cookies": "^0.9.1",
+    "gapi-script": "^1.2.0",
     "jsonwebtoken": "^9.0.2",
     "moment": "^2.30.1",
     "next": "15.3.4",

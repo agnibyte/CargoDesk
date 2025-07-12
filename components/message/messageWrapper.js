@@ -5,6 +5,7 @@ import commonStyle from "@/styles/common/common.module.scss";
 import { postApiData } from "@/utilities/services/apiService";
 import PrevMessageCard from "./prevMessageCard";
 import CommonModal from "../common/commonModal";
+import GoogleContacts from "./googleContacts";
 
 export default function MessageWrapper() {
   const contactsList = [
@@ -174,6 +175,9 @@ export default function MessageWrapper() {
 
   return (
     <>
+      <div>
+        <GoogleContacts />
+      </div>
       <form
         className={styles.container}
         onSubmit={handleSubmit(onSubmit)}
