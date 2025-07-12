@@ -239,7 +239,7 @@ export default function MessageWrapper() {
               href="/messager/manage-contacts"
               className={styles.importButton}
             >
-              Mangae Contacts
+              Manage Contacts
             </Link>
             <div className={styles.toggleContainer}>
               <div

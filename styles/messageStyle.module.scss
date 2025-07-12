@@ -131,16 +131,31 @@
 
 
 .importButton {
-  padding: 8px 14px;
+  display: block;
+  padding: 12px 16px;
   border: 2px solid #1d4ed8;
-  color: #001d6e;
+  // background-color: #f0f8ff;
+  color: #1d4ed8;
   border-radius: 8px;
-  margin-bottom: 16px;
-  cursor: pointer;
-  font-weight: 700;
+  font-weight: 600;
+  text-align: center;
+  text-decoration: none;
   width: 100%;
+  margin-bottom: 1rem;
+  transition: all 0.3s ease;
+  cursor: pointer;
 
+  &:hover {
+    background-color: #1d4ed8;
+    color: #ffffff;
+  }
+
+  &:focus {
+    outline: none;
+    box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.4); // Accessible focus ring
+  }
 }
+
 
 .tabs {
   display: flex;
