@@ -6,6 +6,7 @@ import { postApiData } from "@/utilities/services/apiService";
 import PrevMessageCard from "./prevMessageCard";
 import CommonModal from "../common/commonModal";
 import GoogleContacts from "./googleContacts";
+import Link from "next/link";
 
 export default function MessageWrapper() {
   const contactsList = [
@@ -234,12 +235,12 @@ export default function MessageWrapper() {
 
         <div className="flex flex-col">
           <div className={styles.contactSection}>
-            <button
-              type="button"
+            <Link
+              href="/messager/manage-contacts"
               className={styles.importButton}
             >
-              Import
-            </button>
+              Mangae Contacts
+            </Link>
             <div className={styles.toggleContainer}>
               <div
                 className={styles.toggleSlider}
