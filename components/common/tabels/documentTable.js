@@ -12,6 +12,8 @@ import FormControlLabel from "@mui/material/FormControlLabel";
 import Switch from "@mui/material/Switch";
 import { visuallyHidden } from "@mui/utils";
 import { useState, useMemo } from "react";
+import { FiEdit } from "react-icons/fi";
+
 import {
   formatDate,
   formatVehicleNumber,
@@ -276,7 +278,7 @@ const DocumentTable = ({
 
   return (
     <Box sx={{ width: "100%" }}>
-      <Paper sx={{ width: "100%", my: 2 }}>
+      <Paper sx={{ width: "100%" }}>
         {selected.length > 0 && (
           <EnhancedTableToolbar
             selectedItems={selected}
@@ -337,68 +339,65 @@ const DocumentTable = ({
                     selected={isItemSelected}
                     sx={{ cursor: "pointer" }}
                   >
+                    {/* Checkbox Cell */}
                     <TableCell padding="checkbox">
                       <Checkbox
                         color="primary"
                         checked={isItemSelected}
-                        inputProps={{
-                          "aria-labelledby": labelId,
-                        }}
+                        inputProps={{ "aria-labelledby": labelId }}
                       />
                     </TableCell>
-                    {/* <TableCell
-                      component="th"
-                      id={labelId}
-                      scope="row"
-                      padding="none"
-                    >
-                      {row.masterNo}
-                    </TableCell> */}
-                    <TableCell
-                      align={row.id ? "left" : "center"}
-                      title={row.id}
-                    >
-                      {row.id}
-                    </TableCell>
-                    <TableCell
-                      align="left"
-                      component="th"
-                      id={labelId}
-                      scope="row"
-                      padding="normal"
-                    >
-                      {formatVehicleNumber(row.vehicleNo)}
-                    </TableCell>
-                    <TableCell
-                      align={row.note ? "left" : "center"}
-                      title={row.note}
-                    >
-                      {truncateString(row.note) || "-"}
-                    </TableCell>
-                    <TableCell align="left">
-                      {formatVehicleNumber(row.documentType)}
-                    </TableCell>
-                    <TableCell align="left">
-                      {formatDate(row.expiryDate)}
-                    </TableCell>
-                    <TableCell align="left">
-                      {getDateBeforeDays(
-                        row.expiryDate,
-                        getConstant("DAYS_BEFORE_ALERT")
-                      )}
-                    </TableCell>
-                    <TableCell align="left">
-                      <button
-                        className="btn btn-outline-warning mx-2"
-                        variant="outline-warning"
-                        onClick={(event) => {
-                          event.stopPropagation();
-                          onClickEdit(row.id);
-                        }}
-                      >
-                        Edit
-                      </button>
-                    </TableCell>
+
+                    {/* Dynamic Cells Based on headCells */}
+                    {headCells.map((headCell) => {
+                      let value = row[headCell.id];
+
+                      // Optional formatting logic based on field type
+                      if (headCell.id === "vehicleNo")
+                        value = formatVehicleNumber(value);
+                      if (headCell.id === "expiryDate")
+                        value = formatDate(value);
+                      if (headCell.id === "alertDate") {
+                        value = getDateBeforeDays(
+                          row.expiryDate,
+                          getConstant("DAYS_BEFORE_ALERT")
+                        );
+                      }
+                      if (headCell.id === "note") {
+                        value = truncateString(value);
+                      }
+
+                      // Handle Action Button
+                      if (headCell.id === "action") {
+                        return (
+                          <TableCell
+                            key={headCell.id}
+                            align="left"
+                          >
+                            <button
+                              className="mx-2 text-yellow-500 hover:text-yellow-600 text-lg "
+                              onClick={(event) => {
+                                event.stopPropagation();
+                                onClickEdit(row.id);
+                              }}
+                              title="Edit"
+                            >
+                              <FiEdit className="inline-block cursor-pointer" />
+                            </button>
+                          </TableCell>
+                        );
+                      }
+
+                      return (
+                        <TableCell
+                          key={headCell.id}
+                          align="left"
+                          title={row[headCell.id]}
+                        >
+                          {value || "-"}
+                        </TableCell>
+                      );
+                    })}
                   </TableRow>
                 );
               })}
