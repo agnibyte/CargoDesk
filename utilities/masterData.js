@@ -16,18 +16,21 @@ export const docTableHeadCells = [
     numeric: false,
     disablePadding: false,
     label: "Vehicle No.",
+    format: true,
   },
   {
     id: "note",
     numeric: false,
     disablePadding: false,
     label: "Note",
+    format: true,
   },
   {
     id: "documentType",
     numeric: false,
     disablePadding: false,
     label: "Document Type",
+    format: true,
   },
   {
     id: "expiryDate",
