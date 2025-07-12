@@ -146,14 +146,14 @@
   cursor: pointer;
 
   &:hover {
-    background-color: #1d4ed8;
+    background-color: #0f2666;
     color: #ffffff;
   }
 
-  &:focus {
-    outline: none;
-    box-shadow: 0 0 0 3px rgba(29, 78, 216, 0.4); // Accessible focus ring
-  }
+  // &:focus {
+  //   outline: none;
+  //   box-shadow: 0 0 0 3px rgba(128, 128, 128, 0.4); // Accessible focus ring
+  // }
 }
 
 
@@ -270,7 +270,7 @@
 
 /* Selected state */
 .selected {
-  background: #e8fdff;
+  background: #d4fbff;
   border: 1px #00bac0 solid;
 }
 
