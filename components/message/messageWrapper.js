@@ -176,9 +176,6 @@ export default function MessageWrapper() {
 
   return (
     <>
-      <div>
-        <GoogleContacts />
-      </div>
       <form
         className={styles.container}
         onSubmit={handleSubmit(onSubmit)}
