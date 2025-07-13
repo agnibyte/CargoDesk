@@ -27,8 +27,8 @@ export default function PrevMessageCard({
 
   return (
     <div
-      className={`contact-card relative w-full lg:w-[48%] border  border-gray-300 rounded-md shadow-sm transition-all duration-300 ${
-        isConfirm.id == item.id && "confirmContactDelete"
+      className={`contact-card relative w-full lg:w-[48%] border overflow-hidden border-gray-300 rounded-md shadow-sm transition-all duration-300 ${
+        isConfirm.id == item.id && "confirmContactDelete  "
       }`}
     >
       {isConfirm.id != item.id ? (
