@@ -23,7 +23,6 @@ export default function PrevMessageCard({
 
   const onClickDelete = (item) => {
     setIsConfirm(item);
-    // handleConfirm();
   };
 
   return (
@@ -35,7 +34,6 @@ export default function PrevMessageCard({
       {isConfirm.id != item.id ? (
         <>
           <div className="absolute top-2 right-2 flex flex-wrap items-center gap-2">
-            {/* Use */}
             <button
               onClick={() => {
                 handleChange("message", item.message);
