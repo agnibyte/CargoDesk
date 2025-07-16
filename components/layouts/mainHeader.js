@@ -228,7 +228,7 @@ export default function MainHeader({ pageData = {} }) {
               <Link
                 key={idx}
                 href={item.url}
-                className={`px-4 py-2  font-bold rounded-lg transition-colors hover:bg-gray-100 ${
+                className={`px-4 py-2  font-bold rounded-lg transition-colors ${
                   router.pathname === item.url
                     ? "text-blue-600"
                     : "text-gray-700"
@@ -242,7 +242,7 @@ export default function MainHeader({ pageData = {} }) {
                 key={idx}
               >
                 <button
-                  className="px-4 py-2 font-bold text-gray-700 rounded-lg transition-colors hover:bg-gray-100 flex items-center gap-2"
+                  className="px-4 py-2 font-bold text-gray-700 rounded-lg transition-colors  flex items-center gap-2"
                   aria-haspopup="true"
                   aria-expanded={activeMenu === idx}
                 >
@@ -272,7 +272,7 @@ export default function MainHeader({ pageData = {} }) {
                         <Link
                           key={cidx}
                           href={child.url || "#"}
-                          className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 hover:text-blue-600 transition-colors"
+                          className="block px-4 py-3 text-sm text-gray-700 hover:bg-gray-50 transition-colors"
                         >
                           {child.title}
                         </Link>
