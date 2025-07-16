@@ -3,15 +3,16 @@ import TabComponent from "../common/tabComponent";
 import dashboardStyle from "@/styles/dashBoard.module.scss";
 import GoogleContacts from "./googleContacts";
 import AllContactsSection from "../manageContacts/allContactsSection";
+import ImportContactsTab from "./import/importContactsTab";
 
 export default function ManageContactsWrapper() {
   const contactsTabs = [
+    { id: "02", label: "Import", value: "import" },
     {
       id: "01",
       label: "All Contacts",
       value: "allContacts",
     },
-    { id: "02", label: "Import", value: "import" },
   ];
 
   const [selectedTab, setSelectedTab] = useState(contactsTabs[0].value);
@@ -39,9 +40,10 @@ export default function ManageContactsWrapper() {
               <AllContactsSection />{" "}
             </>
           ) : selectedTab == "import" ? (
-            <div>
-              <GoogleContacts />
-            </div>
+            <>
+              {/* <GoogleContacts /> */}
+              <ImportContactsTab />
+            </>
           ) : null}
         </div>
       </div>
