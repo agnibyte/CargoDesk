@@ -20,7 +20,7 @@
 }
 
 body {
-	font-family: Arial, Helvetica, sans-serif;
+	font-family: "Rubik", sans-serif;
 }
 
 .card-header {
@@ -62,21 +62,22 @@ body {
 
 
 .animate-dropdown {
-  animation: dropdown 0.3s ease-out forwards;
+	animation: dropdown 0.3s ease-out forwards;
 }
 
 
 @layer utilities {
-  .animate-slide-in {
-    animation: slideIn 0.5s ease forwards;
-  }
+	.animate-slide-in {
+		animation: slideIn 0.5s ease forwards;
+	}
 
-  @keyframes slideIn {
-    from {
-      transform: translateX(-100%);
-    }
-    to {
-      transform: translateX(0%);
-    }
-  }
+	@keyframes slideIn {
+		from {
+			transform: translateX(-100%);
+		}
+
+		to {
+			transform: translateX(0%);
+		}
+	}
 }
