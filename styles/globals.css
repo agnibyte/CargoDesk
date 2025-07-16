@@ -19,7 +19,9 @@
 	}
 }
 
-body {
+body,
+.css-1ygcj2i-MuiTableCell-root,
+td.css-1ex1afd-MuiTableCell-root {
 	font-family: "Rubik", sans-serif;
 }
 
