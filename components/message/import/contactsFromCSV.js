@@ -27,30 +27,29 @@ export default function ContactsFromCSV({ contacts, setContacts }) {
         <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
           Import Contacts (CSV)
         </h3>
-      </div>
-
-      <div className="bg-gray-100 p-4 rounded-md mb-4">
-        <p className="text-sm text-gray-700 mb-2">
+        <p className="text-sm text-gray-700 flex items-center gap-1">
           Need a format?{" "}
           <a
             href="/downloads/sampleContacts.csv"
             download="sampleContacts.csv"
-            className="text-blue-600 hover:underline font-medium inline-flex items-center gap-1"
+            className="text-blue-600 hover:underline inline-flex items-center gap-1"
           >
             <MdOutlineFileUpload className="w-4 h-4" />
             Download Sample CSV
           </a>
         </p>
+      </div>
 
+      <div className="bg-gray-10 p-4 rounded-md mb-4">
         <input
           type="file"
           accept=".csv"
           onChange={handleCSVUpload}
           className="block w-full text-sm file:mr-4 file:py-2 file:px-4
-            file:rounded-md file:border-0
+            file:rounded-l-md file:border file:border-gray-300
             file:text-sm file:font-semibold
-            file:bg-blue-50 file:text-blue-700
-            hover:file:bg-blue-100"
+            file:bg-blue-100 file:text-blue-900 
+            hover:file:bg-blue-100 border border-gray-300 rounded-md file:cursor-pointer cursor-pointer"
         />
       </div>
 
