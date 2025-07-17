@@ -4,6 +4,7 @@ import GoogleSignIn from "./googleSignIn";
 import ManualAddForm from "./manualAddForm";
 import { parseVCF } from "@/utilities/vcfParser";
 import ContactsFromCSV from "./contactsFromCSV";
+import ContactsFromVCF from "./contactsFromVCF";
 
 const tabs = [
   { id: "google", label: "Google" },
@@ -33,13 +34,6 @@ export default function ImportContactsTab() {
     });
   };
 
-  const handleVCFImport = async (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-    const text = await file.text();
-    const parsed = parseVCF(text);
-    setContacts(parsed);
-  };
 
   return (
     <>
@@ -86,17 +80,10 @@ export default function ImportContactsTab() {
 
             {/* VCF Import */}
             {activeTab === "vcf" && (
-              <div className="w-full  bg-white border border-gray-200 rounded-xl shadow p-5">
-                <label className="block font-semibold text-gray-800 mb-2">
-                  Upload vCard (.vcf) File
-                </label>
-                <input
-                  type="file"
-                  accept=".vcf"
-                  onChange={handleVCFImport}
-                  className="block w-full border rounded px-3 py-2 text-sm text-gray-700"
-                />
-              </div>
+              <ContactsFromVCF
+                contacts={contacts}
+                setContacts={setContacts}
+              />
             )}
 
             {/* Manual Input */}
