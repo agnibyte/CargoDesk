@@ -136,3 +136,21 @@ $mediumRed: #ff5f5f;
   color: $mediumRed !important;
   font-size: 13px;
 }
+
+.inputField {
+  border: 1px solid #ccc;
+  padding: 8px;
+  outline: none;
+
+  &:focus {
+    border-color: none;
+  }
+
+  &.error {
+    border-color: red;
+
+    &:focus {
+      border-color: red;
+    }
+  }
+}
