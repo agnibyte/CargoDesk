@@ -59,7 +59,7 @@ export default function ManualAddForm({ setContacts }) {
       // Simulate successful response
       setSuccessMsg("Form submitted successfully!");
 
-      setContacts((prev) => [...prev, formData]);
+      // setContacts((prev) => [...prev, formData]);
       console.log("Submitted Data:", formData);
     } catch (error) {
       setApiError("Something went wrong. Please try again.");
@@ -85,6 +85,7 @@ export default function ManualAddForm({ setContacts }) {
             className={`w-full border border-gray-300 px-3 py-2 rounded ${
               formStyle.inputField
             } ${errors.name ? formStyle.error : ""}`}
+            placeholder="Enter Name"
           />
           {errors.name && (
             <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
@@ -102,6 +103,7 @@ export default function ManualAddForm({ setContacts }) {
             className={`w-full border border-gray-300 px-3 py-2 rounded ${
               formStyle.inputField
             } ${errors.phone ? formStyle.error : ""}`}
+            placeholder="Enter Phone No"
           />
           {errors.phone && (
             <p className="text-red-500 text-sm mt-1">{errors.phone.message}</p>
@@ -118,6 +120,7 @@ export default function ManualAddForm({ setContacts }) {
         className={`w-full border border-gray-300 px-3 py-2 rounded ${
           formStyle.inputField
         } ${errors.note ? formStyle.error : ""}`}
+        placeholder="Enter Note"
       />
       {errors.note && (
         <p className="text-red-500 text-sm mt-1">{errors.note.message}</p>
