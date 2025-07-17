@@ -61,7 +61,7 @@ $mediumRed: #ff5f5f;
       border-radius: 5px;
       font-size: 1rem;
       cursor: pointer;
-      border:  1px solid red;
+      border: 1px solid red;
 
       &.btnPrimary {
         background-color: #130468;
@@ -71,9 +71,11 @@ $mediumRed: #ff5f5f;
         &:hover {
           // background-color: darken(#100452, 10%);
         }
+
         &:active {
           background-color: #080033;
         }
+
         &:disabled {
           background-color: #ccc;
           cursor: not-allowed;
@@ -110,6 +112,7 @@ $mediumRed: #ff5f5f;
   &:disabled {
     cursor: not-allowed;
   }
+
   &:hover {
     background-color: #e0f7fa;
   }
@@ -122,13 +125,14 @@ $mediumRed: #ff5f5f;
     margin: auto; // Center the SVG within the button
     fill: #05001b; // Customize color
     transition: transform 0.3s;
+
     &:hover {
       // transform: scale(1.2); // Zoom effect on hover
     }
   }
 }
 
-	.errorMsg {
-		color: $mediumRed !important;
-		font-size: 13px;
-	}
+.errorMsg {
+  color: $mediumRed !important;
+  font-size: 13px;
+}
