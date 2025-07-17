@@ -43,8 +43,8 @@ export default function ImportContactsTab() {
 
   return (
     <>
-      <div className="max-w-5xl mx-auto px-4 py-6 bg-white rounded-lg shadow-md">
-        <h2 className="text-2xl font-bold mb-6 text-gray-800">
+      <div className="mx-auto px-4 py-6 bg-white shadow-xl min-h-[60vh]">
+        <h2 className="text-2xl font-medium mb-6 text-gray-800">
           Import Contacts
         </h2>
 
@@ -58,7 +58,7 @@ export default function ImportContactsTab() {
                   setActiveTab(tab.id);
                   setContacts([]);
                 }}
-                className={`px-4 py-2 text-sm rounded-full font-medium border transition ${
+                className={`px-4 py-2 text-sm rounded-l-xl font-medium border transition ${
                   activeTab === tab.id
                     ? "bg-blue-50 text-blue-700 border-blue-500"
                     : "bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200"
