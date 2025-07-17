@@ -86,7 +86,7 @@ export default function ImportContactsTab() {
 
             {/* VCF Import */}
             {activeTab === "vcf" && (
-              <div className="border p-5 rounded-lg shadow bg-white">
+              <div className="w-full  bg-white border border-gray-200 rounded-xl shadow p-5">
                 <label className="block font-semibold text-gray-800 mb-2">
                   Upload vCard (.vcf) File
                 </label>
