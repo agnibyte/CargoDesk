@@ -8,6 +8,7 @@ import ContactsFromVCF from "./contactsFromVCF";
 import { FcGoogle } from "react-icons/fc";
 import { PiFileCsvDuotone } from "react-icons/pi";
 // import { ReactComponent as Dialpad } from "@/public/imges/svg/dialpad.svg";
+import msgStyle from "@/styles/manageContacts.module.scss";
 
 import { BsPersonVcard } from "react-icons/bs";
 import Image from "next/image";
@@ -49,7 +50,7 @@ export default function ImportContactsTab() {
 
         <div className="flex flex-col md:flex-row gap-6">
           {/* Sidebar Tabs */}
-          <div className="flex md:flex-col gap-2">
+          <div className="flex md:flex-col justify-start gap-2">
             {tabs.map((tab) => (
               <button
                 key={tab.id}
@@ -57,27 +58,27 @@ export default function ImportContactsTab() {
                   setActiveTab(tab.id);
                   setContacts([]);
                 }}
-                className={` flex items-center gap-x-2 px-4 py-2 text-sm rounded-l-xl font-medium border transition cursor-pointer ${
-                  activeTab === tab.id
-                    ? "bg-blue-50 text-blue-700 border-blue-500"
-                    : "bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200"
+                className={`${msgStyle.importOption} ${
+                  activeTab === tab.id ? msgStyle.active : msgStyle.inactive
                 }`}
               >
                 {tab.id == "google" ? (
-                  <FcGoogle className="text-sm" />
+                  <FcGoogle className="text-[12px] md:text-sm " />
                 ) : tab.id == "vcf" ? (
-                  <BsPersonVcard className="text-sm" />
+                  <BsPersonVcard className="text-[12px] md:text-sm" />
                 ) : tab.id == "csv" ? (
                   <Image
                     src={"/imges/svg/csv.svg"}
                     width={15}
                     height={15}
-                  />
-                ) : tab.id == "manual" ? (
-                  <Image
+                    className={msgStyle.importOptionIcon}
+                    />
+                  ) : tab.id == "manual" ? (
+                    <Image
                     src={"/imges/svg/dialpad.svg"}
                     width={15}
                     height={15}
+                    className={msgStyle.importOptionIcon}
                   />
                 ) : (
                   ""
