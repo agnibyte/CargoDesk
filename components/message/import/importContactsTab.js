@@ -5,6 +5,12 @@ import ManualAddForm from "./manualAddForm";
 import { parseVCF } from "@/utilities/vcfParser";
 import ContactsFromCSV from "./contactsFromCSV";
 import ContactsFromVCF from "./contactsFromVCF";
+import { FcGoogle } from "react-icons/fc";
+import { PiFileCsvDuotone } from "react-icons/pi";
+// import { ReactComponent as Dialpad } from "@/public/imges/svg/dialpad.svg";
+
+import { BsPersonVcard } from "react-icons/bs";
+import Image from "next/image";
 
 const tabs = [
   { id: "google", label: "Google" },
@@ -34,13 +40,12 @@ export default function ImportContactsTab() {
     });
   };
 
-
   return (
     <>
       <div className="mx-auto px-4 py-6 bg-white shadow-xl min-h-[60vh]">
-        <h2 className="text-2xl font-medium mb-6 text-gray-800">
+        {/* <h2 className="text-2xl font-medium mb-6 text-gray-800">
           Import Contacts
-        </h2>
+        </h2> */}
 
         <div className="flex flex-col md:flex-row gap-6">
           {/* Sidebar Tabs */}
@@ -52,12 +57,31 @@ export default function ImportContactsTab() {
                   setActiveTab(tab.id);
                   setContacts([]);
                 }}
-                className={`px-4 py-2 text-sm rounded-l-xl font-medium border transition ${
+                className={` flex items-center gap-x-2 px-4 py-2 text-sm rounded-l-xl font-medium border transition cursor-pointer ${
                   activeTab === tab.id
                     ? "bg-blue-50 text-blue-700 border-blue-500"
                     : "bg-gray-100 text-gray-700 border-gray-300 hover:bg-gray-200"
                 }`}
               >
+                {tab.id == "google" ? (
+                  <FcGoogle className="text-sm" />
+                ) : tab.id == "vcf" ? (
+                  <BsPersonVcard className="text-sm" />
+                ) : tab.id == "csv" ? (
+                  <Image
+                    src={"/imges/svg/csv.svg"}
+                    width={15}
+                    height={15}
+                  />
+                ) : tab.id == "manual" ? (
+                  <Image
+                    src={"/imges/svg/dialpad.svg"}
+                    width={15}
+                    height={15}
+                  />
+                ) : (
+                  ""
+                )}
                 {tab.label}
               </button>
             ))}
