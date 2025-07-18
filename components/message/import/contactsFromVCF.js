@@ -18,7 +18,7 @@ export default function ContactsFromVCF({ contacts, setContacts }) {
         </h3>
       </div>
 
-      <div className="bg-gray-10 p-4 rounded-md mb-4">
+      <div className="bg-gray-10 md:p-4 rounded-md mb-4">
         <input
           type="file"
           accept=".vcf"

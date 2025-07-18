@@ -23,11 +23,11 @@ export default function ContactsFromCSV({ contacts, setContacts }) {
 
   return (
     <div className="w-full  bg-white border border-gray-200 rounded-xl shadow p-5">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+      <div className="flex flex-col md:flex-row items-start md:items-center justify-between mb-4">
+        <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2 mb-4 md:m-0">
           Import Contacts (CSV)
         </h3>
-        <p className="text-sm text-gray-700 flex items-center gap-1">
+        <p className="text-sm text-gray-700 flex items-center gap-1 ">
           Need a format?{" "}
           <a
             href="/downloads/sampleContacts.csv"
@@ -40,7 +40,7 @@ export default function ContactsFromCSV({ contacts, setContacts }) {
         </p>
       </div>
 
-      <div className="bg-gray-10 p-4 rounded-md mb-4">
+      <div className="bg-gray-10 md:p-4 rounded-md mb-4">
         <input
           type="file"
           accept=".csv"
