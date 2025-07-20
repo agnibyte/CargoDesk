@@ -205,7 +205,7 @@ export default function MessageWrapper({ pageData, contacts = [] }) {
                 onClick={() => handleToggle("contacts")}
                 type="button"
               >
-                Contacts
+                Contacts ({contactsList.length})
               </button>
               <button
                 className={`${styles.toggleBtn} ${
@@ -214,7 +214,7 @@ export default function MessageWrapper({ pageData, contacts = [] }) {
                 onClick={() => handleToggle("groups")}
                 type="button"
               >
-                Groungs
+                Groungs ({groupsList.length})
               </button>
             </div>
 
