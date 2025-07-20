@@ -22,5 +22,6 @@ export const internalList = {
   GET_CONTACT_LIST: "/api/contact/get-list",
   UPDATE_CONTACT: "/api/contact/update",
   DELETE_CONTACT: "/api/contact/delete",
+  DELETE_BULK_CONTACTS: "/api/contact/bulk-delete",
   IMPORT_CONTACTS_IN_BLUK: "/api/contact/import-contacts-in-bluk",
 };

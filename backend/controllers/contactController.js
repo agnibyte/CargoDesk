@@ -1,6 +1,7 @@
 import {
   addBulkContactsModel,
   addNewContactModel,
+  deleteBulkContactsModel,
   deleteContactModel,
   getContactsModel,
   updateContactModel,
@@ -118,6 +119,30 @@ export function importContactsInBulkController(request) {
           response.status = true;
           response.message = result.message;
           response.skipped = result.skipped;
+          resolve(response);
+        } else {
+          response.message = result.message;
+          resolve(response);
+        }
+      })
+      .catch((error) => {
+        reject(error);
+      });
+  });
+}
+
+export function deleteBulkContactsController(request) {
+  return new Promise((resolve, reject) => {
+    const response = {
+      status: false,
+    };
+    const contacts = request.contacts;
+
+    deleteBulkContactsModel(contacts)
+      .then((result) => {
+        if (result.status) {
+          response.status = true;
+          response.message = result.message;
           resolve(response);
         } else {
           response.message = result.message;

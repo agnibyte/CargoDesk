@@ -6,6 +6,7 @@ import commonStyle from "@/styles/common/common.module.scss";
 import { getConstant } from "@/utilities/utils";
 import { allContactsTableHeadCells } from "@/utilities/masterData";
 import ManualAddForm from "../message/import/manualAddForm";
+import { postApiData } from "@/utilities/services/apiService";
 
 export default function AllContactsSection({ pageData, contacts }) {
   const [selected, setSelected] = useState([]);
@@ -19,18 +20,17 @@ export default function AllContactsSection({ pageData, contacts }) {
 
   const onClickDelete = async (ids) => {
     const payload = {
-      ids: ids,
+      contacts: selected,
     };
     setDeleteLoad(true);
     setDeleteError("");
     try {
       // Simulate API call to delete contacts
-      const response = await postApiData("DELETE_CONTACTS", payload);
+      const response = await postApiData("DELETE_BULK_CONTACTS", payload);
       if (response.status) {
         setContactsList((prev) =>
-          prev.filter((item) => !ids.includes(item.id))
+          prev.filter((item) => !selected.includes(item.id))
         );
-        console.log("Deleting contacts with IDs:", ids);
         setDeletePopup(false);
         setSelected([]);
       }
@@ -65,7 +65,7 @@ export default function AllContactsSection({ pageData, contacts }) {
         onClickEdit={onClickEdit}
         selected={selected}
         setSelected={setSelected}
-        onClickDelete={onClickDelete}
+        onClickDelete={() => setDeletePopup(true)}
         isFilterApplied={false}
       />
 
@@ -77,7 +77,7 @@ export default function AllContactsSection({ pageData, contacts }) {
       >
         <div className={modalStyle.deleteModal}>
           <p className={modalStyle.conformationMsg}>
-            Are you sure you want to delete this Contact?
+            Are you sure you want to delete selected contacts?
           </p>
           <div className={modalStyle.buttonsWrapper}>
             <button
