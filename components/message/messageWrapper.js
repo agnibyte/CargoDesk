@@ -8,59 +8,8 @@ import CommonModal from "../common/commonModal";
 import GoogleContacts from "./googleContacts";
 import Link from "next/link";
 
-export default function MessageWrapper({ pageData }) {
-  const contactsList = [
-    {
-      id: "01",
-      contactNo: "+917039529129",
-      name: "Suraj Sangale",
-    },
-    {
-      id: "02",
-      contactNo: "+917039529129",
-      name: "Suraj Sangale",
-    },
-    {
-      id: "03",
-      contactNo: "+917039529129",
-      name: "Suraj Sangale",
-    },
-    {
-      id: "04",
-      contactNo: "+917039529129",
-      name: "Suraj Sangale",
-    },
-    {
-      id: "05",
-      contactNo: "+917039529129",
-      name: "Suraj Sangale",
-    },
-    {
-      id: "06",
-      contactNo: "+917039529129",
-      name: "Suraj Sangale",
-    },
-    {
-      id: "07",
-      contactNo: "+917039529129",
-      name: "Suraj Sangale",
-    },
-    {
-      id: "08",
-      contactNo: "+917039529129",
-      name: "Suraj Sangale",
-    },
-    {
-      id: "09",
-      contactNo: "+917039529129",
-      name: "Suraj Sangale",
-    },
-    {
-      id: "10",
-      contactNo: "+917039529129",
-      name: "Suraj Sangale",
-    },
-  ];
+export default function MessageWrapper({ pageData, contacts = [] }) {
+  const contactsList = contacts;
   const groupsList = [
     {
       id: "01",
@@ -270,34 +219,50 @@ export default function MessageWrapper({ pageData }) {
             </div>
 
             {selectedTab === "contacts" ? (
-              <div className={styles.contactList}>
-                {contactsList.map((contact) => (
-                  <label
-                    key={contact.id}
-                    className={`${styles.contactItem} ${
-                      formData.contacts.find((c) => c.id === contact.id)
-                        ? styles.selected
-                        : ""
-                    }`}
-                  >
-                    <input
-                      type="checkbox"
-                      className={styles.hiddenCheckbox}
-                      checked={
-                        !!formData.contacts.find((c) => c.id === contact.id)
-                      }
-                      onChange={() => handleCheckboxChange(contact)}
-                    />
+              <>
+                {contactsList.length > 0 ? (
+                  <div className={styles.contactList}>
+                    {contactsList.map((contact) => (
+                      <label
+                        key={contact.id}
+                        className={`${styles.contactItem} ${
+                          formData.contacts.find((c) => c.id === contact.id)
+                            ? styles.selected
+                            : ""
+                        }`}
+                      >
+                        <input
+                          type="checkbox"
+                          className={styles.hiddenCheckbox}
+                          checked={
+                            !!formData.contacts.find((c) => c.id === contact.id)
+                          }
+                          onChange={() => handleCheckboxChange(contact)}
+                        />
 
-                    <div className="flex justify-between items-start w-full">
-                      <span className={styles.contactName}>{contact.name}</span>
-                      <span className={styles.contactNo}>
-                        {contact.contactNo}
-                      </span>
-                    </div>
-                  </label>
-                ))}
-              </div>
+                        <div className="flex justify-between items-start w-full">
+                          <span className={styles.contactName}>
+                            {contact.name}
+                          </span>
+                          <span className={styles.contactNo}>
+                            {contact.contactNo}
+                          </span>
+                        </div>
+                      </label>
+                    ))}
+                  </div>
+                ) : (
+                  <div className="text-center p-2">
+                    No Contacts Found. You can Add Contacts from&nbsp;
+                    <Link
+                      href={"/messager/manage-contacts"}
+                      className="text-blue-600 underline"
+                    >
+                      here.
+                    </Link>
+                  </div>
+                )}
+              </>
             ) : (
               <div className={styles.contactList}>
                 {groupsList.map((contact) => (
@@ -330,7 +295,7 @@ export default function MessageWrapper({ pageData }) {
           <button
             className={styles.sendButton}
             type="submit"
-            disabled={loading}
+            disabled={loading || formData.contacts.length === 0}
           >
             {loading ? "Sending..." : "Send"}
           </button>

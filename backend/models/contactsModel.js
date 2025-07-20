@@ -11,7 +11,7 @@ export function getContactsModel(userId) {
       SELECT id, userId, name, contactNo, note, status, createdAt, updatedAt 
       FROM contacts 
       WHERE userId = ? AND status = 1
-      ORDER BY createdAt DESC
+      ORDER BY name ASC
     `;
 
     executeQuery(getQuery, [userId])

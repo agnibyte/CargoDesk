@@ -1,13 +1,17 @@
+import { getContactListController } from "@/backend/controllers/contactController";
 import { getUserDetailsById } from "@/backend/controllers/userController";
 import MessageWrapper from "@/components/message/messageWrapper";
 import { getCurrentToken } from "@/utilities/utils";
 import { parseCookies } from "nookies";
 import React from "react";
 
-export default function Messager({ pageData }) {
+export default function Messager({ pageData, contacts }) {
   return (
     <>
-      <MessageWrapper pageData={pageData} />
+      <MessageWrapper
+        pageData={pageData}
+        contacts={contacts}
+      />
     </>
   );
 }
@@ -16,6 +20,8 @@ export async function getServerSideProps(context) {
   const token = cookies.auth_token;
 
   const pageData = {};
+  let contacts = [];
+
   const res = context.res;
 
   let decoded;
@@ -52,7 +58,15 @@ export async function getServerSideProps(context) {
   }
 
   // Token is valid → fetch user details from DB
-  const [userDetails] = await Promise.all([getUserDetailsById(decoded.userId)]);
+
+  const [userDetails, contactsData] = await Promise.all([
+    getUserDetailsById(decoded.userId),
+    getContactListController(decoded.userId),
+  ]);
+
+  if (contactsData?.status) {
+    contacts = contactsData.data;
+  }
 
   if (!userDetails?.status || !userDetails.data) {
     // User not found → clear cookie & redirect
@@ -89,6 +103,7 @@ export async function getServerSideProps(context) {
   return {
     props: {
       pageData,
+      contacts,
     },
   };
 }
