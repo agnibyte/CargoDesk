@@ -11,11 +11,28 @@ export default function ContactsFromCSV({ contacts, setContacts }) {
       header: true,
       skipEmptyLines: true,
       complete: (results) => {
-        console.log("results", results);
-        const parsedContacts = results.data.map((row) => ({
-          name: row.name?.trim(),
-          contactNo: row.contactNo?.trim(),
-        }));
+        const seen = new Set();
+
+        const parsedContacts = results.data
+          .map((row) => {
+            const name = row.name?.trim() || "";
+            let contactNo = row.contactNo?.replace(/\D/g, "") || ""; // remove non-digits
+
+            // Get last 10 digits if more than 10
+            if (contactNo.length > 10) {
+              contactNo = contactNo.slice(-10);
+            }
+
+            // Only allow valid 10-digit numbers
+            if (contactNo.length === 10 && !seen.has(contactNo)) {
+              seen.add(contactNo);
+              return { name, contactNo };
+            }
+
+            return null; // Invalid or duplicate
+          })
+          .filter(Boolean); // Remove nulls
+
         setContacts(parsedContacts);
       },
     });
