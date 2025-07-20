@@ -9,7 +9,7 @@ export default function ManageContactsWrapper({ pageData, contacts }) {
   const contactsTabs = [
     {
       id: "01",
-      label: "All Contacts",
+      label: `All Contacts (${contacts.length})`,
       value: "allContacts",
     },
     { id: "02", label: "Import", value: "import" },
