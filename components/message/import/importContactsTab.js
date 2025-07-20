@@ -21,10 +21,8 @@ const tabs = [
   { id: "manual", label: "Manual" },
 ];
 export default function ImportContactsTab() {
-  console.log("first in pinport");
   const [contacts, setContacts] = useState([]);
   const [activeTab, setActiveTab] = useState(tabs[0].id);
-  console.log("contacts", contacts);
 
   const handleCSVImport = (e) => {
     const file = e.target.files[0];
