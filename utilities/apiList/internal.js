@@ -16,4 +16,10 @@ export const internalList = {
   // add new user
   ADD_NEW_USER: "/api/user/add-new-user",
   VERIFY_USER_LOGIN: "/api/user/verify-user",
+
+  // contacts
+  ADD_NEW_CONTACT: "/api/contact/add-new",
+  GET_CONTACT_LIST: "/api/contact/get-list",
+  UPDATE_CONTACT_LIST: "/api/contact/update",
+  DELETE_CONTACT_LIST: "/api/contact/delete",
 };
