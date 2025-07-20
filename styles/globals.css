@@ -25,6 +25,10 @@ td.css-1ex1afd-MuiTableCell-root {
 	font-family: "Rubik", sans-serif;
 }
 
+button {
+	cursor: pointer;
+}
+
 .card-header {
 	background: #100452;
 	color: white;
