@@ -4,11 +4,8 @@ import formStyle from "@/styles/formStyles.module.scss";
 import { getConstant } from "@/utilities/utils";
 import { postApiData } from "@/utilities/services/apiService";
 export default function ManualAddForm({ setContacts, pageData }) {
-  const [formData, setFormData] = useState({
-    name: "",
-    phone: "",
-    note: "",
-  });
+  const defaultFormData = { name: "", phone: "", note: "" };
+  const [formData, setFormData] = useState(defaultFormData);
 
   const [validations, setValidations] = useState({});
   const [loading, setLoading] = useState(false);
@@ -20,6 +17,7 @@ export default function ManualAddForm({ setContacts, pageData }) {
     handleSubmit,
     setError,
     clearErrors,
+    reset,
     formState: { errors },
   } = useForm();
 
@@ -31,14 +29,25 @@ export default function ManualAddForm({ setContacts, pageData }) {
         maxLength: { value: 50, message: "Name too long" },
       },
       phone: {
-        required: "Email is required",
+        required: "Phone number is required",
+        minLength: {
+          value: getConstant("LEN_MIN_PHONE_NO"),
+          message: "Phone number is too short",
+        },
+        maxLength: {
+          value: getConstant("LEN_MAX_PHONE_NO"), // You should probably use MAX here
+          message: "Phone number is too long",
+        },
         pattern: {
-          value: /^\+?[1-9]/,
-          message: "Invalid phone address",
+          value: /^[+]?[0-9]{7,15}$/, // E.164-compatible basic pattern
+          message: "Please enter a valid phone number",
         },
       },
       note: {
-        maxLength: { value: 50, message: "Max 50 characters" },
+        maxLength: {
+          value: getConstant("LEN_MAX_NOTE"),
+          message: `Max ${getConstant("LEN_MAX_NOTE")} characters`,
+        },
       },
     });
   }, []);
@@ -64,6 +73,12 @@ export default function ManualAddForm({ setContacts, pageData }) {
       const response = await postApiData("ADD_NEW_CONTACT", payload);
       if (response.status) {
         setSuccessMsg(response.message);
+        setTimeout(() => {
+          setSuccessMsg("");
+        }, 3000);
+
+        reset();
+        setFormData(defaultFormData);
       } else {
         setApiError(response.message);
       }
@@ -94,6 +109,7 @@ export default function ManualAddForm({ setContacts, pageData }) {
               formStyle.inputField
             } ${errors.name ? formStyle.error : ""}`}
             placeholder="Enter Name"
+            name="name"
           />
           {errors.name && (
             <p className="text-red-500 text-sm mt-1">{errors.name.message}</p>
@@ -105,6 +121,7 @@ export default function ManualAddForm({ setContacts, pageData }) {
           <input
             type="phone"
             value={formData.phone}
+            minLength={getConstant("LEN_MIN_PHONE_NO")}
             maxLength={getConstant("LEN_MAX_PHONE_NO")}
             {...register("phone", validations.phone)}
             onChange={(e) => handleChange("phone", e.target.value)}
@@ -112,6 +129,7 @@ export default function ManualAddForm({ setContacts, pageData }) {
               formStyle.inputField
             } ${errors.phone ? formStyle.error : ""}`}
             placeholder="Enter Phone No"
+            name="phone"
           />
           {errors.phone && (
             <p className="text-red-500 text-sm mt-1">{errors.phone.message}</p>
@@ -129,6 +147,7 @@ export default function ManualAddForm({ setContacts, pageData }) {
           formStyle.inputField
         } ${errors.note ? formStyle.error : ""}`}
         placeholder="Enter Note"
+        name="note"
       />
       {errors.note && (
         <p className="text-red-500 text-sm mt-1">{errors.note.message}</p>
