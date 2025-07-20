@@ -41,7 +41,6 @@ export default function ManageContactsWrapper({ pageData }) {
             </>
           ) : selectedTab == "import" ? (
             <>
-              {/* <GoogleContacts /> */}
               <ImportContactsTab pageData={pageData} />
             </>
           ) : null}

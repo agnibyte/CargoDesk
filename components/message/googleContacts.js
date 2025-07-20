@@ -1,10 +1,10 @@
 // pages/contacts.js or components/GoogleContacts.js
 
 import React, { useEffect, useState } from "react";
+import { FcGoogle } from "react-icons/fc";
 
-export default function GoogleContacts() {
+export default function GoogleContacts({ contacts, setContacts }) {
   const [gapiLoaded, setGapiLoaded] = useState(false);
-  const [contacts, setContacts] = useState([]);
 
   useEffect(() => {
     // Dynamically import gapi-script only on the client
@@ -47,14 +47,19 @@ export default function GoogleContacts() {
   };
   console.log("contacts", contacts);
   return (
-    <div className="p-4">
-      <h2 className="text-xl font-bold mb-4">Google Contacts</h2>
+    <div className="w-full  bg-white border border-gray-200 rounded-xl shadow p-5">
+      <div className="flex items-center justify-between mb-7">
+        <h3 className="text-lg font-semibold text-gray-800 flex items-center gap-2">
+          Google Contacts
+        </h3>
+      </div>
       <button
         onClick={signIn}
         disabled={!gapiLoaded}
-        className="bg-blue-500 text-white px-4 py-2 rounded"
+        className="bg-white text-gray-800 px-4 py-2 rounded-full flex gap-3 shadow-md items-center border border-gray-200 hover:bg-gray-50 hover:text-gray-900 transition duration-300 ease-in-out"
       >
-        Sign in and Fetch Contacts
+        <FcGoogle className="text-xl " />
+        Sign in with Google
       </button>
 
       <ul className="mt-4 space-y-2">

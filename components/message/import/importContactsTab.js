@@ -12,6 +12,7 @@ import msgStyle from "@/styles/manageContacts.module.scss";
 import { BsPersonVcard } from "react-icons/bs";
 import Image from "next/image";
 import ContactsPreviewList from "./contactsPreviewList";
+import GoogleContacts from "../googleContacts";
 
 const tabs = [
   { id: "google", label: "Google" },
@@ -75,7 +76,11 @@ export default function ImportContactsTab({ pageData }) {
           <div className="flex-1 space-y-6">
             {/* Google Import */}
             {activeTab === "google" && (
-              <GoogleSignIn setContacts={setContacts} />
+              // <GoogleSignIn setContacts={setContacts} />
+              <GoogleContacts
+                contacts={contacts}
+                setContacts={setContacts}
+              />
             )}
 
             {/* CSV Import */}
