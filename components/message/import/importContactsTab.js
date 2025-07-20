@@ -12,6 +12,7 @@ import msgStyle from "@/styles/manageContacts.module.scss";
 
 import { BsPersonVcard } from "react-icons/bs";
 import Image from "next/image";
+import ContactsPreviewList from "./contactsPreviewList";
 
 const tabs = [
   { id: "google", label: "Google" },
@@ -72,9 +73,9 @@ export default function ImportContactsTab() {
                     width={15}
                     height={15}
                     className={msgStyle.importOptionIcon}
-                    />
-                  ) : tab.id == "manual" ? (
-                    <Image
+                  />
+                ) : tab.id == "manual" ? (
+                  <Image
                     src={"/imges/svg/dialpad.svg"}
                     width={15}
                     height={15}
@@ -117,28 +118,7 @@ export default function ImportContactsTab() {
             )}
 
             {/* Imported Contacts Preview */}
-            {contacts.length > 0 && (
-              <div className="mt-6">
-                <h3 className="text-lg font-semibold mb-3 text-gray-800">
-                  Imported Contacts
-                </h3>
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  {contacts.map((c, i) => (
-                    <div
-                      key={i}
-                      className="bg-gray-50 p-4 rounded-md border border-gray-200 flex justify-between items-center shadow-sm"
-                    >
-                      <span className="font-medium text-gray-800 text-sm">
-                        {c.name}
-                      </span>
-                      <span className="text-sm text-gray-500">
-                        {c.contactNo}
-                      </span>
-                    </div>
-                  ))}
-                </div>
-              </div>
-            )}
+            {contacts.length > 0 && <ContactsPreviewList contacts={contacts} />}
           </div>
         </div>
       </div>

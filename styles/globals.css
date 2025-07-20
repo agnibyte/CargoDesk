@@ -83,3 +83,29 @@ td.css-1ex1afd-MuiTableCell-root {
 		}
 	}
 }
+
+
+.contact-card {
+	position: relative;
+	background-color: white;
+}
+
+.contact-card::before {
+	content: "";
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	width: 20px;
+	height: 20px;
+	background-color: #dc2626;
+	/* red-600 */
+	border-radius: 50%;
+	transform: translate(-50%, -50%) scale(0);
+	z-index: 0;
+	transition: transform 0.5s ease-out;
+}
+
+.contact-card.confirmContactDelete::before {
+	transform: translate(-50%, -50%) scale(25);
+	/* scale outward to fill card */
+}
