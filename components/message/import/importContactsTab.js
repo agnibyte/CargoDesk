@@ -24,22 +24,6 @@ export default function ImportContactsTab() {
   const [contacts, setContacts] = useState([]);
   const [activeTab, setActiveTab] = useState(tabs[0].id);
 
-  const handleCSVImport = (e) => {
-    const file = e.target.files[0];
-    if (!file) return;
-
-    Papa.parse(file, {
-      header: true,
-      complete: (results) => {
-        const data = results.data.map((row) => ({
-          name: row.name || row.Name || "Unnamed",
-          contactNo: row.contactNo || row.Phone || "",
-        }));
-        setContacts(data);
-      },
-    });
-  };
-
   return (
     <>
       <div className="mx-auto px-4 py-6 bg-white shadow-xl min-h-[60vh]">
