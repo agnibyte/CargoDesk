@@ -23,6 +23,7 @@ export function addNewContactController(request) {
         }
       })
       .catch((error) => {
+        console.log('error000000000000000000000================', error)
         reject(error);
       });
   });

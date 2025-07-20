@@ -46,7 +46,7 @@ export function getContactsModel(userId) {
 }
 
 export function addNewContactModel(data) {
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve) => {
     const insertQuery = `INSERT INTO contacts SET ?`;
 
     const contactObj = {
@@ -59,7 +59,7 @@ export function addNewContactModel(data) {
 
     executeQuery(insertQuery, contactObj)
       .then((result) => {
-        if (result.affectedRows > 0) {
+        if (result && result.affectedRows > 0) {
           response.status = true;
           response.message = "Contact added successfully";
 
@@ -71,8 +71,15 @@ export function addNewContactModel(data) {
       })
       .catch((error) => {
         console.error("Error adding contact:", error);
-        response.message = "Database error while adding contact.";
-        reject(response);
+        if (error.code === "ER_DUP_ENTRY") {
+          response.message =
+            "Contact already exists. Please check in All Contacts section";
+          resolve(response);
+        } else {
+          // Log but DO NOT reject – avoid unhandledRejection
+          response.message = "Database error while adding contact.";
+          reject(response);
+        }
       });
   });
 }

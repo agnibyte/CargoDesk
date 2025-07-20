@@ -9,7 +9,6 @@ import { FcGoogle } from "react-icons/fc";
 import { PiFileCsvDuotone } from "react-icons/pi";
 // import { ReactComponent as Dialpad } from "@/public/imges/svg/dialpad.svg";
 import msgStyle from "@/styles/manageContacts.module.scss";
-
 import { BsPersonVcard } from "react-icons/bs";
 import Image from "next/image";
 import ContactsPreviewList from "./contactsPreviewList";
