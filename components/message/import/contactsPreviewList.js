@@ -17,6 +17,7 @@ export default function ContactsPreviewList({
 
   const handleDelete = (index) => {
     console.log("Deleting contact:", contacts[index]);
+    setContacts(contacts.filter((_, i) => i !== index));
     setConfirmIndex(null); // Hide confirmation
   };
 
