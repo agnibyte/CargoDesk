@@ -8,7 +8,7 @@ import CommonModal from "../common/commonModal";
 import GoogleContacts from "./googleContacts";
 import Link from "next/link";
 
-export default function MessageWrapper() {
+export default function MessageWrapper({ pageData }) {
   const contactsList = [
     {
       id: "01",

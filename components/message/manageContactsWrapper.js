@@ -5,7 +5,7 @@ import GoogleContacts from "./googleContacts";
 import AllContactsSection from "../manageContacts/allContactsSection";
 import ImportContactsTab from "./import/importContactsTab";
 
-export default function ManageContactsWrapper() {
+export default function ManageContactsWrapper({ pageData }) {
   const contactsTabs = [
     { id: "02", label: "Import", value: "import" },
     {
@@ -42,7 +42,7 @@ export default function ManageContactsWrapper() {
           ) : selectedTab == "import" ? (
             <>
               {/* <GoogleContacts /> */}
-              <ImportContactsTab />
+              <ImportContactsTab pageData={pageData} />
             </>
           ) : null}
         </div>

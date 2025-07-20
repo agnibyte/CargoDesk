@@ -20,7 +20,7 @@ const tabs = [
   { id: "vcf", label: "vCard" },
   { id: "manual", label: "Manual" },
 ];
-export default function ImportContactsTab() {
+export default function ImportContactsTab({ pageData }) {
   const [contacts, setContacts] = useState([]);
   const [activeTab, setActiveTab] = useState(tabs[0].id);
 
@@ -96,7 +96,10 @@ export default function ImportContactsTab() {
 
             {/* Manual Input */}
             {activeTab === "manual" && (
-              <ManualAddForm setContacts={setContacts} />
+              <ManualAddForm
+                setContacts={setContacts}
+                pageData={pageData}
+              />
             )}
 
             {/* Imported Contacts Preview */}
