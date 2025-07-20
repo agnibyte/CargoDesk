@@ -6,6 +6,28 @@
     font-size: 13px;
 }
 
+.deleteButton {
+    padding: 10px 15px;
+    border-radius: 5px;
+    background-color: #ff4d4f;
+    color: white;
+
+    &:hover {
+        background-color: #d9363e;
+    }
+}
+
+.editButton {
+    padding: 10px 15px;
+    border-radius: 5px;
+    background-color: #fdba00;
+    color: white;
+
+    &:hover {
+        background-color: #e0a500;
+    }
+}
+
 // .events-none {
 // 	pointer-events: none;
 // }

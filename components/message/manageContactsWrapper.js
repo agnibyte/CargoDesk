@@ -7,12 +7,12 @@ import ImportContactsTab from "./import/importContactsTab";
 
 export default function ManageContactsWrapper({ pageData, contacts }) {
   const contactsTabs = [
-    { id: "02", label: "Import", value: "import" },
     {
       id: "01",
       label: "All Contacts",
       value: "allContacts",
     },
+    { id: "02", label: "Import", value: "import" },
   ];
 
   const [selectedTab, setSelectedTab] = useState(contactsTabs[0].value);
@@ -37,7 +37,10 @@ export default function ManageContactsWrapper({ pageData, contacts }) {
           </div>
           {selectedTab == "allContacts" ? (
             <>
-              <AllContactsSection contacts={contacts} />{" "}
+              <AllContactsSection
+                pageData={pageData}
+                contacts={contacts}
+              />{" "}
             </>
           ) : selectedTab == "import" ? (
             <>

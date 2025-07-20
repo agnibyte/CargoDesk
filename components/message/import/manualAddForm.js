@@ -3,9 +3,18 @@ import { useForm } from "react-hook-form";
 import formStyle from "@/styles/formStyles.module.scss";
 import { getConstant } from "@/utilities/utils";
 import { postApiData } from "@/utilities/services/apiService";
-export default function ManualAddForm({ setContacts, pageData }) {
+import commonStyle from "@/styles/common/common.module.scss";
+
+export default function ManualAddForm({
+  pageData,
+  modalData,
+  isEdit = false,
+  setContactModal,
+  setContactsList,
+}) {
   const defaultFormData = { name: "", phone: "", note: "" };
-  const [formData, setFormData] = useState(defaultFormData);
+  const initialFormData = isEdit ? modalData : defaultFormData;
+  const [formData, setFormData] = useState(initialFormData);
 
   const [validations, setValidations] = useState({});
   const [loading, setLoading] = useState(false);
@@ -57,11 +66,7 @@ export default function ManualAddForm({ setContacts, pageData }) {
     if (errors[field]) clearErrors(field);
   };
 
-  const onSubmit = async () => {
-    setLoading(true);
-    setApiError(null);
-    setSuccessMsg(null);
-
+  const addNewContact = async () => {
     try {
       const payload = {
         userId: pageData.user.userId,
@@ -91,9 +96,57 @@ export default function ManualAddForm({ setContacts, pageData }) {
     }
   };
 
+  const editContact = async () => {
+    try {
+      const editPayload = {
+        id: modalData.id,
+        data: {
+          name: formData.name,
+          contactNo: formData.phone,
+          note: formData.note,
+        },
+      };
+
+      const response = await postApiData("UPDATE_CONTACT", editPayload);
+      if (response.status) {
+        setSuccessMsg(response.message);
+        setTimeout(() => {
+          setSuccessMsg("");
+        }, 3000);
+
+        reset();
+        setFormData(defaultFormData);
+        setContactModal(false);
+        setContactsList((prev) =>
+          prev.map((c) =>
+            c.id === editPayload.id ? { ...c, ...editPayload.data } : c
+          )
+        );
+      } else {
+        setApiError(response.message);
+      }
+      // setContacts((prev) => [...prev, formData]);
+      // console.log("Submitted Data:", formData);
+    } catch (error) {
+      console.log("error", error);
+      setApiError("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+  const onSubmit = (data) => {
+    setLoading(true);
+    setApiError(null);
+    setSuccessMsg(null);
+    if (isEdit) {
+      editContact();
+    } else addNewContact();
+  };
   return (
     <form
-      className="w-full  bg-white border border-gray-200 rounded-xl shadow p-5"
+      className={`w-full bg-white p-5 ${
+        !isEdit ? "border border-gray-200 rounded-xl shadow" : " rounded-b-2xl"
+      }`}
       onSubmit={handleSubmit(onSubmit)}
     >
       <div className="flex flex-row space-x-4">
@@ -153,13 +206,23 @@ export default function ManualAddForm({ setContacts, pageData }) {
         <p className="text-red-500 text-sm mt-1">{errors.note.message}</p>
       )}
       {/* Submit Button */}
-      <button
-        type="submit"
-        disabled={loading}
-        className="w-full bg-blue-600 text-white font-semibold mt-6 py-2 rounded hover:bg-blue-700 transition cursor-pointer"
-      >
-        {loading ? "Submitting..." : "Submit"}
-      </button>
+      {isEdit ? (
+        <button
+          type="submit"
+          disabled={loading}
+          className={`w-full bg-blue-600 text-white font-semibold mt-6 py-2 rounded hover:bg-blue-700 transition ${commonStyle.editButton}`}
+        >
+          {loading ? getConstant("LOADING_TEXT") : "Submit"}
+        </button>
+      ) : (
+        <button
+          type="submit"
+          disabled={loading}
+          className="w-full bg-blue-600 text-white font-semibold mt-6 py-2 rounded hover:bg-blue-700 transition cursor-pointer"
+        >
+          {loading ? "Submitting..." : "Submit"}
+        </button>
+      )}
       {/* Status Messages */}
       {apiError && <p className="text-red-500 mt-3 text-center">{apiError}</p>}
       {successMsg && (

@@ -5,12 +5,18 @@ import modalStyle from "@/styles/modal.module.scss";
 import commonStyle from "@/styles/common/common.module.scss";
 import { getConstant } from "@/utilities/utils";
 import { allContactsTableHeadCells } from "@/utilities/masterData";
+import ManualAddForm from "../message/import/manualAddForm";
 
-export default function AllContactsSection({ contacts }) {
+export default function AllContactsSection({ pageData, contacts }) {
   const [selected, setSelected] = useState([]);
   const [deletePopup, setDeletePopup] = useState(false);
   const [deleteLoad, setDeleteLoad] = useState(false);
   const [deleteError, setDeleteError] = useState("");
+  const [contactModal, setContactModal] = useState(false);
+  const [isEdit, setIsEdit] = useState(false);
+  const [modalData, setModalData] = useState({});
+  const [contactsList, setContactsList] = useState(contacts);
+
   const onClickDelete = async (ids) => {
     const payload = {
       ids: ids,
@@ -33,12 +39,22 @@ export default function AllContactsSection({ contacts }) {
 
   const onClickEdit = (id) => {
     console.log("Edit clicked for id:", id);
+
+    const selectedItem = contactsList.find((item) => item.id == id);
+    setModalData({
+      id: selectedItem.id,
+      name: selectedItem.name,
+      phone: selectedItem.contactNo,
+      note: selectedItem.note,
+    });
+    setContactModal(true);
+    setIsEdit(true);
   };
 
   return (
     <div>
       <DocumentTable
-        rows={contacts}
+        rows={contactsList}
         headCells={allContactsTableHeadCells}
         onClickEdit={onClickEdit}
         selected={selected}
@@ -77,6 +93,20 @@ export default function AllContactsSection({ contacts }) {
             <span className={commonStyle["errorMsg"]}>{deleteError}</span>
           )}
         </div>
+      </CommonModal>
+      <CommonModal
+        modalTitle={isEdit ? "Edit Contact" : "Add New Contact"}
+        modalOpen={contactModal}
+        setModalOpen={setContactModal}
+        modalSize={"w-11/12 md:w-3/6"}
+      >
+        <ManualAddForm
+          isEdit={isEdit}
+          modalData={modalData}
+          pageData={pageData}
+          setContactModal={setContactModal}
+          setContactsList={setContactsList}
+        />
       </CommonModal>
     </div>
   );

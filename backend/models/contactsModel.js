@@ -92,7 +92,7 @@ export function updateContactModel(contactId, data) {
       WHERE id = ?
     `;
 
-    const values = [data.name, data.contactNo, data.note || null, contactId];
+    const values = [data.name, data.contactNo, data.note || "", contactId];
 
     executeQuery(updateQuery, values)
       .then((result) => {
@@ -101,10 +101,8 @@ export function updateContactModel(contactId, data) {
           response.message = "Contact updated successfully";
           resolve(response);
         } else {
-          resolve({
-            status: false,
-            message: "Contact not found or no changes made",
-          });
+          response.message = "Contact not found for selected ID";
+          resolve(response);
         }
       })
       .catch((error) => {

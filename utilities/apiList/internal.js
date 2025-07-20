@@ -20,7 +20,7 @@ export const internalList = {
   // contacts
   ADD_NEW_CONTACT: "/api/contact/add-new",
   GET_CONTACT_LIST: "/api/contact/get-list",
-  UPDATE_CONTACT_LIST: "/api/contact/update",
-  DELETE_CONTACT_LIST: "/api/contact/delete",
-  IMPORT_CONTACTS_IN_BLUK: '/api/contact/import-contacts-in-bluk',
+  UPDATE_CONTACT: "/api/contact/update",
+  DELETE_CONTACT: "/api/contact/delete",
+  IMPORT_CONTACTS_IN_BLUK: "/api/contact/import-contacts-in-bluk",
 };

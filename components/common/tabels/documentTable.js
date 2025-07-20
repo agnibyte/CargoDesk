@@ -13,6 +13,7 @@ import Switch from "@mui/material/Switch";
 import { visuallyHidden } from "@mui/utils";
 import { useState, useMemo } from "react";
 import { FiEdit } from "react-icons/fi";
+import commonStyle from "@/styles/common/common.module.scss";
 
 import {
   formatDate,
@@ -162,22 +163,20 @@ function EnhancedTableToolbar({
             }}
           >
             {numSelected == 1 && (
-              <Button
-                variant="contained"
-                color="primary"
+              <button
+                className={commonStyle.editButton}
                 onClick={() => onClickEdit(selectedItems[0])}
                 style={{ marginRight: "10px" }}
               >
                 Edit
-              </Button>
+              </button>
             )}
-            <Button
-              variant="contained"
-              color="secondary"
+            <button
+              className={commonStyle.deleteButton}
               onClick={() => onClickDelete(selectedItems[0])}
             >
               Delete
-            </Button>
+            </button>
           </div>
         </>
       ) : (
