@@ -63,9 +63,9 @@ export default function ImportContactsTab() {
                 }`}
               >
                 {tab.id == "google" ? (
-                  <FcGoogle className="text-[12px] md:text-sm " />
+                  <FcGoogle className="text-sm " />
                 ) : tab.id == "vcf" ? (
-                  <BsPersonVcard className="text-[12px] md:text-sm" />
+                  <BsPersonVcard className="text-sm" />
                 ) : tab.id == "csv" ? (
                   <Image
                     src={"/imges/svg/csv.svg"}
