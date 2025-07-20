@@ -29,6 +29,35 @@ export default function GoogleContacts({ contacts, setContacts }) {
     const gapi = window.gapi;
     gapi.auth2.getAuthInstance().signIn().then(fetchContacts);
   };
+  function extractContactsFromGoogleData(data) {
+    try {
+      return data
+        .map((person) => {
+          try {
+            const name = person.names?.[0]?.displayName?.trim();
+            let contactNo = person.phoneNumbers?.[0]?.value?.replace(/\D/g, "");
+
+            if (contactNo && contactNo.length >= 10) {
+              contactNo = contactNo.slice(-10);
+            } else {
+              contactNo = null;
+            }
+
+            if (name && contactNo) {
+              return { name, contactNo };
+            }
+            return null;
+          } catch (innerErr) {
+            console.warn("Skipping a contact due to error:", innerErr);
+            return null;
+          }
+        })
+        .filter(Boolean);
+    } catch (error) {
+      console.error("Error extracting contacts:", error);
+      return [];
+    }
+  }
 
   const fetchContacts = () => {
     const gapi = window.gapi;
@@ -41,11 +70,13 @@ export default function GoogleContacts({ contacts, setContacts }) {
         },
       })
       .then((res) => {
-        console.log("result======", res);
-        setContacts(res.result.connections || []);
+        const contactsData = extractContactsFromGoogleData(
+          res.result.connections || []
+        );
+        setContacts(contactsData);
       });
   };
-  console.log("contacts", contacts);
+
   return (
     <div className="w-full  bg-white border border-gray-200 rounded-xl shadow p-5">
       <div className="flex items-center justify-between mb-7">
@@ -62,7 +93,7 @@ export default function GoogleContacts({ contacts, setContacts }) {
         Sign in with Google
       </button>
 
-      <ul className="mt-4 space-y-2">
+      {/* <ul className="mt-4 space-y-2">
         {contacts.map((contact, idx) => (
           <li
             key={idx}
@@ -73,7 +104,7 @@ export default function GoogleContacts({ contacts, setContacts }) {
             {contact.emailAddresses?.[0]?.value || "No email"}
           </li>
         ))}
-      </ul>
+      </ul> */}
     </div>
   );
 }
