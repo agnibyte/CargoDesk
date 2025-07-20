@@ -25,9 +25,15 @@ export default function AllContactsSection({ pageData, contacts }) {
     setDeleteError("");
     try {
       // Simulate API call to delete contacts
-      console.log("Deleting contacts with IDs:", ids);
-      setDeletePopup(false);
-      setSelected([]);
+      const response = await postApiData("DELETE_CONTACTS", payload);
+      if (response.status) {
+        setContactsList((prev) =>
+          prev.filter((item) => !ids.includes(item.id))
+        );
+        console.log("Deleting contacts with IDs:", ids);
+        setDeletePopup(false);
+        setSelected([]);
+      }
     } catch (error) {
       console.error("Error occurred during deletion:", error);
       setDeleteError(
@@ -59,9 +65,7 @@ export default function AllContactsSection({ pageData, contacts }) {
         onClickEdit={onClickEdit}
         selected={selected}
         setSelected={setSelected}
-        onClickDelete={() => {
-          setDeletePopup(true);
-        }}
+        onClickDelete={onClickDelete}
         isFilterApplied={false}
       />
 
