@@ -4,8 +4,9 @@ import CommonModal from "../common/commonModal";
 import modalStyle from "@/styles/modal.module.scss";
 import commonStyle from "@/styles/common/common.module.scss";
 import { getConstant } from "@/utilities/utils";
+import { allContactsTableHeadCells } from "@/utilities/masterData";
 
-export default function AllContactsSection() {
+export default function AllContactsSection({ contacts }) {
   const [selected, setSelected] = useState([]);
   const [deletePopup, setDeletePopup] = useState(false);
   const [deleteLoad, setDeleteLoad] = useState(false);
@@ -30,51 +31,6 @@ export default function AllContactsSection() {
     setDeleteLoad(false);
   };
 
-  const data = {
-    rows: [
-      {
-        id: 93,
-        contactName: "suraj",
-        contactNo: "+919876543210",
-        note: "hello this is for testing",
-      },
-    ],
-    headCells: [
-      {
-        id: "id",
-        numeric: false,
-        disablePadding: false,
-        label: "Sr. No.",
-      },
-      {
-        id: "contactName",
-        numeric: false,
-        disablePadding: false,
-        label: "Contact Name",
-      },
-      {
-        id: "contactNo",
-        numeric: false,
-        disablePadding: false,
-        label: "Contact No.",
-      },
-      {
-        id: "note",
-        numeric: false,
-        disablePadding: false,
-        label: "Note",
-      },
-      {
-        id: "action",
-        numeric: false,
-        disablePadding: false,
-        label: "Action",
-      },
-    ],
-    title: "",
-    selected: [],
-  };
-
   const onClickEdit = (id) => {
     console.log("Edit clicked for id:", id);
   };
@@ -82,8 +38,8 @@ export default function AllContactsSection() {
   return (
     <div>
       <DocumentTable
-        rows={data.rows}
-        headCells={data.headCells}
+        rows={contacts}
+        headCells={allContactsTableHeadCells}
         onClickEdit={onClickEdit}
         selected={selected}
         setSelected={setSelected}

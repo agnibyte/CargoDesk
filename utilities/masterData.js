@@ -302,3 +302,36 @@ const smapleconatacts = [
     ],
   },
 ];
+
+export const allContactsTableHeadCells = [
+  {
+    id: "id",
+    numeric: false,
+    disablePadding: false,
+    label: "Sr. No.",
+  },
+  {
+    id: "name",
+    numeric: false,
+    disablePadding: false,
+    label: "Contact Name",
+  },
+  {
+    id: "contactNo",
+    numeric: false,
+    disablePadding: false,
+    label: "Contact No.",
+  },
+  {
+    id: "note",
+    numeric: false,
+    disablePadding: false,
+    label: "Note",
+  },
+  {
+    id: "action",
+    numeric: false,
+    disablePadding: false,
+    label: "Action",
+  },
+];

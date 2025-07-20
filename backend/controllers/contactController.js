@@ -30,12 +30,11 @@ export function addNewContactController(request) {
   });
 }
 
-export function getContactListController(request) {
+export function getContactListController(userId) {
   return new Promise((resolve, reject) => {
     const response = {
       status: false,
     };
-    const userId = request.userId;
 
     getContactsModel(userId)
       .then((result) => {
