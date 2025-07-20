@@ -13,14 +13,14 @@ const database = mysql({
 
 export default function executeQuery(query, values = []) {
   return new Promise((resolve, reject) => {
-    try {
-      database.query(query, values).then((results) => {
-        database.end();
+    database
+      .query(query, values)
+      .then((results) => {
         resolve(JSON.parse(JSON.stringify(results)));
+      })
+      .catch((error) => {
+        console.error("Database query error ====", error);
+        reject(error);
       });
-    } catch (error) {
-      console.error("error in connecting db====", error);
-      resolve([]);
-    }
   });
 }
