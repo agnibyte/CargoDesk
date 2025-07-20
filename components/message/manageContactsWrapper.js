@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import TabComponent from "../common/tabComponent";
 import dashboardStyle from "@/styles/dashBoard.module.scss";
-import GoogleContacts from "./googleContacts";
+// import GoogleContacts from "./googleContacts";
 import AllContactsSection from "../manageContacts/allContactsSection";
 import ImportContactsTab from "./import/importContactsTab";
 
