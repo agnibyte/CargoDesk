@@ -22,6 +22,7 @@ const tabs = [
 export default function ImportContactsTab({ pageData }) {
   const [contacts, setContacts] = useState([]);
   const [activeTab, setActiveTab] = useState(tabs[0].id);
+  const [apiSuccess, setApiSuccess] = useState(false);
 
   return (
     <>
@@ -82,6 +83,7 @@ export default function ImportContactsTab({ pageData }) {
               <ContactsFromCSV
                 contacts={contacts}
                 setContacts={setContacts}
+                apiSuccess={apiSuccess}
               />
             )}
 
@@ -90,6 +92,7 @@ export default function ImportContactsTab({ pageData }) {
               <ContactsFromVCF
                 contacts={contacts}
                 setContacts={setContacts}
+                apiSuccess={apiSuccess}
               />
             )}
 
@@ -102,7 +105,14 @@ export default function ImportContactsTab({ pageData }) {
             )}
 
             {/* Imported Contacts Preview */}
-            {contacts.length > 0 && <ContactsPreviewList contacts={contacts} />}
+
+            <ContactsPreviewList
+              contacts={contacts}
+              setContacts={setContacts}
+              pageData={pageData}
+              apiSuccess={apiSuccess}
+              setApiSuccess={setApiSuccess}
+            />
           </div>
         </div>
       </div>

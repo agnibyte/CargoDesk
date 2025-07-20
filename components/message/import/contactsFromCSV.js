@@ -1,11 +1,22 @@
-import React, { useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { MdOutlineFileUpload } from "react-icons/md";
 import Papa from "papaparse";
 
-export default function ContactsFromCSV({ contacts, setContacts }) {
+export default function ContactsFromCSV({ contacts, setContacts, apiSuccess }) {
+  const [selectedCSVFile, setSelectedCSVFile] = useState(null);
+  const fileInputRef = useRef(null);
+
+  useEffect(() => {
+    if (apiSuccess) {
+      setSelectedCSVFile(null);
+      if (fileInputRef.current) fileInputRef.current.value = "";
+    }
+  }, [apiSuccess]);
+
   const handleCSVUpload = (e) => {
     const file = e.target.files[0];
     if (!file) return;
+    setSelectedCSVFile(file);
 
     Papa.parse(file, {
       header: true,
@@ -59,14 +70,15 @@ export default function ContactsFromCSV({ contacts, setContacts }) {
 
       <div className="bg-gray-10 md:p-4 rounded-md mb-4">
         <input
+          ref={fileInputRef}
           type="file"
           accept=".csv"
           onChange={handleCSVUpload}
           className="block w-full text-sm file:mr-4 file:py-2 file:px-4
-            file:rounded-l-md file:border file:border-gray-300
-            file:text-sm file:font-semibold
-            file:bg-blue-100 file:text-blue-900 
-            hover:file:bg-blue-100 border border-gray-300 rounded-md file:cursor-pointer cursor-pointer"
+      file:rounded-l-md file:border file:border-gray-300
+      file:text-sm file:font-semibold
+      file:bg-blue-100 file:text-blue-900 
+      hover:file:bg-blue-100 border border-gray-300 rounded-md file:cursor-pointer cursor-pointer"
         />
       </div>
 

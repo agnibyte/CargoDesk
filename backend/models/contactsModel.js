@@ -140,3 +140,46 @@ export function deleteContactModel(contactId) {
       });
   });
 }
+export function addBulkContactsModel(userId, contactList) {
+  return new Promise(async (resolve, reject) => {
+    if (!Array.isArray(contactList) || contactList.length === 0) {
+      return resolve({ status: false, message: "Empty contact list" });
+    }
+
+    try {
+      const insertQuery = `
+        INSERT IGNORE INTO contacts (userId, name, contactNo, note, status)
+        VALUES ?
+      `;
+
+      const values = contactList.map((c) => [
+        userId,
+        c.name,
+        c.contactNo,
+        c.note || null,
+        1,
+      ]);
+
+      const BATCH_SIZE = 500;
+      let insertedRows = 0;
+
+      for (let i = 0; i < values.length; i += BATCH_SIZE) {
+        const chunk = values.slice(i, i + BATCH_SIZE);
+        const result = await executeQuery(insertQuery, [chunk]);
+        insertedRows += result.affectedRows || 0;
+      }
+
+      resolve({
+        status: true,
+        message: `${insertedRows} new contacts added`,
+        skipped: contactList.length - insertedRows,
+      });
+    } catch (error) {
+      console.error("Bulk insert failed:", error);
+      reject({
+        status: false,
+        message: "Database error while inserting contacts",
+      });
+    }
+  });
+}
