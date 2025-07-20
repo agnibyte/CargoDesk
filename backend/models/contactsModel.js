@@ -53,7 +53,7 @@ export function addNewContactModel(data) {
       userId: data.userId,
       name: data.name,
       contactNo: data.contactNo,
-      note: data.note || null,
+      note: data.note || "",
       status: 1,
     };
 

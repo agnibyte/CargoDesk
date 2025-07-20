@@ -2,7 +2,8 @@ import React, { useEffect, useState } from "react";
 import { useForm } from "react-hook-form";
 import formStyle from "@/styles/formStyles.module.scss";
 import { getConstant } from "@/utilities/utils";
-export default function ManualAddForm({ setContacts }) {
+import { postApiData } from "@/utilities/services/apiService";
+export default function ManualAddForm({ setContacts, pageData }) {
   const [formData, setFormData] = useState({
     name: "",
     phone: "",
@@ -53,14 +54,21 @@ export default function ManualAddForm({ setContacts }) {
     setSuccessMsg(null);
 
     try {
-      // Simulate API request
-      //   await new Promise((res) => setTimeout(res, 1000));
+      const payload = {
+        userId: pageData.user.userId,
+        name: formData.name,
+        contactNo: formData.phone,
+        note: formData.note,
+      };
 
-      // Simulate successful response
-      setSuccessMsg("Form submitted successfully!");
-
+      const response = await postApiData("ADD_NEW_CONTACT", payload);
+      if (response.status) {
+        setSuccessMsg(response.message);
+      } else {
+        setApiError(response.message);
+      }
       // setContacts((prev) => [...prev, formData]);
-      console.log("Submitted Data:", formData);
+      // console.log("Submitted Data:", formData);
     } catch (error) {
       setApiError("Something went wrong. Please try again.");
     } finally {
