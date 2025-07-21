@@ -158,14 +158,14 @@ export default function MainHeader({ pageData = {} }) {
   return (
     <>
       <header
-        className={`w-full px-4 md:px-14 py-3 flex items-center justify-between shadow-md bg-white z-50 top-0 sticky transition-all duration-300 ${
+        className={`w-full px-4 lg:px-14 py-3 flex items-center justify-between shadow-md bg-white z-50 top-0 sticky transition-all duration-300 ${
           isScrolled ? "shadow-lg backdrop-blur-sm bg-white/95" : ""
         }`}
         role="banner"
       >
         {/* Mobile Menu Button */}
         <button
-          className="md:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
+          className="lg:hidden p-2 rounded-lg hover:bg-gray-100 transition-colors"
           onClick={handleMobileMenuToggle}
           aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
           aria-expanded={isMobileMenuOpen}
@@ -199,7 +199,7 @@ export default function MainHeader({ pageData = {} }) {
         <div className="flex items-center space-x-3">
           <Link
             href="/"
-            className="flex items-center space-x-32 md:space-x-3 hover:opacity-80 transition-opacity"
+            className="flex items-center space-x-32 lg:space-x-3 hover:opacity-80 transition-opacity"
           >
             <Image
               src="/logo.png"
@@ -220,7 +220,7 @@ export default function MainHeader({ pageData = {} }) {
 
         {/* Desktop Navigation */}
         <nav
-          className="hidden md:flex items-center space-x-1"
+          className="hidden lg:flex items-center space-x-1"
           role="navigation"
         >
           {menuItems.map((item, idx) =>
@@ -424,12 +424,12 @@ export default function MainHeader({ pageData = {} }) {
       {isMobileMenuOpen && (
         <>
           <div
-            className="fixed inset-0  backdrop-blur-sm bg-opacity-50 z-40 md:hidden"
+            className="fixed inset-0  backdrop-blur-sm bg-opacity-50 z-40 lg:hidden"
             onClick={closeMobileMenu}
           />
           <div
             ref={mobileMenuRef}
-            className="fixed top-0 left-0 w-80 h-full bg-white shadow-xl z-50 transform transition-transform duration-300 md:hidden overflow-y-auto"
+            className="fixed top-0 left-0 w-80 h-full bg-white shadow-xl z-50 transform transition-transform duration-300 lg:hidden overflow-y-auto"
           >
             {/* Mobile Menu Header */}
             <div className="flex items-center justify-between p-4 border-b border-gray-200">
