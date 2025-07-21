@@ -20,7 +20,7 @@ const tabs = [
   { id: "vcf", label: "vCard" },
   { id: "manual", label: "Manual" },
 ];
-export default function ImportContactsTab({ pageData }) {
+export default function ImportContactsTab({ pageData, setContactsList }) {
   const [contacts, setContacts] = useState([]);
   const [activeTab, setActiveTab] = useState(tabs[0].id);
   const [apiSuccess, setApiSuccess] = useState(false);
@@ -106,6 +106,7 @@ export default function ImportContactsTab({ pageData }) {
               <ManualAddForm
                 setContacts={setContacts}
                 pageData={pageData}
+                setContactsList={setContactsList}
               />
             )}
 
@@ -117,6 +118,7 @@ export default function ImportContactsTab({ pageData }) {
               pageData={pageData}
               apiSuccess={apiSuccess}
               setApiSuccess={setApiSuccess}
+              setContactsList={setContactsList}
             />
           </div>
         </div>

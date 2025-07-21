@@ -9,6 +9,7 @@ export default function ContactsPreviewList({
   setContacts,
   apiSuccess,
   setApiSuccess,
+  setContactsList,
 }) {
   const [confirmIndex, setConfirmIndex] = useState(null);
   const [apiLoading, setApiLoading] = useState(false);
@@ -35,6 +36,7 @@ export default function ContactsPreviewList({
       };
       const response = await postApiData("IMPORT_CONTACTS_IN_BLUK", payload);
       if (response.status) {
+        setContactsList((prev) => [...prev, ...contacts]);
         setSuccessMsg("Contacts saved successfully!!");
         setContacts([]);
         setApiSuccess(true);

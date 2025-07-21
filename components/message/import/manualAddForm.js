@@ -78,6 +78,7 @@ export default function ManualAddForm({
       const response = await postApiData("ADD_NEW_CONTACT", payload);
       if (response.status) {
         setSuccessMsg(response.message);
+        setContactsList((prev) => [...prev, payload]);
         setTimeout(() => {
           setSuccessMsg("");
         }, 3000);

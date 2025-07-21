@@ -6,10 +6,12 @@ import AllContactsSection from "../manageContacts/allContactsSection";
 import ImportContactsTab from "./import/importContactsTab";
 
 export default function ManageContactsWrapper({ pageData, contacts }) {
+  const [contactsList, setContactsList] = useState(contacts);
+
   const contactsTabs = [
     {
       id: "01",
-      label: `All Contacts (${contacts.length})`,
+      label: `All Contacts (${contactsList.length})`,
       value: "allContacts",
     },
     { id: "02", label: "Import", value: "import" },
@@ -39,12 +41,16 @@ export default function ManageContactsWrapper({ pageData, contacts }) {
             <>
               <AllContactsSection
                 pageData={pageData}
-                contacts={contacts}
-              />{" "}
+                contactsList={contactsList}
+                setContactsList={setContactsList}
+              />
             </>
           ) : selectedTab == "import" ? (
             <>
-              <ImportContactsTab pageData={pageData} />
+              <ImportContactsTab
+                pageData={pageData}
+                setContactsList={setContactsList}
+              />
             </>
           ) : null}
         </div>

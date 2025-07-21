@@ -8,7 +8,7 @@ import { allContactsTableHeadCells } from "@/utilities/masterData";
 import ManualAddForm from "../message/import/manualAddForm";
 import { postApiData } from "@/utilities/services/apiService";
 
-export default function AllContactsSection({ pageData, contacts }) {
+export default function AllContactsSection({ pageData, contactsList, setContactsList }) {
   const [selected, setSelected] = useState([]);
   const [deletePopup, setDeletePopup] = useState(false);
   const [deleteLoad, setDeleteLoad] = useState(false);
@@ -16,7 +16,6 @@ export default function AllContactsSection({ pageData, contacts }) {
   const [contactModal, setContactModal] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [modalData, setModalData] = useState({});
-  const [contactsList, setContactsList] = useState(contacts);
 
   const onClickDelete = async (ids) => {
     const payload = {
