@@ -77,13 +77,13 @@
 @media (max-width: 767px) {
 
   .documentCard {
-    width: 100%;
-    padding: 0.5rem;
+    // width: 100%;
+    padding: 0.5rem 0.4rem;
     margin-bottom: 3px; // Add some space between cards
-  }
 
-  .label {
-    font-size: 16px; // Slightly smaller font size on mobile
+    .label {
+      font-size: 0.7rem; // Slightly smaller font size on mobile
+    }
   }
 
   .h5 {
@@ -145,6 +145,7 @@
   border: none;
   cursor: pointer;
   transition: all 0.3s ease;
+  margin-bottom: 10px;
 
   &:hover {
     // transform: translateX(-3px);
@@ -168,7 +169,14 @@
 
 @media (max-width: 768px) {
   .labelWrap {
-    flex-direction: row;
+    // flex-direction: row;
     text-align: center;
+    justify-content: center;
+    font-size: 5px;
+  }
+
+  .addButton {
+    padding: 5px 10px;
+    font-size: 13px;
   }
 }

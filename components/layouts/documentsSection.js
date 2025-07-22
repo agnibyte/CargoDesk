@@ -89,7 +89,7 @@ export default function DocumentsSection({
 
   return (
     <div>
-      <div className="flex flex-wrap w-full flex-col md:flex-row">
+      <div className="flex flex-wrap w-full flex-row">
         {documentsTypeList.map((item) => (
           <DocumentsFilterCard
             key={item.id}
@@ -125,7 +125,7 @@ export default function DocumentsSection({
               onClick={onClickAddDocument}
               className={"flex items-center " + docSecStyle.addButton}
             >
-              <FaPlusCircle className="mr-3" />
+              <FaPlusCircle className="mr-3 text-[12px] md:text-[16px]" />
               Add Document
             </button>
           </div>

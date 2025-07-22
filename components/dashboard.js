@@ -103,7 +103,7 @@ const Dashboard = ({ pageData }) => {
 
   return (
     <div className={dashboardStyle.dashboardContainer}>
-      <div className="m-5">
+      <div className="my-3 mx-2 md:m-5">
         <div className="flex flex-col shadow-lg rounded-lg">
           <div className="card-header flex justify-between items-center p-2">
             <h2 className="text-white my-1.5">Dashboard</h2>

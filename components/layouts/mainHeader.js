@@ -424,7 +424,7 @@ export default function MainHeader({ pageData = {} }) {
       {isMobileMenuOpen && (
         <>
           <div
-            className="fixed inset-0  backdrop-blur-sm bg-opacity-50 z-40 lg:hidden"
+            className="fixed inset-0 backdrop-blur-sm bg-opacity-50 z-40 lg:hidden"
             onClick={closeMobileMenu}
           />
           <div
