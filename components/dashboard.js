@@ -25,7 +25,7 @@ const Dashboard = ({ pageData }) => {
     { id: "02", label: "EMI", value: "emi", component: <></> },
   ];
 
-  const [selectedTab, setSelectedTab] = useState("");
+  const [selectedTab, setSelectedTab] = useState(dashboardTabs[0].value);
 
   const addReminderData = async (data) => {
     const payload = {
