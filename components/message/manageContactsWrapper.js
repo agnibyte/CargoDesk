@@ -20,7 +20,6 @@ export default function ManageContactsWrapper({ pageData, contacts }) {
     { id: "02", label: "Import", value: "import" },
   ];
 
-  console.log("pageData.tab", pageData.tab);
   const [selectedTab, setSelectedTab] = useState(
     pageData.tab || contactsTabs[0].value
   );
