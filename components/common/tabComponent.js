@@ -13,11 +13,11 @@ const TabComponent = ({ tabsData, setSelectedTab, selectedTab }) => {
     setSelectedTab(tabId);
   };
 
-  useEffect(() => {
-    if (tabsData && tabsData.length > 0) {
-      setSelectedTab(tabsData[0].value);
-    }
-  }, []);
+  // useEffect(() => {
+  //   if (tabsData && tabsData.length > 0) {
+  //     setSelectedTab(tabsData[0].value);
+  //   }
+  // }, []);
 
   return (
     <div className={`${styles.tabs} ${styles.group}`}>
