@@ -16,6 +16,7 @@ export default function ManageContacts({ pageData, contacts }) {
   );
 }
 export async function getServerSideProps(context) {
+  const { tab = "" } = context.query;
   const cookies = parseCookies(context);
   const token = cookies.auth_token;
 
@@ -97,6 +98,7 @@ export async function getServerSideProps(context) {
   };
 
   pageData.user = userData;
+  pageData.tab = tab;
 
   return {
     props: {

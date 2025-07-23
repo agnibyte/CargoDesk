@@ -4,9 +4,12 @@ import dashboardStyle from "@/styles/dashBoard.module.scss";
 // import GoogleContacts from "./googleContacts";
 import AllContactsSection from "../manageContacts/allContactsSection";
 import ImportContactsTab from "./import/importContactsTab";
+import { useRouter } from "next/router";
 
 export default function ManageContactsWrapper({ pageData, contacts }) {
   const [contactsList, setContactsList] = useState(contacts);
+
+  const router = useRouter();
 
   const contactsTabs = [
     {
@@ -17,9 +20,19 @@ export default function ManageContactsWrapper({ pageData, contacts }) {
     { id: "02", label: "Import", value: "import" },
   ];
 
-  const [selectedTab, setSelectedTab] = useState(contactsTabs[0].value);
+  console.log("pageData.tab", pageData.tab);
+  const [selectedTab, setSelectedTab] = useState(
+    pageData.tab || contactsTabs[0].value
+  );
 
   console.log("selectedTab", selectedTab);
+
+  const handleTabClick = (tabId) => {
+    if (pageData.tab)
+      router.replace(router.pathname, undefined, { shallow: true });
+
+    setSelectedTab(tabId);
+  };
 
   return (
     <>
@@ -32,7 +45,7 @@ export default function ManageContactsWrapper({ pageData, contacts }) {
             <div className={dashboardStyle["mainTabel"]}>
               <TabComponent
                 tabsData={contactsTabs}
-                setSelectedTab={setSelectedTab}
+                setSelectedTab={handleTabClick}
                 selectedTab={selectedTab}
               />
             </div>

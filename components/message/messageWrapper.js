@@ -255,7 +255,7 @@ export default function MessageWrapper({ pageData, contacts = [] }) {
                   <div className="text-center p-2">
                     No Contacts Found. You can Add Contacts from&nbsp;
                     <Link
-                      href={"/messager/manage-contacts"}
+                      href={"/messager/manage-contacts?tab=import"}
                       className="text-blue-600 underline"
                     >
                       here.
