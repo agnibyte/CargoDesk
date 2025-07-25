@@ -67,8 +67,8 @@ export const InputWithVoice = ({ label, note, setNote }) => {
           }
           className={`${
             styles.input
-          } w-full rounded-md border border-gray-300 pr-10 p-3 text-sm focus:outline-none focus:ring-2 ${
-            isListening ? "focus:ring-green-400" : "focus:ring-blue-500"
+          } w-full rounded-md border border-gray-300 pr-10 p-3 text-sm focus:outline-none ${
+            isListening ? "focus:ring-2  focus:ring-green-400" : ""
           } focus:border-transparent transition duration-150 ease-in-out`}
         />
         <Tooltip
@@ -99,7 +99,7 @@ export const InputWithVoice = ({ label, note, setNote }) => {
         </Tooltip>
       </div>
 
-      {error && <p className={styles.errorText}>{error}</p>}
+      {error && <p className={styles.errorMsg}>{error}</p>}
     </div>
   );
 };
