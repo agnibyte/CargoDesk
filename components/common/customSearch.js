@@ -13,8 +13,7 @@ const CustomSearch = forwardRef(
       isSearchable: true,
       menuPosition: "fixed",
       ...props,
-      className:
-        customSearchStyle[className] ?? customSearchStyle["form_search"],
+      className: customSearchStyle["form_search"] + " " + className,
     };
 
     const colorStyles = {

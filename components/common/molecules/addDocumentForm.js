@@ -157,7 +157,7 @@ export default function AddDocumentForm({
                 clearErrors("vehicleNo");
                 updateSelectedForm("vehicleNo", e);
               }}
-              className="form-control"
+              className="form-control cutomClass"
               placeholder="Please Select Vehicle Number"
               isSearchable
             />
