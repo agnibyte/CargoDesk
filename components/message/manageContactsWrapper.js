@@ -24,8 +24,6 @@ export default function ManageContactsWrapper({ pageData, contacts }) {
     pageData.tab || contactsTabs[0].value
   );
 
-  console.log("selectedTab", selectedTab);
-
   const handleTabClick = (tabId) => {
     if (pageData.tab)
       router.replace(router.pathname, undefined, { shallow: true });
