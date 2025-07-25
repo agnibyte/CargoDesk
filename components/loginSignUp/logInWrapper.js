@@ -49,7 +49,11 @@ export default function LoginWrapper() {
     setApiError("");
 
     try {
-      const response = await postApiData("VERIFY_USER_LOGIN", formData);
+      const payload = {
+        email_id: formData.email_id.trim(),
+        password: formData.password.trim(),
+      };
+      const response = await postApiData("VERIFY_USER_LOGIN", payload);
       // handle auth token or redirect
       console.log("response", response);
       if (response.status) {
