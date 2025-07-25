@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect } from "react";
 
 export default function CommonModal({
   modalOpen,
@@ -20,24 +20,31 @@ export default function CommonModal({
     }
   };
 
-  // modalSize === "sm"
-  //   ? "w-[32%]"
-  //   : modalSize === "md"
-  //   ? "w-1/2"
-  //   : modalSize === "lg"
-  //   ? "w-3/4"
-  //   : "w-[32%]";
+  // 🔒 Lock scroll when modal is open
+  useEffect(() => {
+    if (modalOpen) {
+      document.body.style.overflow = "hidden";
+    } else {
+      document.body.style.overflow = "";
+    }
+
+    // 🧹 Cleanup on unmount
+    return () => {
+      document.body.style.overflow = "";
+    };
+  }, [modalOpen]);
+
   return (
     <>
       {modalOpen && (
         <div
           id="backdrop"
-          className={`fixed inset-0 z-[101] flex items-center justify-center  backdrop-blur-sm  bg-gray-900/30 p-5`}
+          className="fixed inset-0 z-[101] flex items-center justify-center backdrop-blur-sm bg-gray-900/30 p-5"
           onClick={handleBackdropClick}
         >
           <div
             className={`bg-white rounded-lg shadow-lg ${modalSize} mx-auto`}
-            onClick={(e) => e.stopPropagation()} // Prevent closing when clicking inside the modal
+            onClick={(e) => e.stopPropagation()}
           >
             {/* Modal Header */}
             {modalTitle && (
