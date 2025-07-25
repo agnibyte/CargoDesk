@@ -360,3 +360,74 @@
   }
 
 }
+
+.sendButnWrap {
+  font-family: inherit;
+  font-size: 18px;
+  background: linear-gradient(to right, #34abfa 0%, #152294 100%);
+  color: white;
+  padding: 0.8em 1.2em;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: none;
+  border-radius: 25px;
+  box-shadow: 0px 5px 10px rgba(0, 0, 0, 0.2);
+  transition: all 0.3s ease;
+  cursor: pointer;
+
+
+  &:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+  }
+
+  span {
+    margin-left: 0.4em;
+    transition: all 0.3s ease;
+  }
+
+  svg {
+    width: 18px;
+    height: 18px;
+    fill: white;
+    transition: all 0.3s ease;
+  }
+
+  .svg-wrapper-1 {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+
+  .svg-wrapper {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    background-color: rgba(255, 255, 255, 0.2);
+    margin-right: 0.5em;
+    transition: all 0.3s ease;
+  }
+
+  // 👇 Only applies hover effect when not disabled
+  &:not(:disabled):hover {
+    transform: translateY(-3px);
+    box-shadow: 0px 8px 15px rgba(0, 0, 0, 0.3);
+
+    .svg-wrapper {
+      background-color: rgba(255, 255, 255, 0.5);
+    }
+
+    svg {
+      transform: rotate(45deg);
+    }
+  }
+
+  &:not(:disabled):active {
+    transform: scale(0.95);
+    box-shadow: 0px 2px 5px rgba(0, 0, 0, 0.2);
+  }
+}

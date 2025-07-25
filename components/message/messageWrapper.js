@@ -187,6 +187,7 @@ export default function MessageWrapper({ pageData, contacts = [] }) {
             >
               Manage Contacts
             </Link>
+
             <div className={styles.toggleContainer}>
               <div
                 className={styles.toggleSlider}
@@ -292,12 +293,60 @@ export default function MessageWrapper({ pageData, contacts = [] }) {
               </span>
             )}
           </div>
+          <div className="md:hidden fixed bottom-0 left-0 w-full bg-white px-4 py-3 z-50">
+            <button
+              type="submit"
+              className={styles.sendButnWrap + " w-full"}
+              disabled={loading || formData.contacts.length === 0}
+            >
+              <div className="svg-wrapper-1">
+                <div className="svg-wrapper">
+                  <svg
+                    xmlns="http://www.w3.org/2000/svg"
+                    viewBox="0 0 24 24"
+                    width="24"
+                    height="24"
+                  >
+                    <path
+                      fill="none"
+                      d="M0 0h24v24H0z"
+                    />
+                    <path
+                      fill="currentColor"
+                      d="M1.946 9.315c-.522-.174-.527-.455.01-.634l19.087-6.362c.529-.176.832.12.684.638l-5.454 19.086c-.15.529-.455.547-.679.045L12 14l6-8-8 6-8.054-2.685z"
+                    />
+                  </svg>
+                </div>
+              </div>
+              <span>{loading ? "Sending..." : "Send"}</span>
+            </button>
+          </div>
+
           <button
-            className={styles.sendButton}
             type="submit"
+            className={styles.sendButnWrap + " hidden md:block mt-6"}
             disabled={loading || formData.contacts.length === 0}
           >
-            {loading ? "Sending..." : "Send"}
+            <div className="svg-wrapper-1">
+              <div className="svg-wrapper">
+                <svg
+                  xmlns="http://www.w3.org/2000/svg"
+                  viewBox="0 0 24 24"
+                  width="24"
+                  height="24"
+                >
+                  <path
+                    fill="none"
+                    d="M0 0h24v24H0z"
+                  />
+                  <path
+                    fill="currentColor"
+                    d="M1.946 9.315c-.522-.174-.527-.455.01-.634l19.087-6.362c.529-.176.832.12.684.638l-5.454 19.086c-.15.529-.455.547-.679.045L12 14l6-8-8 6-8.054-2.685z"
+                  />
+                </svg>
+              </div>
+            </div>
+            <span>{loading ? "Sending..." : "Send"}</span>
           </button>
         </div>
       </form>
