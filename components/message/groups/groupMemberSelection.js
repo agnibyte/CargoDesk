@@ -20,9 +20,9 @@ export default function GroupMemberSelection({
   const handleMemberToggle = (id) => {
     setFormData((prev) => ({
       ...prev,
-      members: prev.members.includes(id)
-        ? prev.members.filter((memberId) => memberId !== id)
-        : [...prev.members, id],
+      contactIds: prev.contactIds.includes(id)
+        ? prev.contactIds.filter((memberId) => memberId !== id)
+        : [...prev.contactIds, id],
     }));
   };
 
@@ -41,14 +41,14 @@ export default function GroupMemberSelection({
         />
       </div>
       <div className="text-sm text-gray-600 mt-1 md:mt-0 text-end mb-3">
-        <strong>{formData.members.length}</strong> selected out of{" "}
+        <strong>{formData.contactIds.length}</strong> selected out of{" "}
         <strong>{contactsList.length}</strong> contacts
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-60 overflow-y-auto p-2">
         {filteredContacts.length > 0 ? (
           filteredContacts.map((contact) => {
-            const isSelected = formData.members.includes(contact.id);
+            const isSelected = formData.contactIds.includes(contact.id);
             return (
               <div
                 key={contact.id}

@@ -211,3 +211,193 @@ export function deleteBulkContactsModel(contactIds = []) {
     }
   });
 }
+
+export function addContactGroupModel(userId, groupName) {
+  return new Promise((resolve, reject) => {
+    const insertQuery = `INSERT INTO contact_groups (userId, groupName) VALUES (?, ?)`;
+
+    executeQuery(insertQuery, [userId, groupName])
+      .then((result) => {
+        if (result.affectedRows > 0) {
+          resolve({
+            status: true,
+            message: "Group created successfully",
+            groupId: result.insertId,
+          });
+        } else {
+          resolve({ status: false, message: "Failed to create group" });
+        }
+      })
+      .catch((error) => {
+        console.error("Error creating group:", error);
+        reject({
+          status: false,
+          message: "Database error while creating group",
+        });
+      });
+  });
+}
+
+export function editContactGroupModel(groupId, groupName) {
+  return new Promise((resolve, reject) => {
+    const updateQuery = `
+      UPDATE contact_groups 
+      SET groupName = ?, updatedAt = CURRENT_TIMESTAMP 
+      WHERE id = ?
+    `;
+
+    executeQuery(updateQuery, [groupName, groupId])
+      .then((result) => {
+        if (result.affectedRows > 0) {
+          resolve({ status: true, message: "Group name updated successfully" });
+        } else {
+          resolve({ status: false, message: "Group not found or unchanged" });
+        }
+      })
+      .catch((error) => {
+        console.error("Error editing group:", error);
+        reject({
+          status: false,
+          message: "Database error while editing group",
+        });
+      });
+  });
+}
+
+export function addContactsToGroupModel(groupId, contactIds = []) {
+  return new Promise((resolve, reject) => {
+    if (!Array.isArray(contactIds) || contactIds.length === 0) {
+      return resolve({ status: false, message: "No contacts provided" });
+    }
+
+    const insertQuery = `
+      INSERT IGNORE INTO contact_group_members (groupId, contactId)
+      VALUES ?
+    `;
+
+    const values = contactIds.map((cid) => [groupId, cid]);
+
+    executeQuery(insertQuery, [values])
+      .then((result) => {
+        resolve({
+          status: true,
+          message: `${result.affectedRows} contact(s) added to group`,
+        });
+      })
+      .catch((error) => {
+        console.error("Error adding contacts to group:", error);
+        reject({
+          status: false,
+          message: "Database error while adding contacts to group",
+        });
+      });
+  });
+}
+
+export function getGroupsByUserModel(userId) {
+  return new Promise((resolve, reject) => {
+    const query = `SELECT id as groupId, groupName, createdAt FROM contact_groups WHERE userId = ?`;
+
+    executeQuery(query, [userId])
+      .then((result) => {
+        resolve({
+          status: true,
+          groups: result,
+        });
+      })
+      .catch((error) => {
+        console.error("Error fetching groups:", error);
+        reject({
+          status: false,
+          message: "Database error while fetching groups",
+        });
+      });
+  });
+}
+
+export function getContactsByGroupIdModel(groupId) {
+  return new Promise((resolve, reject) => {
+    const query = `
+      SELECT c.id, c.name, c.contactNo, c.note, c.status
+      FROM contact_group_members gm
+      JOIN contacts c ON c.id = gm.contactId
+      WHERE gm.groupId = ? AND c.status = 1
+    `;
+
+    executeQuery(query, [groupId])
+      .then((result) => {
+        resolve({
+          status: true,
+          contacts: result,
+        });
+      })
+      .catch((error) => {
+        console.error("Error fetching contacts in group:", error);
+        reject({
+          status: false,
+          message: "Database error while fetching group contacts",
+        });
+      });
+  });
+}
+
+export function createGroupWithContactsModel(request) {
+  return new Promise((resolve, reject) => {
+    const { userId, groupName, description, contactIds = [] } = request;
+    const payload = { userId, groupName, description };
+    const insertGroupQuery = `INSERT INTO contact_groups set ?`;
+
+    executeQuery(insertGroupQuery, payload)
+      .then((groupResult) => {
+        if (!groupResult.insertId) {
+          return resolve({
+            status: false,
+            message: "Failed to create group",
+          });
+        }
+
+        const groupId = groupResult.insertId;
+
+        // If no contacts to add, return early
+        if (!Array.isArray(contactIds) || contactIds.length === 0) {
+          return resolve({
+            status: true,
+            message: `Group '${groupName}' created with 0 contacts`,
+            groupId,
+          });
+        }
+
+        const insertContactsQuery = `
+          INSERT IGNORE INTO contact_group_members (groupId, contactId)
+          VALUES ?
+        `;
+
+        const values = contactIds.map((contactId) => [groupId, contactId]);
+
+        executeQuery(insertContactsQuery, [values])
+          .then((memberResult) => {
+            resolve({
+              status: true,
+              message: `Group '${groupName}' created with ${memberResult.affectedRows} contact(s)`,
+              groupId,
+            });
+          })
+          .catch((error) => {
+            console.error("Error inserting group members:", error);
+            resolve({
+              status: true,
+              message: `Group '${groupName}' created, but failed to add contacts`,
+              groupId,
+            });
+          });
+      })
+      .catch((error) => {
+        console.error("Error creating group:", error);
+        reject({
+          status: false,
+          message: "Database error while creating group",
+          error: error.sqlMessage || error.message,
+        });
+      });
+  });
+}

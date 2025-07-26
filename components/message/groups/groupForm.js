@@ -14,7 +14,7 @@ export default function GroupForm({
   setGroupsList,
   contactsList = [],
 }) {
-  const defaultFormData = { groupName: "", description: "", members: [] };
+  const defaultFormData = { groupName: "", description: "", contactIds: [] };
   const initialFormData = isEdit ? modalData : defaultFormData;
   const [formData, setFormData] = useState(initialFormData);
   const [loading, setLoading] = useState(false);
@@ -50,11 +50,11 @@ export default function GroupForm({
 
   const handleMemberToggle = (contactId) => {
     setFormData((prev) => {
-      const exists = prev.members.includes(contactId);
-      const members = exists
-        ? prev.members.filter((id) => id !== contactId)
-        : [...prev.members, contactId];
-      return { ...prev, members };
+      const exists = prev.contactIds.includes(contactId);
+      const contactIds = exists
+        ? prev.contactIds.filter((id) => id !== contactId)
+        : [...prev.contactIds, contactId];
+      return { ...prev, contactIds };
     });
   };
 
@@ -63,12 +63,12 @@ export default function GroupForm({
       userId: pageData.user.userId,
       groupName: formData.groupName,
       description: formData.description,
-      members: formData.members,
+      contactIds: formData.contactIds,
     };
 
     try {
       const response = await postApiData(
-        isEdit ? "UPDATE_GROUP" : "CREATE_GROUP",
+        isEdit ? "UPDATE_GROUP" : "CREATE_NEW_GROUP_OF_CONTACTS",
         isEdit ? { id: modalData.id, data: payload } : payload
       );
 
@@ -98,6 +98,7 @@ export default function GroupForm({
   };
 
   const onSubmit = () => {
+    console.log("formData", formData);
     setLoading(true);
     setApiError(null);
     setSuccessMsg(null);
@@ -173,7 +174,7 @@ export default function GroupForm({
           >
             <input
               type="checkbox"
-              checked={formData.members.includes(contact.id)}
+              checked={formData.contactIds.includes(contact.id)}
               onChange={() => handleMemberToggle(contact.id)}
               className="accent-blue-600"
             />
