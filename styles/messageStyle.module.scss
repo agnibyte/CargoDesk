@@ -363,10 +363,10 @@
 
 .sendButnWrap {
   font-family: inherit;
-  font-size: 18px;
+  font-size: 16px;
   background: linear-gradient(to right, #34abfa 0%, #152294 100%);
   color: white;
-  padding: 0.8em 1.2em;
+  padding: 0.5em 1.2em;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -380,6 +380,7 @@
   &:disabled {
     opacity: 0.6;
     cursor: not-allowed;
+    background: #808080;
   }
 
   span {
