@@ -1,11 +1,32 @@
 @use "../_variable.scss" as *;
 
 .tabs {
-  div {
-    float: left;
-    left: 20px;
-    position: relative;
+  display: flex;
+  gap: 8px;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  scrollbar-width: thin;
+
+  // Optional: Style scrollbar (for webkit)
+  &::-webkit-scrollbar {
+    height: 6px;
   }
+
+  &::-webkit-scrollbar-thumb {
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
+  }
+
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+
+  div {
+    flex: 0 0 auto; // prevent shrinking
+    position: relative;
+    left: 0;
+  }
+
 
   .tabsLabel {
     float: left;

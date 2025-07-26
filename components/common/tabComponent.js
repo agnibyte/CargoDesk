@@ -20,17 +20,19 @@ const TabComponent = ({ tabsData, setSelectedTab, selectedTab }) => {
   // }, []);
 
   return (
-    <div className={`${styles.tabs} ${styles.group}`}>
-      {tabsData &&
-        tabsData.map((tab) => (
-          <div
-            key={tab.id}
-            className={selectedTab === tab.value ? styles.active : ""}
-            onClick={() => handleTabClick(tab.value)}
-          >
-            <span className={`${styles.tabsLabel}`}>{tab.label}</span>
-          </div>
-        ))}
+    <div className="overflow-x-auto">
+      <div className={`${styles.tabs} ${styles.group} whitespace-nowrap`}>
+        {tabsData &&
+          tabsData.map((tab) => (
+            <div
+              key={tab.id}
+              className={selectedTab === tab.value ? styles.active : ""}
+              onClick={() => handleTabClick(tab.value)}
+            >
+              <span className={`${styles.tabsLabel}`}>{tab.label}</span>
+            </div>
+          ))}
+      </div>
     </div>
   );
 };
