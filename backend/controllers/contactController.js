@@ -4,7 +4,9 @@ import {
   createGroupWithContactsModel,
   deleteBulkContactsModel,
   deleteContactModel,
+  getContactsByGroupIdModel,
   getContactsModel,
+  getGroupsByUserModel,
   updateContactModel,
 } from "../models/contactsModel";
 
@@ -166,6 +168,54 @@ export function addNewGroupOfContactsController(request) {
         if (result.status) {
           response.status = true;
           response.message = result.message;
+          resolve(response);
+        } else {
+          response.message = result.message;
+          resolve(response);
+        }
+      })
+      .catch((error) => {
+        reject(error);
+      });
+  });
+}
+
+export function getUserCntactGroups(userId) {
+  return new Promise((resolve, reject) => {
+    const response = {
+      status: false,
+    };
+
+    getGroupsByUserModel(userId)
+      .then((result) => {
+        if (result.status) {
+          response.status = true;
+          response.message = result.message;
+          response.data = result.data;
+          resolve(response);
+        } else {
+          response.message = result.message;
+          resolve(response);
+        }
+      })
+      .catch((error) => {
+        reject(error);
+      });
+  });
+}
+
+export function getGroupMembersList(groupId) {
+  return new Promise((resolve, reject) => {
+    const response = {
+      status: false,
+    };
+
+    getContactsByGroupIdModel(groupId)
+      .then((result) => {
+        if (result.status) {
+          response.status = true;
+          response.message = result.message;
+          response.data = result.data;
           resolve(response);
         } else {
           response.message = result.message;

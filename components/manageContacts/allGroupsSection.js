@@ -4,15 +4,21 @@ import CommonModal from "../common/commonModal";
 import modalStyle from "@/styles/modal.module.scss";
 import commonStyle from "@/styles/common/common.module.scss";
 import { getConstant } from "@/utilities/utils";
-import { allContactsTableHeadCells } from "@/utilities/masterData";
+import {
+  allContactsGroupsTableHeadCells,
+  allContactsTableHeadCells,
+} from "@/utilities/masterData";
 import ManualAddForm from "../message/import/manualAddForm";
 import { postApiData } from "@/utilities/services/apiService";
+import GroupForm from "../message/groups/groupForm";
 
 export default function AllGroupsSection({
   pageData,
   contactsList,
   setContactsList,
   searchTerm = "",
+  groupsList,
+  setGroupsList,
 }) {
   const [selected, setSelected] = useState([]);
   const [deletePopup, setDeletePopup] = useState(false);
@@ -32,7 +38,7 @@ export default function AllGroupsSection({
       // Simulate API call to delete contacts
       const response = await postApiData("DELETE_BULK_CONTACTS", payload);
       if (response.status) {
-        setContactsList((prev) =>
+        setGroupsList((prev) =>
           prev.filter((item) => !selected.includes(item.id))
         );
         setDeletePopup(false);
@@ -50,7 +56,7 @@ export default function AllGroupsSection({
   const onClickEdit = (id) => {
     console.log("Edit clicked for id:", id);
 
-    const selectedItem = contactsList.find((item) => item.id == id);
+    const selectedItem = groupsList.find((item) => item.id == id);
     setModalData({
       id: selectedItem.id,
       name: selectedItem.name,
@@ -64,8 +70,8 @@ export default function AllGroupsSection({
   return (
     <div>
       <DocumentTable
-        rows={contactsList}
-        headCells={allContactsTableHeadCells}
+        rows={groupsList}
+        headCells={allContactsGroupsTableHeadCells}
         onClickEdit={onClickEdit}
         selected={selected}
         setSelected={setSelected}
@@ -109,12 +115,12 @@ export default function AllGroupsSection({
         setModalOpen={setContactModal}
         modalSize={"w-11/12 md:w-3/6"}
       >
-        <ManualAddForm
+        <GroupForm
           isEdit={isEdit}
           modalData={modalData}
           pageData={pageData}
           setContactModal={setContactModal}
-          setContactsList={setContactsList}
+          setGroupsList={setGroupsList}
         />
       </CommonModal>
     </div>

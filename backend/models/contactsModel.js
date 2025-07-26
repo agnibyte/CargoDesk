@@ -302,7 +302,7 @@ export function getGroupsByUserModel(userId) {
       .then((result) => {
         resolve({
           status: true,
-          groups: result,
+          data: result,
         });
       })
       .catch((error) => {
@@ -328,7 +328,7 @@ export function getContactsByGroupIdModel(groupId) {
       .then((result) => {
         resolve({
           status: true,
-          contacts: result,
+          data: result,
         });
       })
       .catch((error) => {

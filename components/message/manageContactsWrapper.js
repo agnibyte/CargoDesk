@@ -105,6 +105,8 @@ export default function ManageContactsWrapper({
                 contactsList={filteredContacts}
                 setContactsList={setContactsList}
                 searchTerm={searchTerm}
+                groupsList={groupsList}
+                setGroupsList={setGroupsList}
               />
             </>
           ) : selectedTab == "import" ? (

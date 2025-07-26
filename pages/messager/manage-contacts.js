@@ -1,16 +1,20 @@
-import { getContactListController } from "@/backend/controllers/contactController";
+import {
+  getContactListController,
+  getUserCntactGroups,
+} from "@/backend/controllers/contactController";
 import { getUserDetailsById } from "@/backend/controllers/userController";
 import ManageContactsWrapper from "@/components/message/manageContactsWrapper";
 import { getCurrentToken } from "@/utilities/utils";
 import { parseCookies } from "nookies";
 import React from "react";
 
-export default function ManageContacts({ pageData, contacts }) {
+export default function ManageContacts({ pageData, contacts, groups }) {
   return (
     <>
       <ManageContactsWrapper
         pageData={pageData}
         contacts={contacts}
+        groups={groups}
       />
     </>
   );
@@ -22,6 +26,7 @@ export async function getServerSideProps(context) {
 
   const pageData = {};
   let contacts = [];
+  let groups = [];
   const res = context.res;
 
   let decoded;
@@ -58,13 +63,18 @@ export async function getServerSideProps(context) {
   }
 
   // Token is valid → fetch user details from DB
-  const [userDetails, contactsData] = await Promise.all([
+  const [userDetails, contactsData, groupsList] = await Promise.all([
     getUserDetailsById(decoded.userId),
     getContactListController(decoded.userId),
+    getUserCntactGroups(decoded.userId),
   ]);
 
   if (contactsData?.status) {
     contacts = contactsData.data;
+  }
+
+  if (groupsList?.status) {
+    groups = groupsList.data;
   }
 
   if (!userDetails?.status || !userDetails.data) {
@@ -104,6 +114,7 @@ export async function getServerSideProps(context) {
     props: {
       pageData,
       contacts,
+      groups,
     },
   };
 }

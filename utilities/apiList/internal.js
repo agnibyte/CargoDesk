@@ -27,4 +27,5 @@ export const internalList = {
 
   // contact group
   CREATE_NEW_GROUP_OF_CONTACTS: "/api/contact/create-new-group",
+  GET_GROUP_MEMBERS: "/api/contact/get-group-members",
 };

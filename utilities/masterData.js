@@ -335,3 +335,30 @@ export const allContactsTableHeadCells = [
     label: "Action",
   },
 ];
+export const allContactsGroupsTableHeadCells = [
+  {
+    id: "groupId",
+    numeric: false,
+    disablePadding: false,
+    label: "Sr. No.",
+  },
+  {
+    id: "groupName",
+    numeric: false,
+    disablePadding: false,
+    label: "Group Name",
+  },
+
+  {
+    id: "description",
+    numeric: false,
+    disablePadding: false,
+    label: "Description",
+  },
+  {
+    id: "action",
+    numeric: false,
+    disablePadding: false,
+    label: "Action",
+  },
+];
