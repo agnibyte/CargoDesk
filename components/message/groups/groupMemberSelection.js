@@ -27,8 +27,8 @@ export default function GroupMemberSelection({
   };
 
   return (
-    <div className="mt-6">
-      <div className="mb-3 flex items-center justify-between flex-wrap gap-2">
+    <>
+      <div className="my-3 flex items-center justify-between flex-wrap gap-2">
         <label className="block mb-2 font-semibold text-gray-700">
           Select Members
         </label>
@@ -63,10 +63,10 @@ export default function GroupMemberSelection({
                 className={`
     cursor-pointer p-4 rounded-md border transition shadow-sm 
     outline-none 
-    focus:ring-2 focus:ring-purple-400 
+    focus:ring-2 focus:ring-blue-500 
     ${
       isSelected
-        ? "bg-blue-100 border-blue-500 ring-2 ring-blue-300"
+        ? "bg-cyan-50 border-cyan-200 ring-2 ring-blue-300"
         : "bg-white hover:bg-gray-50 border-gray-300"
     }
   `}
@@ -88,6 +88,6 @@ export default function GroupMemberSelection({
           </div>
         )}
       </div>
-    </div>
+    </>
   );
 }

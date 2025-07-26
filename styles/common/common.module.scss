@@ -28,6 +28,22 @@
     }
 }
 
+.commonButton {
+    color: variable.$white;
+    background-image: linear-gradient(to right, #6366f1, #9333ea);
+    /* from indigo-500 to purple-600 */
+}
+
+.commonButtonOutline {
+    background: none;
+    padding: 2px;
+    /* border thickness */
+    border-radius: 0.5rem;
+    /* rounded corners */
+    display: inline-block;
+    border: 2px solid #9333ea;
+}
+
 // .events-none {
 // 	pointer-events: none;
 // }

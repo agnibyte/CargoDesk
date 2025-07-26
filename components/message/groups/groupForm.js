@@ -107,7 +107,7 @@ export default function GroupForm({
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className={`w-full bg-white p-5 ${
+      className={`w-full bg-white p-2 md:p-5 ${
         !isEdit ? "border-b border-gray-200 rounded-xl shadow" : "rounded-b-2xl"
       }`}
     >
@@ -187,7 +187,9 @@ export default function GroupForm({
       <button
         type="submit"
         disabled={loading}
-        className={`w-full bg-blue-600 text-white font-semibold mt-6 py-2 rounded hover:bg-blue-700 transition cursor-pointer ${commonStyle.editButton}`}
+        className={`w-full font-semibold mt-6 py-2 rounded hover:bg-blue-700 transition cursor-pointer i ${
+          isEdit ? commonStyle.editButton : commonStyle.commonButton
+        }`}
       >
         {loading ? "Submitting..." : isEdit ? "Update Group" : "Create Group"}
       </button>
