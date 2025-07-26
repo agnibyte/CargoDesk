@@ -2,10 +2,11 @@ import React, { useState } from "react";
 import TabComponent from "../common/tabComponent";
 import dashboardStyle from "@/styles/dashBoard.module.scss";
 // import GoogleContacts from "./googleContacts";
-import AllContactsSection from "../manageContacts/allContactsSection";
-import ImportContactsTab from "./import/importContactsTab";
+import AllContactsTab from "../manageContacts/allContactsTab";
+import ImportContactsTab from "../manageContacts/importContactsTab";
 import { useRouter } from "next/router";
 import { FiSearch } from "react-icons/fi";
+import AllGroupsSection from "../manageContacts/allGroupsSection";
 
 export default function ManageContactsWrapper({
   pageData,
@@ -25,12 +26,13 @@ export default function ManageContactsWrapper({
       label: `All Contacts (${contactsList.length})`,
       value: "allContacts",
     },
+    { id: "02", label: "Import Contacts", value: "import" },
     {
       id: "03",
       label: `All Groups (${groupsList.length})`,
       value: "allGroups",
     },
-    { id: "02", label: "Import", value: "import" },
+    { id: "04", label: "Create Group", value: "createGroup" },
   ];
 
   const [selectedTab, setSelectedTab] = useState(
@@ -88,7 +90,7 @@ export default function ManageContactsWrapper({
           </div>
           {selectedTab == "allContacts" ? (
             <>
-              <AllContactsSection
+              <AllContactsTab
                 pageData={pageData}
                 contactsList={filteredContacts}
                 setContactsList={setContactsList}
@@ -97,7 +99,7 @@ export default function ManageContactsWrapper({
             </>
           ) : selectedTab == "allGroups" ? (
             <>
-              <AllContactsSection
+              <AllGroupsSection
                 pageData={pageData}
                 contactsList={filteredContacts}
                 setContactsList={setContactsList}

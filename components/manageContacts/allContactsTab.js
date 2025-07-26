@@ -8,7 +8,7 @@ import { allContactsTableHeadCells } from "@/utilities/masterData";
 import ManualAddForm from "../message/import/manualAddForm";
 import { postApiData } from "@/utilities/services/apiService";
 
-export default function AllContactsSection({
+export default function AllContactsTab({
   pageData,
   contactsList,
   setContactsList,

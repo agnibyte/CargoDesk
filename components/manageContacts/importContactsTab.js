@@ -1,18 +1,18 @@
 import React, { useState } from "react";
 import Papa from "papaparse";
-import GoogleSignIn from "./googleSignIn";
-import ManualAddForm from "./manualAddForm";
+import GoogleSignIn from "../message/import/googleSignIn";
+import ManualAddForm from "../message/import/manualAddForm";
 import { parseVCF } from "@/utilities/vcfParser";
-import ContactsFromCSV from "./contactsFromCSV";
-import ContactsFromVCF from "./contactsFromVCF";
+import ContactsFromCSV from "../message/import/contactsFromCSV";
+import ContactsFromVCF from "../message/import/contactsFromVCF";
 import { FcGoogle } from "react-icons/fc";
 import { PiFileCsvDuotone } from "react-icons/pi";
 // import { ReactComponent as Dialpad } from "@/public/imges/svg/dialpad.svg";
 import msgStyle from "@/styles/manageContacts.module.scss";
 import { BsPersonVcard } from "react-icons/bs";
 import Image from "next/image";
-import ContactsPreviewList from "./contactsPreviewList";
-import GoogleContacts from "../googleContacts";
+import ContactsPreviewList from "../message/import/contactsPreviewList";
+import GoogleContacts from "../message/googleContacts";
 
 const tabs = [
   { id: "google", label: "Google" },
