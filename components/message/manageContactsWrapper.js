@@ -5,9 +5,12 @@ import dashboardStyle from "@/styles/dashBoard.module.scss";
 import AllContactsSection from "../manageContacts/allContactsSection";
 import ImportContactsTab from "./import/importContactsTab";
 import { useRouter } from "next/router";
+import { FiSearch } from "react-icons/fi";
 
 export default function ManageContactsWrapper({ pageData, contacts }) {
   const [contactsList, setContactsList] = useState(contacts);
+
+  const [searchTerm, setSearchTerm] = useState("");
 
   const router = useRouter();
 
@@ -31,14 +34,40 @@ export default function ManageContactsWrapper({ pageData, contacts }) {
     setSelectedTab(tabId);
   };
 
+  const handleSearch = (e) => {
+    setSearchTerm(e.target.value);
+  };
+
+  const filteredContacts = contactsList.filter((contact) => {
+    return contact.name.toLowerCase().includes(searchTerm.toLowerCase());
+  });
+
   return (
     <>
       <div className={dashboardStyle.dashboardContainer}>
         <div className="m-5">
           <div className="flex flex-col shadow-lg rounded-lg">
-            <div className="card-header flex justify-between items-center p-2">
-              <h2 className="text-white my-1.5">Manage Contacts</h2>
+            <div className="flex flex-col shadow-lg rounded-lg">
+              <div className="card-header flex flex-col md:flex-row md:justify-between md:items-center p-4 gap-3 bg-gradient-to-r from-[#f27121] via-[#e94057] to-[#8a2387] rounded-t-lg">
+                <h2 className="text-white text-lg font-semibold">
+                  Manage Contacts
+                </h2>
+
+                {/* Search Box */}
+                <div className="relative w-full md:w-1/3">
+                  <input
+                    type="text"
+                    placeholder="Search contacts..."
+                    className="w-full py-2 pl-10 pr-4 rounde border-b border-gray-300 focus:outline-none focus:border-blue-600   shadow-sm text-sm"
+                    onChange={handleSearch}
+                  />
+                  <span className="absolute left-3 top-2.5 text-gray-400">
+                    <FiSearch />
+                  </span>
+                </div>
+              </div>
             </div>
+
             <div className={dashboardStyle["mainTabel"]}>
               <TabComponent
                 tabsData={contactsTabs}
@@ -51,8 +80,9 @@ export default function ManageContactsWrapper({ pageData, contacts }) {
             <>
               <AllContactsSection
                 pageData={pageData}
-                contactsList={contactsList}
+                contactsList={filteredContacts}
                 setContactsList={setContactsList}
+                searchTerm={searchTerm}
               />
             </>
           ) : selectedTab == "import" ? (

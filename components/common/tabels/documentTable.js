@@ -6,12 +6,12 @@ import TablePagination from "@mui/material/TablePagination";
 import TableSortLabel from "@mui/material/TableSortLabel";
 import Toolbar from "@mui/material/Toolbar";
 import Typography from "@mui/material/Typography";
-import IconButton from "@mui/material/IconButton";
-import Tooltip from "@mui/material/Tooltip";
+// import IconButton from "@mui/material/IconButton";
+// import Tooltip from "@mui/material/Tooltip";
 import FormControlLabel from "@mui/material/FormControlLabel";
 import Switch from "@mui/material/Switch";
 import { visuallyHidden } from "@mui/utils";
-import { useState, useMemo } from "react";
+import { useState, useMemo, useEffect } from "react";
 import { FiEdit } from "react-icons/fi";
 import commonStyle from "@/styles/common/common.module.scss";
 
@@ -210,6 +210,7 @@ const DocumentTable = ({
   onClickEdit,
   selected,
   setSelected,
+  searchTerm = "",
 }) => {
   const [order, setOrder] = useState("asc");
   const [orderBy, setOrderBy] = useState(headCells[0].id);
@@ -259,6 +260,10 @@ const DocumentTable = ({
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
+
+  useEffect(() => {
+    setPage(0);
+  }, [searchTerm]);
 
   const handleChangeDense = (event) => {
     setDense(event.target.checked);

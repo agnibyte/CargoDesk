@@ -8,7 +8,12 @@ import { allContactsTableHeadCells } from "@/utilities/masterData";
 import ManualAddForm from "../message/import/manualAddForm";
 import { postApiData } from "@/utilities/services/apiService";
 
-export default function AllContactsSection({ pageData, contactsList, setContactsList }) {
+export default function AllContactsSection({
+  pageData,
+  contactsList,
+  setContactsList,
+  searchTerm = "",
+}) {
   const [selected, setSelected] = useState([]);
   const [deletePopup, setDeletePopup] = useState(false);
   const [deleteLoad, setDeleteLoad] = useState(false);
@@ -66,6 +71,7 @@ export default function AllContactsSection({ pageData, contactsList, setContacts
         setSelected={setSelected}
         onClickDelete={() => setDeletePopup(true)}
         isFilterApplied={false}
+        searchTerm={searchTerm}
       />
 
       <CommonModal
