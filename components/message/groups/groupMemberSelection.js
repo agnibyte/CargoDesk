@@ -53,11 +53,23 @@ export default function GroupMemberSelection({
               <div
                 key={contact.id}
                 onClick={() => handleMemberToggle(contact.id)}
-                className={`cursor-pointer p-4 rounded-md border transition shadow-sm ${
-                  isSelected
-                    ? "bg-blue-100 border-blue-500 ring-2 ring-blue-400"
-                    : "bg-white hover:bg-gray-50 border-gray-300"
-                }`}
+                tabIndex={0}
+                onKeyDown={(e) => {
+                  if (e.key === "Enter" || e.key === " ") {
+                    e.preventDefault();
+                    handleMemberToggle(contact.id);
+                  }
+                }}
+                className={`
+    cursor-pointer p-4 rounded-md border transition shadow-sm 
+    outline-none 
+    focus:ring-2 focus:ring-purple-400 
+    ${
+      isSelected
+        ? "bg-blue-100 border-blue-500 ring-2 ring-blue-300"
+        : "bg-white hover:bg-gray-50 border-gray-300"
+    }
+  `}
               >
                 <div className="flex flex-row justify-between">
                   <div className="font-medium text-sm text-gray-900">
