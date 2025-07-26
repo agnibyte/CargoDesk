@@ -7,6 +7,7 @@ import ImportContactsTab from "../manageContacts/importContactsTab";
 import { useRouter } from "next/router";
 import { FiSearch } from "react-icons/fi";
 import AllGroupsSection from "../manageContacts/allGroupsSection";
+import CreateGroupTab from "../manageContacts/createGroupTab";
 
 export default function ManageContactsWrapper({
   pageData,
@@ -111,6 +112,14 @@ export default function ManageContactsWrapper({
               <ImportContactsTab
                 pageData={pageData}
                 setContactsList={setContactsList}
+              />
+            </>
+          ) : selectedTab == "createGroup" ? (
+            <>
+              <CreateGroupTab
+                pageData={pageData}
+                setGroupsList={setGroupsList}
+                contactsList={contactsList}
               />
             </>
           ) : null}
