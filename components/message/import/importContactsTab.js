@@ -53,6 +53,7 @@ export default function ImportContactsTab({ pageData, setContactsList }) {
                 ) : tab.id == "csv" ? (
                   <Image
                     src={"/imges/svg/csv.svg"}
+                    alt="CSV logo"
                     width={15}
                     height={15}
                     className={msgStyle.importOptionIcon}
@@ -60,6 +61,7 @@ export default function ImportContactsTab({ pageData, setContactsList }) {
                 ) : tab.id == "manual" ? (
                   <Image
                     src={"/imges/svg/dialpad.svg"}
+                    alt="Dialpad logo"
                     width={15}
                     height={15}
                     className={msgStyle.importOptionIcon}
