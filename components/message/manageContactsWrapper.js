@@ -7,8 +7,13 @@ import ImportContactsTab from "./import/importContactsTab";
 import { useRouter } from "next/router";
 import { FiSearch } from "react-icons/fi";
 
-export default function ManageContactsWrapper({ pageData, contacts }) {
+export default function ManageContactsWrapper({
+  pageData,
+  contacts,
+  groups = [],
+}) {
   const [contactsList, setContactsList] = useState(contacts);
+  const [groupsList, setGroupsList] = useState(groups);
 
   const [searchTerm, setSearchTerm] = useState("");
 
@@ -19,6 +24,11 @@ export default function ManageContactsWrapper({ pageData, contacts }) {
       id: "01",
       label: `All Contacts (${contactsList.length})`,
       value: "allContacts",
+    },
+    {
+      id: "03",
+      label: `All Groups (${groupsList.length})`,
+      value: "allGroups",
     },
     { id: "02", label: "Import", value: "import" },
   ];
@@ -77,6 +87,15 @@ export default function ManageContactsWrapper({ pageData, contacts }) {
             </div>
           </div>
           {selectedTab == "allContacts" ? (
+            <>
+              <AllContactsSection
+                pageData={pageData}
+                contactsList={filteredContacts}
+                setContactsList={setContactsList}
+                searchTerm={searchTerm}
+              />
+            </>
+          ) : selectedTab == "allGroups" ? (
             <>
               <AllContactsSection
                 pageData={pageData}
