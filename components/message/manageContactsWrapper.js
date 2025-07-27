@@ -5,7 +5,7 @@ import dashboardStyle from "@/styles/dashBoard.module.scss";
 import AllContactsTab from "../manageContacts/allContactsTab";
 import ImportContactsTab from "../manageContacts/importContactsTab";
 import { useRouter } from "next/router";
-import { FiSearch } from "react-icons/fi";
+import { FiSearch, FiX } from "react-icons/fi";
 import AllGroupsSection from "../manageContacts/allGroupsSection";
 import CreateGroupTab from "../manageContacts/createGroupTab";
 
@@ -69,17 +69,27 @@ export default function ManageContactsWrapper({
                   Manage Contacts
                 </h2>
 
-                {/* Search Box */}
                 <div className="relative w-full md:w-1/3">
                   <input
                     type="text"
                     placeholder="Search contacts..."
                     className="w-full py-2 pl-10 pr-4 rounde border-b border-gray-300 focus:outline-none focus:border-blue-600   shadow-sm text-sm"
                     onChange={handleSearch}
+                    value={searchTerm}
                   />
                   <span className="absolute left-3 top-2.5 text-gray-400">
                     <FiSearch />
                   </span>
+
+                  {searchTerm && (
+                    <button
+                      type="button"
+                      onClick={() => setSearchTerm("")}
+                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white focus:outline-none"
+                    >
+                      <FiX size={18} />
+                    </button>
+                  )}
                 </div>
               </div>
             </div>

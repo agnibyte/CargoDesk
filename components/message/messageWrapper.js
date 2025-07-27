@@ -265,26 +265,40 @@ export default function MessageWrapper({
                 )}
               </>
             ) : (
-              <div className={styles.contactList}>
-                {groupsList.map((contact) => (
-                  <div
-                    key={contact.id}
-                    className={styles.contactItem}
-                  >
-                    <span className={styles.contactName}>
-                      {contact.groupName}
-                    </span>
-                    <div className="w-5 h-5 rounded-full text-white bg-gray-400 flex items-center justify-center">
-                      {contact.contactIds.length}
-                    </div>
-                    {/* when user hver on item little poup will show contacts in small popup */}
+              <>
+                {groupsList.length > 0 ? (
+                  <div className={styles.contactList}>
+                    {groupsList.map((contact) => (
+                      <div
+                        key={contact.id}
+                        className={styles.contactItem}
+                      >
+                        <span className={styles.contactName}>
+                          {contact.groupName}
+                        </span>
+                        <div className="w-5 h-5 rounded-full text-white bg-gray-400 flex items-center justify-center">
+                          {contact.contactIds.length}
+                        </div>
+                        {/* when user hver on item little poup will show contacts in small popup */}
 
-                    {/* <span className={styles.contactNo}>
+                        {/* <span className={styles.contactNo}>
                     {contact.members.join(", ")}
                   </span> */}
+                      </div>
+                    ))}
                   </div>
-                ))}
-              </div>
+                ) : (
+                  <div className="text-center p-2">
+                    No Groups Found. You can Add Groups from&nbsp;
+                    <Link
+                      href={"/messager/manage-contacts?tab=createGroup"}
+                      className="text-blue-600 underline"
+                    >
+                      here.
+                    </Link>
+                  </div>
+                )}
+              </>
             )}
 
             {contactsError && (
