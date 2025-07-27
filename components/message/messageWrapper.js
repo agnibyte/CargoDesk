@@ -28,13 +28,16 @@ export default function MessageWrapper({
   const [formData, setFormData] = useState({
     message: "",
     contacts: [],
+    groups: [],
   });
   const [loading, setLoading] = useState(false);
   const [contactsError, setContactsError] = useState(false);
+  const [contactsErrorMsg, setContactsErrorMsg] = useState("");
   const [selectedTab, setSelectedTab] = useState("contacts");
   const [validations, setValidations] = useState({});
   const [copied, setCopied] = useState(false);
   const [prevTemplatePoup, setPrevTemplatePopup] = useState(false);
+  const [sendMsgApiError, setSendMsgApiError] = useState("");
 
   const prevTemlateHeading = "Previous Templates";
 
@@ -56,6 +59,8 @@ export default function MessageWrapper({
   };
 
   const handleCheckboxChange = (contact) => {
+    setContactsError(false);
+
     setFormData((prev) => {
       const exists = prev.contacts.find((c) => c.id === contact.id);
       if (exists) {
@@ -73,20 +78,47 @@ export default function MessageWrapper({
   };
 
   const onSubmit = async () => {
-    if (formData.contacts.length === 0) {
+    if (formData.contacts.length === 0 && formData.groups.length === 0) {
       setContactsError(true);
       return;
     }
 
     setLoading(true);
 
+    // const payload = {
+    //   message: formData.message,
+    //   contacts: formData.contacts.map((c) => c.contactNo), // Assuming contactNo is the identifier
+    // };
+    const contactNumbers = [
+      ...formData.contacts.map((c) => c.contactNo),
+      ...formData.groups.flatMap((group) =>
+        group.contactIds.map((id) => {
+          const match = contactsList.find((c) => c.id === id);
+          return match ? match.contactNo : null;
+        })
+      ),
+    ].filter(Boolean); // remove nulls just in case
+    if (contactNumbers.length === 0) {
+      setContactsError(true);
+      setContactsErrorMsg("No contacts found in selection.");
+      setLoading(false);
+
+      return;
+    }
+
     const payload = {
       message: formData.message,
-      contacts: formData.contacts.map((c) => c.contactNo), // Assuming contactNo is the identifier
+      contacts: [...new Set(contactNumbers)], // remove duplicates
     };
 
     try {
-      await postApiData("SEND_MESSAGE", payload);
+      const response = await postApiData("SEND_MESSAGE", payload);
+
+      if (response.status) {
+        setSendMsgApiError("");
+      } else {
+        setSendMsgApiError(response.message);
+      }
     } catch (err) {
       console.error("Message sending failed", err);
     } finally {
@@ -121,6 +153,25 @@ export default function MessageWrapper({
     setTimeout(() => {
       setCopied(false);
     }, 2000);
+  };
+
+  const handleGroupClick = (group) => {
+    setContactsError(false);
+
+    setFormData((prev) => {
+      const exists = prev.groups.find((g) => g.id === group.id);
+      if (exists) {
+        return {
+          ...prev,
+          groups: prev.groups.filter((g) => g.id !== group.id),
+        };
+      } else {
+        return {
+          ...prev,
+          groups: [...prev.groups, group],
+        };
+      }
+    });
   };
 
   return (
@@ -271,7 +322,12 @@ export default function MessageWrapper({
                     {groupsList.map((contact) => (
                       <div
                         key={contact.id}
-                        className={styles.contactItem}
+                        className={`${styles.contactItem} ${
+                          formData.groups.find((g) => g.id === contact.id)
+                            ? styles.selected
+                            : ""
+                        }`}
+                        onClick={() => handleGroupClick(contact)}
                       >
                         <span className={styles.contactName}>
                           {contact.groupName}
@@ -303,29 +359,45 @@ export default function MessageWrapper({
 
             {contactsError && (
               <span style={{ color: "red", fontSize: "0.9rem" }}>
-                Please select at least one contact.
+                {contactsErrorMsg || "Please select at least one contact."}
               </span>
             )}
           </div>
           <div className="md:hidden fixed bottom-0 left-0 w-full bg-white px-4 py-3 z-50">
             <button
               type="submit"
-              className={styles.sendButnWrap + " w-full"}
-              disabled={loading || formData.contacts.length === 0}
+              className={styles.sendButnWrap + " md:hidden w-full"}
+              disabled={
+                loading ||
+                (formData.contacts.length === 0 && formData.groups.length === 0)
+              }
             >
-              <div className="svg-wrapper-1">
-                <div className="svg-wrapper">
-                  <RiSendPlaneFill />
+              {!loading && (
+                <div className="svg-wrapper-1">
+                  <div className="svg-wrapper">
+                    <RiSendPlaneFill />
+                  </div>
                 </div>
-              </div>
+              )}
               <span>{loading ? "Sending..." : "Send"}</span>
-            </button>
+            </button>{" "}
+            {sendMsgApiError && (
+              <span
+                style={{ color: "red", fontSize: "0.9rem" }}
+                className="mt-3 text-center"
+              >
+                {sendMsgApiError}
+              </span>
+            )}
           </div>
 
           <button
             type="submit"
             className={styles.sendButnWrap + " hidden md:block mt-6"}
-            disabled={loading || formData.contacts.length === 0}
+            disabled={
+              loading ||
+              (formData.contacts.length === 0 && formData.groups.length === 0)
+            }
           >
             <div className="svg-wrapper-1">
               <div className="svg-wrapper">
@@ -334,6 +406,14 @@ export default function MessageWrapper({
             </div>
             <span>{loading ? "Sending..." : "Send"}</span>
           </button>
+          {sendMsgApiError && (
+            <span
+              style={{ color: "red", fontSize: "0.9rem" }}
+              className="mt-3 text-center"
+            >
+              {sendMsgApiError}
+            </span>
+          )}
         </div>
       </form>
       <CommonModal
