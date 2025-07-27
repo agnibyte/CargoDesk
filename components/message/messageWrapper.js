@@ -15,8 +15,8 @@ export default function MessageWrapper({
   contacts = [],
   groups = [],
 }) {
-  const [contactsList, setContactsList] = useState(contacts);
-  const [groupsList, setGroupsList] = useState(groups);
+  const [contactsList] = useState(contacts);
+  const [groupsList] = useState(groups);
 
   const {
     register,
