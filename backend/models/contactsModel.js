@@ -222,7 +222,7 @@ export function addContactGroupModel(userId, groupName) {
           resolve({
             status: true,
             message: "Group created successfully",
-            groupId: result.insertId,
+            id: result.insertId,
           });
         } else {
           resolve({ status: false, message: "Failed to create group" });
@@ -296,7 +296,7 @@ export function addContactsToGroupModel(groupId, contactIds = []) {
 
 export function getGroupsByUserModel(userId) {
   return new Promise((resolve, reject) => {
-    const query = `SELECT id as groupId, groupName, createdAt FROM contact_groups WHERE userId = ?`;
+    const query = `SELECT id, groupName, createdAt FROM contact_groups WHERE userId = ?`;
 
     executeQuery(query, [userId])
       .then((result) => {
@@ -317,15 +317,17 @@ export function getGroupsByUserModel(userId) {
 
 export function getContactsByGroupIdModel(groupId) {
   return new Promise((resolve, reject) => {
-    const query = `
-      SELECT c.id, c.name, c.contactNo, c.note, c.status
-      FROM contact_group_members gm
-      JOIN contacts c ON c.id = gm.contactId
-      WHERE gm.groupId = ? AND c.status = 1
-    `;
+    const query = `SELECT c.id AS contactId, c.name,  c.contactNo,  c.note,  c.status
+                FROM 
+                  contact_group_members gm
+                INNER JOIN 
+                  contacts c ON gm.contactId = c.id
+                WHERE 
+                  gm.groupId = ? AND c.status = 1;`;
 
     executeQuery(query, [groupId])
       .then((result) => {
+        // console.log("result", result);
         resolve({
           status: true,
           data: result,

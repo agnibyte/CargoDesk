@@ -337,7 +337,7 @@ export const allContactsTableHeadCells = [
 ];
 export const allContactsGroupsTableHeadCells = [
   {
-    id: "groupId",
+    id: "id",
     numeric: false,
     disablePadding: false,
     label: "Sr. No.",

@@ -57,6 +57,7 @@ export default function GroupForm({
       return { ...prev, contactIds };
     });
   };
+console.log('formData', formData)
 
   const submitGroup = async () => {
     const payload = {

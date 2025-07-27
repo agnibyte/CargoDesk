@@ -7,6 +7,7 @@ export default function handler(req, res) {
       status: false,
     };
 
+    const { groupId } = request;
     getGroupMembersList(request)
       .then((result) => {
         res.status(200).json(result);

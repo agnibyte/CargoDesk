@@ -53,15 +53,17 @@ export default function AllGroupsSection({
     setDeleteLoad(false);
   };
 
-  const onClickEdit = (id) => {
+  const onClickEdit = async (id) => {
     console.log("Edit clicked for id:", id);
+    const response = await postApiData("GET_GROUP_MEMBERS", { groupId: id });
+    console.log("response", response);
 
     const selectedItem = groupsList.find((item) => item.id == id);
     setModalData({
       id: selectedItem.id,
-      name: selectedItem.name,
-      phone: selectedItem.contactNo,
-      note: selectedItem.note,
+      groupName: selectedItem.groupName,
+      description: selectedItem.description,
+      contactIds: selectedItem.contactIds,
     });
     setContactModal(true);
     setIsEdit(true);

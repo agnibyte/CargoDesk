@@ -22,6 +22,11 @@ export default function ManageContactsWrapper({
   const router = useRouter();
 
   const contactsTabs = [
+    {
+      id: "03",
+      label: `All Groups (${groupsList.length})`,
+      value: "allGroups",
+    },
     { id: "04", label: "Create Group", value: "createGroup" },
     {
       id: "01",
@@ -29,11 +34,6 @@ export default function ManageContactsWrapper({
       value: "allContacts",
     },
     { id: "02", label: "Import Contacts", value: "import" },
-    {
-      id: "03",
-      label: `All Groups (${groupsList.length})`,
-      value: "allGroups",
-    },
   ];
 
   const [selectedTab, setSelectedTab] = useState(
