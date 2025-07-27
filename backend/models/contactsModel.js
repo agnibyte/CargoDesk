@@ -296,21 +296,49 @@ export function addContactsToGroupModel(groupId, contactIds = []) {
 
 export function getGroupsByUserModel(userId) {
   return new Promise((resolve, reject) => {
-    const query = `SELECT id, groupName, createdAt FROM contact_groups WHERE userId = ?`;
+    const query = `
+      SELECT 
+        g.id AS groupId,
+        g.groupName,
+        g.description,
+        g.createdAt,
+        gm.contactId
+      FROM 
+        contact_groups g
+      LEFT JOIN 
+        contact_group_members gm ON g.id = gm.groupId
+      WHERE 
+        g.userId = ?
+      ORDER BY 
+        g.id
+    `;
 
     executeQuery(query, [userId])
-      .then((result) => {
-        resolve({
-          status: true,
-          data: result,
+      .then((rows) => {
+        const groupMap = {};
+
+        rows.forEach((row) => {
+          if (!groupMap[row.groupId]) {
+            groupMap[row.groupId] = {
+              id: row.groupId,
+              groupName: row.groupName,
+              description: row.description,
+              createdAt: row.createdAt,
+              contactIds: [],
+            };
+          }
+
+          if (row.contactId) {
+            groupMap[row.groupId].contactIds.push(row.contactId);
+          }
         });
+
+        const groupedList = Object.values(groupMap);
+        resolve({ status: true, data: groupedList });
       })
-      .catch((error) => {
-        console.error("Error fetching groups:", error);
-        reject({
-          status: false,
-          message: "Database error while fetching groups",
-        });
+      .catch((err) => {
+        console.error("Error getting group list with contacts", err);
+        reject({ status: false, message: "DB error while getting groups" });
       });
   });
 }
@@ -327,7 +355,6 @@ export function getContactsByGroupIdModel(groupId) {
 
     executeQuery(query, [groupId])
       .then((result) => {
-        // console.log("result", result);
         resolve({
           status: true,
           data: result,

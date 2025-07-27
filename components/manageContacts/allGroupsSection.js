@@ -54,10 +54,10 @@ export default function AllGroupsSection({
   };
 
   const onClickEdit = async (id) => {
-    console.log("Edit clicked for id:", id);
-    const response = await postApiData("GET_GROUP_MEMBERS", { groupId: id });
-    console.log("response", response);
-
+    // const response = await postApiData("GET_GROUP_MEMBERS", { groupId: id });
+    // let contactIds = [];
+    // if (response.status) {
+    //   contactIds = response.data.map((item) => item.contactId);
     const selectedItem = groupsList.find((item) => item.id == id);
     setModalData({
       id: selectedItem.id,
@@ -65,6 +65,14 @@ export default function AllGroupsSection({
       description: selectedItem.description,
       contactIds: selectedItem.contactIds,
     });
+    // } else {
+    //   setModalData({
+    //     id: id,
+    //     groupName: "",
+    //     description: "",
+    //     contactIds: [],
+    //   });
+    // }
     setContactModal(true);
     setIsEdit(true);
   };
@@ -115,7 +123,7 @@ export default function AllGroupsSection({
         modalTitle={isEdit ? "Edit Contact" : "Add New Contact"}
         modalOpen={contactModal}
         setModalOpen={setContactModal}
-        modalSize={"w-11/12 md:w-3/6"}
+        modalSize={"w-11/12 md:w-5/6"}
       >
         <GroupForm
           isEdit={isEdit}
@@ -123,6 +131,7 @@ export default function AllGroupsSection({
           pageData={pageData}
           setContactModal={setContactModal}
           setGroupsList={setGroupsList}
+          contactsList={contactsList}
         />
       </CommonModal>
     </div>

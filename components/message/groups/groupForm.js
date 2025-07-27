@@ -99,7 +99,6 @@ console.log('formData', formData)
   };
 
   const onSubmit = () => {
-    console.log("formData", formData);
     setLoading(true);
     setApiError(null);
     setSuccessMsg(null);

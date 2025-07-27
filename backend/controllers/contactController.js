@@ -28,7 +28,7 @@ export function addNewContactController(request) {
         }
       })
       .catch((error) => {
-        console.log("error000000000000000000000================", error);
+        console.log("error", error);
         reject(error);
       });
   });
@@ -213,7 +213,6 @@ export function getGroupMembersList(groupId) {
     getContactsByGroupIdModel(groupId)
       .then((result) => {
         if (result.status) {
-          console.log('result', result)
           response.status = true;
           response.message = result.message;
           response.data = result.data;
