@@ -52,7 +52,10 @@ export default function ManageContactsWrapper({
   };
 
   const filteredContacts = contactsList.filter((contact) => {
-    return contact.name.toLowerCase().includes(searchTerm.toLowerCase());
+    return (
+      contact.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      contact.contactNo.includes(searchTerm)
+    );
   });
 
   return (
