@@ -487,3 +487,33 @@ export function updateGroupInfoModel(request) {
       });
   });
 }
+
+export function deleteBulkContactGroupsModel(groupIds = []) {
+  return new Promise(async (resolve, reject) => {
+    const response = { status: false };
+
+    try {
+      if (!Array.isArray(groupIds) || groupIds.length === 0) {
+        return resolve({ status: false, message: "No contact IDs provided" });
+      }
+
+      const placeholders = groupIds.map(() => "?").join(",");
+      const query = `DELETE FROM contacts WHERE id IN (${placeholders})`;
+
+      const result = await executeQuery(query, groupIds);
+
+      if (result.affectedRows > 0) {
+        response.message = `${result.affectedRows} contact(s) deleted successfully`;
+        response.status = true;
+        resolve(response);
+      } else {
+        response.message = "No matching contacts found to delete";
+        resolve(response);
+      }
+    } catch (error) {
+      console.error("Error in bulk delete:", error);
+      response.message = "Database error during bulk delete";
+      resolve(response);
+    }
+  });
+}
