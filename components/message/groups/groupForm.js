@@ -20,6 +20,8 @@ export default function GroupForm({
   const [loading, setLoading] = useState(false);
   const [apiError, setApiError] = useState(null);
   const [successMsg, setSuccessMsg] = useState(null);
+  // const [idsToAdd, setIdsToAdd] = useState([]);
+  // const [idsToRemove, setIdsToRemove] = useState([]);
 
   const {
     register,
@@ -57,10 +59,9 @@ export default function GroupForm({
       return { ...prev, contactIds };
     });
   };
-console.log('formData', formData)
 
-  const submitGroup = async () => {
-    const payload = {
+  const handleCreateGroup = async () => {
+    const addNewPayload = {
       userId: pageData.user.userId,
       groupName: formData.groupName,
       description: formData.description,
@@ -69,8 +70,8 @@ console.log('formData', formData)
 
     try {
       const response = await postApiData(
-        isEdit ? "UPDATE_GROUP" : "CREATE_NEW_GROUP_OF_CONTACTS",
-        isEdit ? { id: modalData.id, data: payload } : payload
+        "CREATE_NEW_GROUP_OF_CONTACTS",
+        addNewPayload
       );
 
       if (response.status) {
@@ -79,22 +80,72 @@ console.log('formData', formData)
         reset();
         setFormData(defaultFormData);
 
-        if (isEdit) {
-          setGroupsList((prev) =>
-            prev.map((g) => (g.id === modalData.id ? { ...g, ...payload } : g))
-          );
-          setGroupModal(false);
-        } else {
-          setGroupsList((prev) => [...prev, payload]);
-        }
+        setGroupsList((prev) => [...prev, addNewPayload]);
       } else {
         setApiError(response.message);
       }
     } catch (error) {
-      console.error("Group form error:", error);
+      console.error("Create group error:", error);
       setApiError("Something went wrong. Please try again.");
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleUpdateGroup = async () => {
+    const idsToAdd = formData.contactIds.filter(
+      (id) => !modalData.contactIds.includes(id)
+    );
+    const idsToRemove = modalData.contactIds.filter(
+      (id) => !formData.contactIds.includes(id)
+    );
+
+    const updatePayload = {
+      groupId: modalData.id,
+      userId: pageData.user.userId,
+      groupName: formData.groupName,
+      description: formData.description,
+      idsToAdd,
+      idsToRemove,
+    };
+
+    try {
+      const response = await postApiData(
+        "UPDATE_USERS_GROUP_DETAILS",
+        updatePayload
+      );
+
+      if (response.status) {
+        setSuccessMsg(response.message);
+        setTimeout(() => setSuccessMsg(""), 3000);
+        reset();
+        setFormData(defaultFormData);
+
+        setGroupsList((prev) =>
+          prev.map((g) =>
+            g.id === modalData.id
+              ? { ...g, ...updatePayload, contactIds: formData.contactIds }
+              : g
+          )
+        );
+        setGroupModal(false);
+      } else {
+        setApiError(response.message);
+      }
+    } catch (error) {
+      console.error("Update group error:", error);
+      setApiError("Something went wrong. Please try again.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const submitGroup = () => {
+    setLoading(true);
+    if (isEdit) {
+      handleUpdateGroup();
+    } else {
+      handleCreateGroup();
     }
   };
 

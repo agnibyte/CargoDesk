@@ -132,6 +132,7 @@ export default function AllGroupsSection({
           setContactModal={setContactModal}
           setGroupsList={setGroupsList}
           contactsList={contactsList}
+          setGroupModal={setContactModal}
         />
       </CommonModal>
     </div>

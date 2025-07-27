@@ -430,3 +430,60 @@ export function createGroupWithContactsModel(request) {
       });
   });
 }
+
+export function updateGroupInfoModel(request) {
+  return new Promise((resolve, reject) => {
+    const {
+      groupId,
+      userId,
+      groupName,
+      description,
+      idsToAdd = [],
+      idsToRemove = [],
+    } = request;
+
+    const updateGroupQuery = `
+      UPDATE contact_groups
+      SET groupName = ?, description = ?, updatedAt = CURRENT_TIMESTAMP
+      WHERE id = ? AND userId = ?
+    `;
+
+    executeQuery(updateGroupQuery, [groupName, description, groupId, userId])
+      .then(() => {
+        // Step 2: Delete members if any
+        if (idsToRemove.length === 0) return Promise.resolve();
+
+        const deleteQuery = `
+          DELETE FROM contact_group_members
+          WHERE groupId = ? AND contactId IN (?)
+        `;
+        return executeQuery(deleteQuery, [groupId, idsToRemove]);
+      })
+      .then(() => {
+        // Step 3: Add new members if any
+        if (idsToAdd.length === 0) return Promise.resolve();
+
+        const insertQuery = `
+          INSERT IGNORE INTO contact_group_members (groupId, contactId)
+          VALUES ?
+        `;
+        const values = idsToAdd.map((cid) => [groupId, cid]);
+
+        return executeQuery(insertQuery, [values]);
+      })
+      .then(() => {
+        resolve({
+          status: true,
+          message: `Group updated with ${idsToAdd.length} added, ${idsToRemove.length} removed.`,
+        });
+      })
+      .catch((err) => {
+        console.error("Error in updateGroupMembersSmart:", err);
+        reject({
+          status: false,
+          message: "Failed to update group or members",
+          error: err.sqlMessage || err.message,
+        });
+      });
+  });
+}

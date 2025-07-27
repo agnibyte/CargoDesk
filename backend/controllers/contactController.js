@@ -8,6 +8,7 @@ import {
   getContactsModel,
   getGroupsByUserModel,
   updateContactModel,
+  updateGroupInfoModel,
 } from "../models/contactsModel";
 
 export function addNewContactController(request) {
@@ -216,6 +217,29 @@ export function getGroupMembersList(groupId) {
           response.status = true;
           response.message = result.message;
           response.data = result.data;
+          resolve(response);
+        } else {
+          response.message = result.message;
+          resolve(response);
+        }
+      })
+      .catch((error) => {
+        reject(error);
+      });
+  });
+}
+
+export function updateGroupDetails(request) {
+  return new Promise((resolve, reject) => {
+    const response = {
+      status: false,
+    };
+
+    updateGroupInfoModel(request)
+      .then((result) => {
+        if (result.status) {
+          response.status = true;
+          response.message = result.message;
           resolve(response);
         } else {
           response.message = result.message;
