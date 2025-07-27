@@ -29,13 +29,11 @@ export default function GroupMemberSelection({
 
   return (
     <>
-      ;
       <div className="my-3 flex flex-col md:flex-row md:items-center md:justify-between gap-2">
         <label className="block font-semibold text-gray-700">
           Select Members
         </label>
-
-        <div className="relative w-full md:w-1/2">
+        <div className="relative">
           {/* Search Icon */}
           <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" />
 
