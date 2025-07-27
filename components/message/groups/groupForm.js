@@ -80,7 +80,10 @@ export default function GroupForm({
         reset();
         setFormData(defaultFormData);
 
-        setGroupsList((prev) => [...prev, addNewPayload]);
+        setGroupsList((prev) => [
+          ...prev,
+          { ...addNewPayload, id: response.id },
+        ]);
       } else {
         setApiError(response.message);
       }

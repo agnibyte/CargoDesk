@@ -169,6 +169,7 @@ export function addNewGroupOfContactsController(request) {
         if (result.status) {
           response.status = true;
           response.message = result.message;
+          response.id = result.groupId;
           resolve(response);
         } else {
           response.message = result.message;
