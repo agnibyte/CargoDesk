@@ -1,4 +1,5 @@
 import { useState, useEffect } from "react";
+import { FiSearch, FiX } from "react-icons/fi";
 
 export default function GroupMemberSelection({
   contactsList = [],
@@ -28,23 +29,40 @@ export default function GroupMemberSelection({
 
   return (
     <>
-      <div className="my-3 flex items-center justify-between flex-wrap gap-2">
-        <label className="block mb-2 font-semibold text-gray-700">
+      ;
+      <div className="my-3 flex flex-col md:flex-row md:items-center md:justify-between gap-2">
+        <label className="block font-semibold text-gray-700">
           Select Members
         </label>
-        <input
-          type="text"
-          placeholder="Search by name or number"
-          className="w-full md:w-1/2 px-3 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-        />
+
+        <div className="relative w-full md:w-1/2">
+          {/* Search Icon */}
+          <FiSearch className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 pointer-events-none" />
+
+          {/* Input Field */}
+          <input
+            type="text"
+            placeholder="Search by name or number"
+            className="w-full pl-10 pr-10 py-2 border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+          />
+
+          {searchTerm && (
+            <button
+              type="button"
+              onClick={() => setSearchTerm("")}
+              className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-500 hover:text-gray-700 focus:outline-none"
+            >
+              <FiX size={18} />
+            </button>
+          )}
+        </div>
       </div>
       <div className="text-sm text-gray-600 mt-1 md:mt-0 text-end mb-3">
         <strong>{formData?.contactIds?.length}</strong> selected out of{" "}
         <strong>{contactsList.length}</strong> contacts
       </div>
-
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 max-h-60 overflow-y-auto p-2">
         {filteredContacts.length > 0 ? (
           filteredContacts.map((contact) => {
