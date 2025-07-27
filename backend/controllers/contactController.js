@@ -2,6 +2,7 @@ import {
   addBulkContactsModel,
   addNewContactModel,
   createGroupWithContactsModel,
+  deleteBulkContactGroupsModel,
   deleteBulkContactsModel,
   deleteContactModel,
   getContactsByGroupIdModel,
@@ -143,6 +144,29 @@ export function deleteBulkContactsController(request) {
     const contacts = request.contacts;
 
     deleteBulkContactsModel(contacts)
+      .then((result) => {
+        if (result.status) {
+          response.status = true;
+          response.message = result.message;
+          resolve(response);
+        } else {
+          response.message = result.message;
+          resolve(response);
+        }
+      })
+      .catch((error) => {
+        reject(error);
+      });
+  });
+}
+export function deleteBulkContactGroupsController(request) {
+  return new Promise((resolve, reject) => {
+    const response = {
+      status: false,
+    };
+    const ids = request.groupIds;
+
+    deleteBulkContactGroupsModel(ids)
       .then((result) => {
         if (result.status) {
           response.status = true;

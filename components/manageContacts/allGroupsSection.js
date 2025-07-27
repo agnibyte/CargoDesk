@@ -30,13 +30,13 @@ export default function AllGroupsSection({
 
   const onClickDelete = async (ids) => {
     const payload = {
-      contacts: selected,
+      groupIds: selected,
     };
     setDeleteLoad(true);
     setDeleteError("");
     try {
-      // Simulate API call to delete contacts
-      const response = await postApiData("DELETE_BULK_CONTACTS", payload);
+      // Simulate API call to delete contacts groups
+      const response = await postApiData("DELETE_BULK_GROUPS", payload);
       if (response.status) {
         setGroupsList((prev) =>
           prev.filter((item) => !selected.includes(item.id))
