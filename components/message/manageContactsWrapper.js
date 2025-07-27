@@ -69,28 +69,30 @@ export default function ManageContactsWrapper({
                   Manage Contacts
                 </h2>
 
-                <div className="relative w-full md:w-1/3">
-                  <input
-                    type="text"
-                    placeholder="Search contacts..."
-                    className="w-full py-2 pl-10 pr-4 rounde border-b border-gray-300 focus:outline-none focus:border-blue-600   shadow-sm text-sm"
-                    onChange={handleSearch}
-                    value={searchTerm}
-                  />
-                  <span className="absolute left-3 top-2.5 text-gray-400">
-                    <FiSearch />
-                  </span>
+                {selectedTab === "allContacts" && (
+                  <div className="relative w-full md:w-1/3">
+                    <input
+                      type="text"
+                      placeholder="Search contacts..."
+                      className="w-full py-2 pl-10 pr-4 rounde border-b border-gray-300 focus:outline-none focus:border-blue-600   shadow-sm text-sm"
+                      onChange={handleSearch}
+                      value={searchTerm}
+                    />
+                    <span className="absolute left-3 top-2.5 text-gray-400">
+                      <FiSearch />
+                    </span>
 
-                  {searchTerm && (
-                    <button
-                      type="button"
-                      onClick={() => setSearchTerm("")}
-                      className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white focus:outline-none"
-                    >
-                      <FiX size={18} />
-                    </button>
-                  )}
-                </div>
+                    {searchTerm && (
+                      <button
+                        type="button"
+                        onClick={() => setSearchTerm("")}
+                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white focus:outline-none"
+                      >
+                        <FiX size={18} />
+                      </button>
+                    )}
+                  </div>
+                )}
               </div>
             </div>
 
@@ -109,6 +111,7 @@ export default function ManageContactsWrapper({
                 contactsList={filteredContacts}
                 setContactsList={setContactsList}
                 searchTerm={searchTerm}
+                setSelectedTab={setSelectedTab}
               />
             </>
           ) : selectedTab == "allGroups" ? (
@@ -120,6 +123,7 @@ export default function ManageContactsWrapper({
                 searchTerm={searchTerm}
                 groupsList={groupsList}
                 setGroupsList={setGroupsList}
+                setSelectedTab={setSelectedTab}
               />
             </>
           ) : selectedTab == "import" ? (

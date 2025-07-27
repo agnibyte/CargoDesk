@@ -13,6 +13,7 @@ export default function AllContactsTab({
   contactsList,
   setContactsList,
   searchTerm = "",
+  setSelectedTab,
 }) {
   const [selected, setSelected] = useState([]);
   const [deletePopup, setDeletePopup] = useState(false);
@@ -63,16 +64,30 @@ export default function AllContactsTab({
 
   return (
     <div>
-      <DocumentTable
-        rows={contactsList}
-        headCells={allContactsTableHeadCells}
-        onClickEdit={onClickEdit}
-        selected={selected}
-        setSelected={setSelected}
-        onClickDelete={() => setDeletePopup(true)}
-        isFilterApplied={false}
-        searchTerm={searchTerm}
-      />
+      {contactsList.length > 0 ? (
+        <DocumentTable
+          rows={contactsList}
+          headCells={allContactsTableHeadCells}
+          onClickEdit={onClickEdit}
+          selected={selected}
+          setSelected={setSelected}
+          onClickDelete={() => setDeletePopup(true)}
+          isFilterApplied={false}
+          searchTerm={searchTerm}
+        />
+      ) : (
+        <div className="flex items-center justify-center h-[200px] bg-white text-gray-500 rounded-b-xl shadow-md">
+          <div className="flex items-center flex-col">
+            <h1>No Contacts Found</h1>
+            <button
+              className={commonStyle.commonButton + " mt-3"}
+              onClick={() => setSelectedTab("import")}
+            >
+              Import Contacts
+            </button>
+          </div>
+        </div>
+      )}
 
       <CommonModal
         modalTitle={"Delete Document"}
