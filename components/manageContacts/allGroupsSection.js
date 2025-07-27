@@ -19,6 +19,7 @@ export default function AllGroupsSection({
   searchTerm = "",
   groupsList,
   setGroupsList,
+  setSelectedTab,
 }) {
   const [selected, setSelected] = useState([]);
   const [deletePopup, setDeletePopup] = useState(false);
@@ -78,17 +79,31 @@ export default function AllGroupsSection({
   };
 
   return (
-    <div>
-      <DocumentTable
-        rows={groupsList}
-        headCells={allContactsGroupsTableHeadCells}
-        onClickEdit={onClickEdit}
-        selected={selected}
-        setSelected={setSelected}
-        onClickDelete={() => setDeletePopup(true)}
-        isFilterApplied={false}
-        searchTerm={searchTerm}
-      />
+    <>
+      {groupsList.length > 0 ? (
+        <DocumentTable
+          rows={groupsList}
+          headCells={allContactsGroupsTableHeadCells}
+          onClickEdit={onClickEdit}
+          selected={selected}
+          setSelected={setSelected}
+          onClickDelete={() => setDeletePopup(true)}
+          isFilterApplied={false}
+          searchTerm={searchTerm}
+        />
+      ) : (
+        <div className="flex items-center justify-center h-[200px] bg-white text-gray-500 rounded-b-xl shadow-md">
+          <div className="flex items-center flex-col">
+            <h1>No Groups Found</h1>
+            <button
+              className={commonStyle.commonButton + " mt-3"}
+              onClick={() => setSelectedTab("createGroup")}
+            >
+              Add New Group
+            </button>
+          </div>
+        </div>
+      )}
 
       <CommonModal
         modalTitle={"Delete Document"}
@@ -135,6 +150,6 @@ export default function AllGroupsSection({
           setGroupModal={setContactModal}
         />
       </CommonModal>
-    </div>
+    </>
   );
 }
