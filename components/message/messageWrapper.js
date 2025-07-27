@@ -10,15 +10,13 @@ import GoogleContacts from "./googleContacts";
 import { RiSendPlaneFill } from "react-icons/ri";
 import Link from "next/link";
 
-export default function MessageWrapper({ pageData, contacts = [] }) {
-  const contactsList = contacts;
-  const groupsList = [
-    {
-      id: "01",
-      groupName: "Family",
-      members: ["+917039529129", "+919702392028"],
-    },
-  ];
+export default function MessageWrapper({
+  pageData,
+  contacts = [],
+  groups = [],
+}) {
+  const [contactsList, setContactsList] = useState(contacts);
+  const [groupsList, setGroupsList] = useState(groups);
 
   const {
     register,
@@ -276,8 +274,8 @@ export default function MessageWrapper({ pageData, contacts = [] }) {
                     <span className={styles.contactName}>
                       {contact.groupName}
                     </span>
-                    <div className="w-5 h-5 rounded-full bg-gray-400 flex items-center justify-center">
-                      {contact.members.length}
+                    <div className="w-5 h-5 rounded-full text-white bg-gray-400 flex items-center justify-center">
+                      {contact.contactIds.length}
                     </div>
                     {/* when user hver on item little poup will show contacts in small popup */}
 
