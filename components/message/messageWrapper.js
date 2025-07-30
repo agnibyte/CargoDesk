@@ -38,8 +38,38 @@ export default function MessageWrapper({
   const [copied, setCopied] = useState(false);
   const [prevTemplatePoup, setPrevTemplatePopup] = useState(false);
   const [sendMsgApiError, setSendMsgApiError] = useState("");
+  const [showAddMsgTemplet, setShowAddMsgTemplet] = useState(false);
+  const [savedMsgTemplets, setSavedMsgTemplets] = useState([]);
+  const [newTemplateText, setNewTemplateText] = useState("");
+  const [addMsgLoading, setAddMsgLoading] = useState(false);
 
-  const prevTemlateHeading = "Previous Templates";
+  const handleSaveTemplate = async () => {
+    if (!newTemplateText.trim()) return;
+
+    setAddMsgLoading(true);
+
+    // Optionally save to API or just update local list
+    const newTemplate = {
+      msg: newTemplateText.trim(),
+    };
+
+    const response = await postApiData("ADD_MESSAGE_TEMPLATE", newTemplate);
+    if (response.status) {
+      setSavedMsgTemplets((prev) => [
+        { ...newTemplate, id: response.templateId },
+        ...prev,
+      ]); // or update your template state if dynamic
+      setNewTemplateText("");
+      setShowAddMsgTemplet(false);
+    } else {
+      setAddMsgLoading(false);
+    }
+    setSavedMsgTemplets((prev) => [newTemplate, ...prev]); // or update your template state if dynamic
+    setNewTemplateText("");
+    setShowAddMsgTemplet(false);
+  };
+
+  const prevTemlateHeading = "Saved Templates";
 
   useEffect(() => {
     register("message", {
@@ -182,7 +212,7 @@ export default function MessageWrapper({
       >
         <div className={styles.messageSection}>
           <div className={styles.messageWrapper}>
-            <div className=" flex items-center justify-between mb-4">
+            <div className=" flex items-center justify-between">
               <h3 className={styles.heading}>Message</h3>
               <button
                 type="button"
@@ -210,22 +240,54 @@ export default function MessageWrapper({
 
           <div className="prevMessagesWrapper hidden sm:block">
             <div className="mb-6">
-              <h4 className="text-lg font-semibold mb-4">
-                {prevTemlateHeading}
-              </h4>
-
-              <div className="flex flex-wrap gap-4">
-                {templates.map((item, i) => (
-                  <React.Fragment key={i}>
-                    <PrevMessageCard
-                      item={item}
-                      handleChange={handleChange}
-                      copied={copied}
-                      handleCopy={handleCopy}
-                    />
-                  </React.Fragment>
-                ))}
+              <div className="flex items-center justify-between mb-2">
+                <h4 className="text-lg font-semibold">{prevTemlateHeading}</h4>
+                <button
+                  type="button"
+                  className={commonStyle.commonButtonOutline}
+                  onClick={() => setShowAddMsgTemplet(!showAddMsgTemplet)}
+                >
+                  {showAddMsgTemplet ? "Cancel" : "Add New"}
+                </button>
               </div>
+              {showAddMsgTemplet ? (
+                <div className="mt-4 space-y-2 ">
+                  <label className="block font-medium text-gray-700">
+                    New Message Template
+                  </label>
+                  <textarea
+                    rows="3"
+                    className="w-full border border-gray-300 rounded px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    placeholder="Type your message to save as a template"
+                    value={newTemplateText}
+                    name="newTemplateText"
+                    onChange={(e) => setNewTemplateText(e.target.value)}
+                  />
+                  <div className="flex justify-end">
+                    <button
+                      type="button"
+                      className={`${commonStyle.commonButton} "px-4 py-2 rounded transition"`}
+                      onClick={handleSaveTemplate}
+                      disabled={!newTemplateText.trim()}
+                    >
+                      Save Template
+                    </button>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex flex-wrap gap-4 h-[40vh]  overflow-y-auto">
+                  {templates.map((item, i) => (
+                    <React.Fragment key={i}>
+                      <PrevMessageCard
+                        item={item}
+                        handleChange={handleChange}
+                        copied={copied}
+                        handleCopy={handleCopy}
+                      />
+                    </React.Fragment>
+                  ))}
+                </div>
+              )}
             </div>
           </div>
         </div>
