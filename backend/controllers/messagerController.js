@@ -1,5 +1,6 @@
 // import { postSiteApiData } from "@/utilities/services/apiService";
 import { Twilio } from "twilio";
+import { addNewMessageTemplateModel } from "../models/messangerModel";
 
 const accountSid = process.env.ACCOUNT_SID;
 const authToken = process.env.AUTH_TOKEN;
@@ -63,3 +64,24 @@ export default async function sendMessage(req, res) {
 //       error.message || "An error occurred while sending the message.";
 //     reject(response);
 //   });
+
+export function addNewMsgTemplateController(request) {
+  return new Promise((resolve, reject) => {
+    const response = {
+      status: false,
+    };
+
+    addNewMessageTemplateModel(request)
+      .then((result) => {
+        if (result.status) {
+          resolve(result);
+        } else {
+          response.message = result.message;
+          resolve(response);
+        }
+      })
+      .catch((error) => {
+        reject(error);
+      });
+  });
+}
