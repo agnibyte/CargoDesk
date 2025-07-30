@@ -1,14 +1,16 @@
+@use "./variable.scss" as variable;
+
 .container {
   display: flex;
   gap: 24px;
   padding: 24px;
   /* background: #f8f8f8; */
   border-radius: 12px;
-  max-width: 80vw;
-  margin: auto;
+  // max-width: 80vw;
+  // margin: auto;
   box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
-  border: 1px solid #ccc;
-  margin-top: 1rem;
+  // border: 1px solid #ccc;
+  // margin-top: 1rem;
 
 }
 
@@ -122,7 +124,7 @@
 
 /* RIGHT SECTION */
 .contactSection {
-  width: 400px;
+  width: 33vw;
   background: #fff;
   border: 1px solid #ccc;
   border-radius: 12px;
@@ -378,9 +380,9 @@
 
 
   &:disabled {
-    opacity: 0.6;
+    // opacity: 0.6;
     cursor: not-allowed;
-    background: #808080;
+    background: variable.$uniqueGray;
   }
 
   span {

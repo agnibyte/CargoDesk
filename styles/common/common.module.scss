@@ -34,17 +34,38 @@
     padding: 10px 15px;
     border-radius: 10px;
     box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
+
+    &:disabled {
+        background: variable.$uniqueGray;
+        cursor: not-allowed;
+    }
+
     /* from indigo-500 to purple-600 */
 }
 
 .commonButtonOutline {
     background: none;
-    padding: 2px;
+    padding: 5px 15px;
     /* border thickness */
     border-radius: 0.5rem;
     /* rounded corners */
     display: inline-block;
-    border: 2px solid #9333ea;
+    border: 2px solid #6366f1;
+    color: #6366f1;
+    font-weight: 500;
+    box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
+
+    &:hover {
+        background-image: linear-gradient(to right, #6366f1, #9333ea);
+        color: variable.$white;
+    }
+
+    &:disabled {
+        background: variable.$uniqueGray;
+        cursor: not-allowed;
+    }
+
+
 }
 
 // .events-none {
