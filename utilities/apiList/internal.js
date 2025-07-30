@@ -7,6 +7,7 @@ export const internalList = {
   // node api
   SEND_SMS: "/api/sendSms",
   SEND_MESSAGE: "/api/sendMessage",
+  ADD_MSG_TEMPLATE: "/api/message/add-template",
 
   // login api
   VERIFY_USER: "/api/user/verify-user",
@@ -24,11 +25,10 @@ export const internalList = {
   DELETE_CONTACT: "/api/contact/delete",
   DELETE_BULK_CONTACTS: "/api/contact/bulk-delete",
   IMPORT_CONTACTS_IN_BLUK: "/api/contact/import-contacts-in-bluk",
-  
+
   // contact group
   CREATE_NEW_GROUP_OF_CONTACTS: "/api/contact/create-new-group",
   GET_GROUP_MEMBERS: "/api/contact/get-group-members",
   UPDATE_USERS_GROUP_DETAILS: "/api/contact/update-users-group-details",
   DELETE_BULK_GROUPS: "/api/contact/bulk-delete-groups",
-
 };
