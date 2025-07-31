@@ -2,19 +2,26 @@ import {
   getContactListController,
   getUserCntactGroups,
 } from "@/backend/controllers/contactController";
+import { getUserMessageTemplates } from "@/backend/controllers/messagerController";
 import { getUserDetailsById } from "@/backend/controllers/userController";
 import MessageWrapper from "@/components/message/messageWrapper";
 import { getCurrentToken } from "@/utilities/utils";
 import { parseCookies } from "nookies";
 import React from "react";
 
-export default function Messager({ pageData, contacts, groups }) {
+export default function Messager({
+  pageData,
+  contacts,
+  groups,
+  savedTemplates,
+}) {
   return (
     <>
       <MessageWrapper
         pageData={pageData}
         contacts={contacts}
         groups={groups}
+        savedTemplates={savedTemplates}
       />
     </>
   );
@@ -26,6 +33,7 @@ export async function getServerSideProps(context) {
   const pageData = {};
   let contacts = [];
   let groups = [];
+  let savedTemplates = [];
 
   const res = context.res;
 
@@ -64,11 +72,13 @@ export async function getServerSideProps(context) {
 
   // Token is valid → fetch user details from DB
 
-  const [userDetails, contactsData, groupsData] = await Promise.all([
-    getUserDetailsById(decoded.userId),
-    getContactListController(decoded.userId),
-    getUserCntactGroups(decoded.userId),
-  ]);
+  const [userDetails, contactsData, groupsData, savedTemplatesData] =
+    await Promise.all([
+      getUserDetailsById(decoded.userId),
+      getContactListController(decoded.userId),
+      getUserCntactGroups(decoded.userId),
+      getUserMessageTemplates(decoded.userId),
+    ]);
 
   if (contactsData?.status) {
     contacts = contactsData.data;
@@ -76,6 +86,10 @@ export async function getServerSideProps(context) {
 
   if (groupsData?.status) {
     groups = groupsData.data;
+  }
+
+  if (savedTemplatesData?.status) {
+    savedTemplates = savedTemplatesData.data;
   }
 
   if (!userDetails?.status || !userDetails.data) {
@@ -115,6 +129,7 @@ export async function getServerSideProps(context) {
       pageData,
       contacts,
       groups,
+      savedTemplates,
     },
   };
 }

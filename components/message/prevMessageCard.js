@@ -15,7 +15,7 @@ export default function PrevMessageCard({
       {/* Buttons */}
       <div className="absolute top-2 right-2 flex gap-2">
         <div
-          onClick={() => handleChange("message", item.msg)}
+          onClick={() => handleChange("message", item.message)}
           className={msgStyles.useBtn}
         >
           <BsPlusCircle className="text-gray-100" />
@@ -39,7 +39,7 @@ export default function PrevMessageCard({
 
       {/* Message Content */}
       <p className="text-gray-800 text-sm whitespace-pre-wrap mt-6">
-        {item.msg}
+        {item.message}
       </p>
     </div>
   );

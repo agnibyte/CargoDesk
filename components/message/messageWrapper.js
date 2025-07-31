@@ -14,6 +14,7 @@ export default function MessageWrapper({
   pageData,
   contacts = [],
   groups = [],
+  savedTemplates,
 }) {
   const [contactsList] = useState(contacts);
   const [groupsList] = useState(groups); // test data
@@ -161,24 +162,24 @@ export default function MessageWrapper({
     // onChange && onChange(type); // pass to parent if needed
   };
 
-  const templates = [
-    { id: "01", msg: "Hello! Just checking in with you." },
-    { id: "02", msg: "Don't forget our meeting at 3 PM." },
-    { id: "03", msg: "Here's the update you requested." },
-    { id: "03", msg: "Here's the update you requested." },
-    { id: "03", msg: "Here's the update you requested." },
-    { id: "03", msg: "Here's the update you requested." },
-    { id: "03", msg: "Here's the update you requested." },
-    { id: "03", msg: "Here's the update you requested." },
-    { id: "04", msg: "Let me know your availability." },
-    { id: "04", msg: "Let me know your availability." },
-    { id: "04", msg: "Let me know your availability." },
-    { id: "04", msg: "Let me know your availability." },
-    { id: "04", msg: "Let me know your availability." },
-  ];
+  // const savedTemplates = [
+  //   { id: "01", message: "Hello! Just checking in with you." },
+  //   { id: "02", message: "Don't forget our meeting at 3 PM." },
+  //   { id: "03", message: "Here's the update you requested." },
+  //   { id: "03", message: "Here's the update you requested." },
+  //   { id: "03", message: "Here's the update you requested." },
+  //   { id: "03", message: "Here's the update you requested." },
+  //   { id: "03", message: "Here's the update you requested." },
+  //   { id: "03", message: "Here's the update you requested." },
+  //   { id: "04", message: "Let me know your availability." },
+  //   { id: "04", message: "Let me know your availability." },
+  //   { id: "04", message: "Let me know your availability." },
+  //   { id: "04", message: "Let me know your availability." },
+  //   { id: "04", message: "Let me know your availability." },
+  // ];
 
   const handleCopy = (item) => {
-    navigator.clipboard.writeText(item.msg);
+    navigator.clipboard.writeText(item.message);
     setCopied(item.id);
     setTimeout(() => {
       setCopied(false);
@@ -276,7 +277,7 @@ export default function MessageWrapper({
                 </div>
               ) : (
                 <div className="flex flex-wrap gap-4 h-[40vh]  overflow-y-auto">
-                  {templates.map((item, i) => (
+                  {savedTemplates.map((item, i) => (
                     <React.Fragment key={i}>
                       <PrevMessageCard
                         item={item}
@@ -487,7 +488,7 @@ export default function MessageWrapper({
       >
         <div className="p-4">
           <div className="flex flex-wrap gap-4 mt-1 h-[65vh] md:h-[60vh] overflow-y-auto">
-            {templates.map((item, i) => (
+            {savedTemplates.map((item, i) => (
               <PrevMessageCard
                 key={i}
                 item={item}
