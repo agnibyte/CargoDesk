@@ -1,6 +1,9 @@
 // import { postSiteApiData } from "@/utilities/services/apiService";
 import { Twilio } from "twilio";
-import { addNewMessageTemplateModel } from "../models/messangerModel";
+import {
+  addNewMessageTemplateModel,
+  getUserMessageTemplatesModel,
+} from "../models/messangerModel";
 
 const accountSid = process.env.ACCOUNT_SID;
 const authToken = process.env.AUTH_TOKEN;
@@ -72,6 +75,26 @@ export function addNewMsgTemplateController(request) {
     };
 
     addNewMessageTemplateModel(request.body)
+      .then((result) => {
+        if (result.status) {
+          resolve(result);
+        } else {
+          response.message = result.message;
+          resolve(response);
+        }
+      })
+      .catch((error) => {
+        reject(error);
+      });
+  });
+}
+export function getUserMessageTemplates(userId) {
+  return new Promise((resolve, reject) => {
+    const response = {
+      status: false,
+    };
+
+    getUserMessageTemplatesModel(userId)
       .then((result) => {
         if (result.status) {
           resolve(result);

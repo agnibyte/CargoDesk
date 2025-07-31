@@ -31,3 +31,30 @@ export function addNewMessageTemplateModel(data) {
       });
   });
 }
+
+export function getUserMessageTemplatesModel(userId) {
+  return new Promise((resolve, reject) => {
+    const query = `
+      SELECT id, message, createdAt, updatedAt
+      FROM message_templates
+      WHERE userId = ? 
+      ORDER BY updatedAt DESC
+    `;
+
+    executeQuery(query, [userId])
+      .then((results) => {
+        resolve({
+          status: true,
+          data: results,
+        });
+      })
+      .catch((err) => {
+        console.error("Error fetching templates:", err);
+        reject({
+          status: false,
+          message: "Error while fetching message templates",
+          error: err.sqlMessage || err.message,
+        });
+      });
+  });
+}
