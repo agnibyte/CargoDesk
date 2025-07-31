@@ -71,7 +71,7 @@ export function addNewMsgTemplateController(request) {
       status: false,
     };
 
-    addNewMessageTemplateModel(request)
+    addNewMessageTemplateModel(request.body)
       .then((result) => {
         if (result.status) {
           resolve(result);

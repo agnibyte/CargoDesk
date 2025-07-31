@@ -58,6 +58,7 @@
     &:hover {
         background-image: linear-gradient(to right, #6366f1, #9333ea);
         color: variable.$white;
+        border: 2px solid #9333ea;
     }
 
     &:disabled {

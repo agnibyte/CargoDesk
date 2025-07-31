@@ -2,8 +2,7 @@ import executeQuery from "@/helpers/dbConnection";
 
 export function addNewMessageTemplateModel(data) {
   return new Promise((resolve, reject) => {
-    const insertQuery = `INSERT INTO message_templates (userId, message) VALUES (?, ?)
-    `;
+    const insertQuery = `INSERT INTO message_templates (userId, message) VALUES (?, ?)`;
 
     const values = [data.userId, data.message];
 

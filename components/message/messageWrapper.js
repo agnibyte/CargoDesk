@@ -50,10 +50,11 @@ export default function MessageWrapper({
 
     // Optionally save to API or just update local list
     const newTemplate = {
-      msg: newTemplateText.trim(),
+      userId: pageData.user.userId,
+      message: newTemplateText.trim(),
     };
 
-    const response = await postApiData("ADD_MESSAGE_TEMPLATE", newTemplate);
+    const response = await postApiData("ADD_MSG_TEMPLATE", newTemplate);
     if (response.status) {
       setSavedMsgTemplets((prev) => [
         { ...newTemplate, id: response.templateId },
@@ -61,12 +62,11 @@ export default function MessageWrapper({
       ]); // or update your template state if dynamic
       setNewTemplateText("");
       setShowAddMsgTemplet(false);
+      setSavedMsgTemplets((prev) => [newTemplate, ...prev]); // or update your template state if dynamic
+      setNewTemplateText("");
     } else {
       setAddMsgLoading(false);
     }
-    setSavedMsgTemplets((prev) => [newTemplate, ...prev]); // or update your template state if dynamic
-    setNewTemplateText("");
-    setShowAddMsgTemplet(false);
   };
 
   const prevTemlateHeading = "Saved Templates";
