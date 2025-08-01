@@ -70,7 +70,9 @@ export default function MessageWrapper({
     }
   };
 
-  const prevTemlateHeading = "Saved Templates";
+  const prevTemlateHeading = showAddMsgTemplet
+    ? "New Message Template"
+    : "Saved Templates";
 
   useEffect(() => {
     register("message", {
@@ -227,7 +229,7 @@ export default function MessageWrapper({
               name="message"
               rows="4"
               placeholder="Type a message..."
-              className={styles.textArea}
+              className={styles.msgInputField}
               value={formData.message}
               onChange={(e) => handleChange("message", e.target.value)}
               style={errors.message ? { borderColor: "red" } : {}}
@@ -253,9 +255,9 @@ export default function MessageWrapper({
               </div>
               {showAddMsgTemplet ? (
                 <div className="mt-4 space-y-2 ">
-                  <label className="block font-medium text-gray-700">
+                  {/* <label className="block font-medium text-gray-700">
                     New Message Template
-                  </label>
+                  </label> */}
                   <textarea
                     rows="3"
                     className="w-full border border-gray-300 rounded px-3 py-2 shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
