@@ -284,20 +284,28 @@ export default function MessageWrapper({
                   </div>
                 </div>
               ) : (
-                <div className="flex flex-wrap gap-4 h-[40vh]  overflow-y-auto">
-                  {prevMessages.map((item, i) => (
-                    <React.Fragment key={i}>
-                      <PrevMessageCard
-                        item={item}
-                        handleChange={handleChange}
-                        copied={copied}
-                        handleCopy={handleCopy}
-                        handleDelete={handleDelete}
-                        deleteMsgLoading={deleteMsgLoading}
-                      />
-                    </React.Fragment>
-                  ))}
-                </div>
+                <>
+                  {prevMessages?.length === 0 ? (
+                    <div className="text-gray-500 text-center mt-10">
+                      No templates saved yet.
+                    </div>
+                  ) : (
+                    <div className="flex flex-wrap gap-4 h-[40vh]  overflow-y-auto">
+                      {prevMessages.map((item, i) => (
+                        <React.Fragment key={i}>
+                          <PrevMessageCard
+                            item={item}
+                            handleChange={handleChange}
+                            copied={copied}
+                            handleCopy={handleCopy}
+                            handleDelete={handleDelete}
+                            deleteMsgLoading={deleteMsgLoading}
+                          />
+                        </React.Fragment>
+                      ))}
+                    </div>
+                  )}
+                </>
               )}
             </div>
           </div>
