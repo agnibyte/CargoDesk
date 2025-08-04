@@ -506,12 +506,12 @@ export default function MessageWrapper({
       >
         <>
           <div className="flex justify-between items-center px-4 pt-2 pb-4 border-b-1 border-gray-200">
-            <h2 className="text-lg font-semibold text-gray-800">
+            <h2 className="font-semibold text-gray-800">
               Saved Message Templates
             </h2>
             <button
               type="button"
-              className={`${commonStyle.commonButtonOutline} transition-all duration-200`}
+              className={`${commonStyle.commonButtonOutline} text-sm transition-all duration-200`}
               onClick={() => setShowAddMsgTemplet(!showAddMsgTemplet)}
             >
               {showAddMsgTemplet ? "Cancel" : "Add New"}
