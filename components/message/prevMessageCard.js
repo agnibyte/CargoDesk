@@ -1,40 +1,70 @@
 import React from "react";
 import { LuCopy, LuCopyCheck } from "react-icons/lu";
-import commonStyle from "@/styles/common/common.module.scss";
-import msgStyles from "@/styles/messageStyle.module.scss";
 import { BsPlusCircle } from "react-icons/bs";
+import { ImBin } from "react-icons/im";
+import { FiEdit } from "react-icons/fi";
 
 export default function PrevMessageCard({
   handleChange,
   item,
   copied,
   handleCopy,
+  handleDelete,
+  deleteMsgLoading,
 }) {
   return (
     <div className="relative w-full lg:w-[48%] bg-white shadow-md rounded-lg p-4 border border-gray-200 h-min">
-      {/* Buttons */}
-      <div className="absolute top-2 right-2 flex gap-2">
-        <div
+      <div className="absolute top-2 right-2 flex flex-wrap items-center gap-2">
+        {/* Use */}
+        <button
           onClick={() => handleChange("message", item.message)}
-          className={msgStyles.useBtn}
-        >
-          <BsPlusCircle className="text-gray-100" />
-          Use
-        </div>
-        <div
-          onClick={() => handleCopy(item)}
-          className="text-xs bg-blue-200 text-gray-800 px-2 py-1 rounded hover:bg-blue-300 cursor-pointer "
+          className="flex items-center gap-1 text-xs bg-green-200 text-green-900 px-2 py-1 rounded-md hover:bg-green-300 transition"
           type="button"
         >
-          <span className="flex items-center gap-1">
-            {copied == item.id ? (
-              <LuCopyCheck className="text-green-500" />
-            ) : (
-              <LuCopy className="text-yellow-800" />
-            )}
-            {copied == item.id ? " Copied" : " Copy"}
-          </span>
-        </div>
+          <BsPlusCircle size={14} />
+          Use
+        </button>
+
+        {/* Copy */}
+        <button
+          onClick={() => handleCopy(item)}
+          className="flex items-center gap-1 text-xs bg-blue-200 text-blue-900 px-2 py-1 rounded-md hover:bg-blue-300 transition"
+          type="button"
+        >
+          {copied == item.id ? (
+            <LuCopyCheck
+              className="text-green-700"
+              size={14}
+            />
+          ) : (
+            <LuCopy
+              className="text-blue-800"
+              size={14}
+            />
+          )}
+          {copied == item.id ? "Copied" : "Copy"}
+        </button>
+
+        {/* Edit */}
+        {/* <button
+          onClick={() => handleChange("message", item.message)}
+          className="flex items-center gap-1 text-xs bg-yellow-200 text-yellow-900 px-2 py-1 rounded-md hover:bg-yellow-300 transition"
+          type="button"
+
+        >
+          <FiEdit size={14} />
+          Edit
+        </button> */}
+
+        {/* Delete */}
+        <button
+          onClick={() => handleDelete(item)}
+          className="flex items-center gap-1 text-xs bg-red-200 text-red-900 px-2 py-1 rounded-md hover:bg-red-300 transition"
+          type="button"
+        >
+          <ImBin size={14} />
+          {deleteMsgLoading ? "Deleting..." : "Delete"}
+        </button>
       </div>
 
       {/* Message Content */}

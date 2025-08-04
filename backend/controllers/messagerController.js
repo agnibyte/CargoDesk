@@ -2,6 +2,7 @@
 import { Twilio } from "twilio";
 import {
   addNewMessageTemplateModel,
+  deleteMessageTemplateModel,
   getUserMessageTemplatesModel,
 } from "../models/messangerModel";
 
@@ -95,6 +96,28 @@ export function getUserMessageTemplates(userId) {
     };
 
     getUserMessageTemplatesModel(userId)
+      .then((result) => {
+        if (result.status) {
+          resolve(result);
+        } else {
+          response.message = result.message;
+          resolve(response);
+        }
+      })
+      .catch((error) => {
+        reject(error);
+      });
+  });
+}
+export function deleteMessageTemplates(request) {
+  return new Promise((resolve, reject) => {
+    const response = {
+      status: false,
+    };
+    const userId = request.body.id;
+    const msgId = request.body.msgId;
+
+    deleteMessageTemplateModel(userId, msgId)
       .then((result) => {
         if (result.status) {
           resolve(result);

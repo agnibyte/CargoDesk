@@ -8,6 +8,7 @@ export const internalList = {
   SEND_SMS: "/api/sendSms",
   SEND_MESSAGE: "/api/sendMessage",
   ADD_MSG_TEMPLATE: "/api/message/add-template",
+  DELETE_MSG_TEMPLATE: "/api/message/delete-template",
 
   // login api
   VERIFY_USER: "/api/user/verify-user",

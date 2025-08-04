@@ -58,3 +58,35 @@ export function getUserMessageTemplatesModel(userId) {
       });
   });
 }
+
+export function deleteMessageTemplateModel(userId, templateId) {
+  return new Promise((resolve, reject) => {
+    const deleteQuery = `
+      DELETE FROM message_templates 
+      WHERE id = ? AND userId = ? 
+    `;
+
+    executeQuery(deleteQuery, [templateId, userId])
+      .then((result) => {
+        if (result.affectedRows > 0) {
+          resolve({
+            status: true,
+            message: "Message template deleted successfully",
+          });
+        } else {
+          resolve({
+            status: false,
+            message: "Message template not found or already deleted",
+          });
+        }
+      })
+      .catch((err) => {
+        console.error("Error deleting message template:", err);
+        reject({
+          status: false,
+          message: "Database error while deleting template",
+          error: err.sqlMessage || err.message,
+        });
+      });
+  });
+}

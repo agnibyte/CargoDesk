@@ -18,6 +18,8 @@ export default function MessageWrapper({
 }) {
   const [contactsList] = useState(contacts);
   const [groupsList] = useState(groups); // test data
+  const [prevMessages, setPrevMessages] = useState(savedTemplates);
+  const [deleteMsgLoading, setDeleteMsgLoading] = useState(false);
 
   const {
     register,
@@ -164,22 +166,6 @@ export default function MessageWrapper({
     // onChange && onChange(type); // pass to parent if needed
   };
 
-  // const savedTemplates = [
-  //   { id: "01", message: "Hello! Just checking in with you." },
-  //   { id: "02", message: "Don't forget our meeting at 3 PM." },
-  //   { id: "03", message: "Here's the update you requested." },
-  //   { id: "03", message: "Here's the update you requested." },
-  //   { id: "03", message: "Here's the update you requested." },
-  //   { id: "03", message: "Here's the update you requested." },
-  //   { id: "03", message: "Here's the update you requested." },
-  //   { id: "03", message: "Here's the update you requested." },
-  //   { id: "04", message: "Let me know your availability." },
-  //   { id: "04", message: "Let me know your availability." },
-  //   { id: "04", message: "Let me know your availability." },
-  //   { id: "04", message: "Let me know your availability." },
-  //   { id: "04", message: "Let me know your availability." },
-  // ];
-
   const handleCopy = (item) => {
     navigator.clipboard.writeText(item.message);
     setCopied(item.id);
@@ -205,6 +191,21 @@ export default function MessageWrapper({
         };
       }
     });
+  };
+
+  const handleDelete = async (msg) => {
+    const payload = { id: pageData.user.userId, msgId: msg.id };
+    setDeleteMsgLoading(true);
+
+    try {
+      const response = await postApiData("DELETE_MSG_TEMPLATE", payload);
+      if (response.status) {
+        setPrevMessages((prev) => prev.filter((m) => m.id !== msg.id));
+      } else {
+      }
+    } catch (err) {
+      console.error("Message sending failed", err);
+    }
   };
 
   return (
@@ -284,13 +285,15 @@ export default function MessageWrapper({
                 </div>
               ) : (
                 <div className="flex flex-wrap gap-4 h-[40vh]  overflow-y-auto">
-                  {savedTemplates.map((item, i) => (
+                  {prevMessages.map((item, i) => (
                     <React.Fragment key={i}>
                       <PrevMessageCard
                         item={item}
                         handleChange={handleChange}
                         copied={copied}
                         handleCopy={handleCopy}
+                        handleDelete={handleDelete}
+                        deleteMsgLoading={deleteMsgLoading}
                       />
                     </React.Fragment>
                   ))}
@@ -530,19 +533,21 @@ export default function MessageWrapper({
             </div>
           ) : (
             <div className="p-4 mt-4">
-              {savedTemplates?.length === 0 ? (
+              {prevMessages?.length === 0 ? (
                 <div className="text-gray-500 text-center mt-10">
                   No templates saved yet.
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:h-[60vh] overflow-y-auto pr-2">
-                  {savedTemplates.map((item, i) => (
+                  {prevMessages.map((item, i) => (
                     <PrevMessageCard
                       key={i}
                       item={item}
                       handleChange={handleChange}
                       copied={copied}
                       handleCopy={handleCopy}
+                      handleDelete={handleDelete}
+                      deleteMsgLoading={deleteMsgLoading}
                     />
                   ))}
                 </div>
