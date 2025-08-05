@@ -9,6 +9,7 @@ import GoogleContacts from "./googleContacts";
 
 import { RiSendPlaneFill } from "react-icons/ri";
 import Link from "next/link";
+import { ImSpinner9 } from "react-icons/im";
 
 export default function MessageWrapper({
   pageData,
@@ -67,8 +68,8 @@ export default function MessageWrapper({
       setSavedMsgTemplets((prev) => [newTemplate, ...prev]); // or update your template state if dynamic
       setNewTemplateText("");
     } else {
-      setAddMsgLoading(false);
     }
+    setAddMsgLoading(false);
   };
 
   const prevTemlateHeading = showAddMsgTemplet
@@ -218,6 +219,7 @@ export default function MessageWrapper({
             <div className=" flex items-center justify-between">
               <h3 className={styles.heading}>Message</h3>
               <button
+                type="button"
                 className=" md:hidden relative inline-flex items-center justify-center p-0.5 mb-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-green-400 to-blue-600 group-hover:from-green-400 group-hover:to-blue-600 hover:text-white dark:text-white focus:ring-4 focus:outline-none focus:ring-green-200 dark:focus:ring-green-800"
                 onClick={() => setPrevTemplatePopup(true)}
               >
@@ -278,7 +280,14 @@ export default function MessageWrapper({
                       onClick={handleSaveTemplate}
                       disabled={!newTemplateText.trim()}
                     >
-                      Save Template
+                      {addMsgLoading ? (
+                        <span className="flex items-center gap-2">
+                          <ImSpinner9 className="animate-spin" />
+                          Please wait
+                        </span>
+                      ) : (
+                        "Save Template"
+                      )}
                     </button>
                   </div>
                 </div>
