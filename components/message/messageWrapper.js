@@ -298,7 +298,7 @@ export default function MessageWrapper({
                       No templates saved yet.
                     </div>
                   ) : (
-                    <div className="flex flex-wrap gap-4 h-[40vh]  overflow-y-auto">
+                    <div className="flex flex-wrap content-start gap-4 h-[40vh]  overflow-y-auto">
                       {savedMsgTemplets.map((item, i) => (
                         <React.Fragment key={i}>
                           <PrevMessageCard
@@ -548,13 +548,13 @@ export default function MessageWrapper({
               </div>
             </div>
           ) : (
-            <div className="p-4 mt-4">
+            <div className="p-4">
               {savedMsgTemplets?.length === 0 ? (
                 <div className="text-gray-500 text-center mt-10">
                   No templates saved yet.
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:h-[60vh] overflow-y-auto pr-2">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:h-[60vh] overflow-y-auto">
                   {savedMsgTemplets.map((item, i) => (
                     <PrevMessageCard
                       key={i}
