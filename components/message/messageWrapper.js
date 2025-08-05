@@ -18,7 +18,6 @@ export default function MessageWrapper({
 }) {
   const [contactsList] = useState(contacts);
   const [groupsList] = useState(groups); // test data
-  const [prevMessages, setPrevMessages] = useState(savedTemplates);
   const [deleteMsgLoading, setDeleteMsgLoading] = useState(false);
 
   const {
@@ -42,7 +41,7 @@ export default function MessageWrapper({
   const [prevTemplatePoup, setPrevTemplatePopup] = useState(false);
   const [sendMsgApiError, setSendMsgApiError] = useState("");
   const [showAddMsgTemplet, setShowAddMsgTemplet] = useState(false);
-  const [savedMsgTemplets, setSavedMsgTemplets] = useState([]);
+  const [savedMsgTemplets, setSavedMsgTemplets] = useState(savedTemplates);
   const [newTemplateText, setNewTemplateText] = useState("");
   const [addMsgLoading, setAddMsgLoading] = useState(false);
 
@@ -200,7 +199,7 @@ export default function MessageWrapper({
     try {
       const response = await postApiData("DELETE_MSG_TEMPLATE", payload);
       if (response.status) {
-        setPrevMessages((prev) => prev.filter((m) => m.id !== msg.id));
+        setSavedMsgTemplets((prev) => prev.filter((m) => m.id !== msg.id));
       } else {
       }
     } catch (err) {
@@ -285,13 +284,13 @@ export default function MessageWrapper({
                 </div>
               ) : (
                 <>
-                  {prevMessages?.length === 0 ? (
+                  {savedMsgTemplets?.length === 0 ? (
                     <div className="text-gray-500 text-center mt-10">
                       No templates saved yet.
                     </div>
                   ) : (
                     <div className="flex flex-wrap gap-4 h-[40vh]  overflow-y-auto">
-                      {prevMessages.map((item, i) => (
+                      {savedMsgTemplets.map((item, i) => (
                         <React.Fragment key={i}>
                           <PrevMessageCard
                             item={item}
@@ -541,13 +540,13 @@ export default function MessageWrapper({
             </div>
           ) : (
             <div className="p-4 mt-4">
-              {prevMessages?.length === 0 ? (
+              {savedMsgTemplets?.length === 0 ? (
                 <div className="text-gray-500 text-center mt-10">
                   No templates saved yet.
                 </div>
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:h-[60vh] overflow-y-auto pr-2">
-                  {prevMessages.map((item, i) => (
+                  {savedMsgTemplets.map((item, i) => (
                     <PrevMessageCard
                       key={i}
                       item={item}
