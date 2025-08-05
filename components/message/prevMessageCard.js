@@ -45,18 +45,6 @@ export default function PrevMessageCard({
           {copied == item.id ? "Copied" : "Copy"}
         </button>
 
-        {/* Edit */}
-        {/* <button
-          onClick={() => handleChange("message", item.message)}
-          className="flex items-center gap-1 text-xs bg-yellow-200 text-yellow-900 px-2 py-1 rounded-md hover:bg-yellow-300 transition"
-          type="button"
-
-        >
-          <FiEdit size={14} />
-          Edit
-        </button> */}
-
-        {/* Delete */}
         <button
           onClick={() => handleDelete(item)}
           className="flex items-center gap-1 text-xs bg-red-200 text-red-900 px-2 py-1 rounded-md hover:bg-red-300 transition"
@@ -68,7 +56,7 @@ export default function PrevMessageCard({
       </div>
 
       {/* Message Content */}
-      <p className="text-gray-800 text-sm whitespace-pre-wrap mt-6">
+      <p className="text-gray-800 text-sm mt-6 break-words whitespace-pre-wrap">
         {item.message}
       </p>
     </div>

@@ -91,6 +91,7 @@ export default function MessageWrapper({
     setValue(field, value, { shouldValidate: true });
 
     if (field === "contacts" && value.length > 0) setContactsError(false);
+    setPrevTemplatePopup(false);
   };
 
   const handleCheckboxChange = (contact) => {
@@ -172,6 +173,7 @@ export default function MessageWrapper({
     setTimeout(() => {
       setCopied(false);
     }, 2000);
+    // setPrevTemplatePopup(false);
   };
 
   const handleGroupClick = (group) => {
@@ -206,6 +208,7 @@ export default function MessageWrapper({
     } catch (err) {
       console.error("Message sending failed", err);
     }
+    // setPrevTemplatePopup(false);
   };
 
   return (
@@ -220,10 +223,10 @@ export default function MessageWrapper({
               <h3 className={styles.heading}>Message</h3>
               <button
                 type="button"
-                className=" md:hidden relative inline-flex items-center justify-center p-0.5 mb-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-green-400 to-blue-600 group-hover:from-green-400 group-hover:to-blue-600 hover:text-white dark:text-white focus:ring-4 focus:outline-none focus:ring-green-200 dark:focus:ring-green-800"
+                className=" md:hidden relative inline-flex items-center justify-center p-0.5 mb-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-green-400 to-blue-600 group-hover:from-green-400 group-hover:to-blue-600 hover:text-white dark:text-white"
                 onClick={() => setPrevTemplatePopup(true)}
               >
-                <span className="relative px-5 py-2 transition-all ease-in duration-75 bg-white text-blue-600  rounded-md group-hover:bg-transparent group-hover:dark:bg-transparent">
+                <span className="relative px-5 py-2 transition-all ease-in duration-75 bg-white text-blue-600  rounded-md group-hover:bg-transparent group-hover:dark:bg-transparent group-hover:text-white">
                   {prevTemlateHeading}
                 </span>
               </button>
@@ -543,7 +546,14 @@ export default function MessageWrapper({
                   onClick={handleSaveTemplate}
                   disabled={!newTemplateText.trim()}
                 >
-                  Save Template
+                  {addMsgLoading ? (
+                    <span className="flex items-center gap-2">
+                      <ImSpinner9 className="animate-spin" />
+                      Please wait
+                    </span>
+                  ) : (
+                    "Save Template"
+                  )}
                 </button>
               </div>
             </div>
@@ -554,7 +564,7 @@ export default function MessageWrapper({
                   No templates saved yet.
                 </div>
               ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 md:h-[60vh] overflow-y-auto">
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 h-[65vh] md:h-[60vh] overflow-y-auto">
                   {savedMsgTemplets.map((item, i) => (
                     <PrevMessageCard
                       key={i}
