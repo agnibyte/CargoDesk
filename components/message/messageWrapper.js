@@ -59,13 +59,12 @@ export default function MessageWrapper({
 
     const response = await postApiData("ADD_MSG_TEMPLATE", newTemplate);
     if (response.status) {
+      setNewTemplateText("");
+      setShowAddMsgTemplet(false);
       setSavedMsgTemplets((prev) => [
         { ...newTemplate, id: response.templateId },
         ...prev,
-      ]); // or update your template state if dynamic
-      setNewTemplateText("");
-      setShowAddMsgTemplet(false);
-      setSavedMsgTemplets((prev) => [newTemplate, ...prev]); // or update your template state if dynamic
+      ]);
       setNewTemplateText("");
     } else {
     }
