@@ -19,7 +19,6 @@ export default function MessageWrapper({
 }) {
   const [contactsList] = useState(contacts);
   const [groupsList] = useState(groups); // test data
-  const [deleteMsgLoading, setDeleteMsgLoading] = useState(false);
 
   const {
     register,
@@ -45,6 +44,8 @@ export default function MessageWrapper({
   const [savedMsgTemplets, setSavedMsgTemplets] = useState(savedTemplates);
   const [newTemplateText, setNewTemplateText] = useState("");
   const [addMsgLoading, setAddMsgLoading] = useState(false);
+  const [deleteMsgLoading, setDeleteMsgLoading] = useState(false);
+  const [toDelete, setToDelete] = useState(false);
 
   const handleSaveTemplate = async () => {
     if (!newTemplateText.trim()) return;
@@ -195,6 +196,7 @@ export default function MessageWrapper({
   };
 
   const handleDelete = async (msg) => {
+    setToDelete(msg);
     const payload = { id: pageData.user.userId, msgId: msg.id };
     setDeleteMsgLoading(true);
 
@@ -202,6 +204,8 @@ export default function MessageWrapper({
       const response = await postApiData("DELETE_MSG_TEMPLATE", payload);
       if (response.status) {
         setSavedMsgTemplets((prev) => prev.filter((m) => m.id !== msg.id));
+        setDeleteMsgLoading(false);
+        setToDelete(false);
       } else {
       }
     } catch (err) {
@@ -310,6 +314,7 @@ export default function MessageWrapper({
                             handleCopy={handleCopy}
                             handleDelete={handleDelete}
                             deleteMsgLoading={deleteMsgLoading}
+                            toDelete={toDelete}
                           />
                         </React.Fragment>
                       ))}
@@ -573,6 +578,7 @@ export default function MessageWrapper({
                       handleCopy={handleCopy}
                       handleDelete={handleDelete}
                       deleteMsgLoading={deleteMsgLoading}
+                      toDelete={toDelete}
                     />
                   ))}
                 </div>
