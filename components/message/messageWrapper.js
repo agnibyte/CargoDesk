@@ -46,6 +46,7 @@ export default function MessageWrapper({
   const [addMsgLoading, setAddMsgLoading] = useState(false);
   const [deleteMsgLoading, setDeleteMsgLoading] = useState(false);
   const [toDelete, setToDelete] = useState(false);
+  const [isConfirm, setIsConfirm] = useState(false);
 
   const handleSaveTemplate = async () => {
     if (!newTemplateText.trim()) return;
@@ -315,6 +316,8 @@ export default function MessageWrapper({
                             handleDelete={handleDelete}
                             deleteMsgLoading={deleteMsgLoading}
                             toDelete={toDelete}
+                            setIsConfirm={setIsConfirm}
+                            isConfirm={isConfirm}
                           />
                         </React.Fragment>
                       ))}
@@ -579,6 +582,8 @@ export default function MessageWrapper({
                       handleDelete={handleDelete}
                       deleteMsgLoading={deleteMsgLoading}
                       toDelete={toDelete}
+                      setIsConfirm={setIsConfirm}
+                      isConfirm={isConfirm}
                     />
                   ))}
                 </div>
