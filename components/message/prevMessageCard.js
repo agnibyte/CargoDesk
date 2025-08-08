@@ -15,8 +15,10 @@ export default function PrevMessageCard({
   isConfirm,
   setIsConfirm,
 }) {
-  const handleConfirm = () => {
-    setIsConfirm(!isConfirm);
+  const handleConfirm = (toDelete = false) => {
+    if (!toDelete) {
+      setIsConfirm({});
+    }
   };
 
   const onClickDelete = (item) => {
@@ -31,46 +33,60 @@ export default function PrevMessageCard({
       }`}
     >
       {isConfirm.id != item.id ? (
-        <div className="absolute top-2 right-2 flex flex-wrap items-center gap-2">
-          {/* Use */}
-          <button
-            onClick={() => handleChange("message", item.message)}
-            className="flex items-center gap-1 text-xs bg-green-200 text-green-900 px-2 py-1 rounded-md hover:bg-green-300 transition"
-            type="button"
-          >
-            <BsPlusCircle size={14} />
-            Use
-          </button>
+        <>
+          <div className="absolute top-2 right-2 flex flex-wrap items-center gap-2">
+            {/* Use */}
+            <button
+              onClick={() => {
+                handleChange("message", item.message);
+                handleConfirm(false);
+              }}
+              className="flex items-center gap-1 text-xs bg-green-200 text-green-900 px-2 py-1 rounded-md hover:bg-green-300 transition"
+              type="button"
+            >
+              <BsPlusCircle size={14} />
+              Use
+            </button>
 
-          {/* Copy */}
-          <button
-            onClick={() => handleCopy(item)}
-            className="flex items-center gap-1 text-xs bg-blue-200 text-blue-900 px-2 py-1 rounded-md hover:bg-blue-300 transition"
-            type="button"
-          >
-            {copied == item.id ? (
-              <LuCopyCheck
-                className="text-green-700"
-                size={14}
-              />
-            ) : (
-              <LuCopy
-                className="text-blue-800"
-                size={14}
-              />
-            )}
-            {copied == item.id ? "Copied" : "Copy"}
-          </button>
+            {/* Copy */}
+            <button
+              onClick={() => {
+                handleCopy(item);
+                handleConfirm(false);
+              }}
+              className="flex items-center gap-1 text-xs bg-blue-200 text-blue-900 px-2 py-1 rounded-md hover:bg-blue-300 transition"
+              type="button"
+            >
+              {copied == item.id ? (
+                <LuCopyCheck
+                  className="text-green-700"
+                  size={14}
+                />
+              ) : (
+                <LuCopy
+                  className="text-blue-800"
+                  size={14}
+                />
+              )}
+              {copied == item.id ? "Copied" : "Copy"}
+            </button>
 
-          <button
-            onClick={() => onClickDelete(item)}
-            className="flex items-center gap-1 text-xs bg-red-200 text-red-900 px-2 py-1 rounded-md hover:bg-red-300 transition"
-            type="button"
-          >
-            <ImBin size={14} />
-            {deleteMsgLoading && toDelete == item.id ? "Deleting..." : "Delete"}
-          </button>
-        </div>
+            <button
+              onClick={() => onClickDelete(item)}
+              className="flex items-center gap-1 text-xs bg-red-200 text-red-900 px-2 py-1 rounded-md hover:bg-red-300 transition"
+              type="button"
+            >
+              <ImBin size={14} />
+              {deleteMsgLoading && toDelete == item.id
+                ? "Deleting..."
+                : "Delete"}
+            </button>
+          </div>
+          {/* Message Content */}
+          <p className="text-gray-800 text-sm m-3 mt-12 break-words whitespace-pre-wrap">
+            {item.message}
+          </p>{" "}
+        </>
       ) : (
         <div className="flex justify-between items-center relative z-10 text-white m-3">
           <span className="font-semibold text-sm">
@@ -85,18 +101,13 @@ export default function PrevMessageCard({
             </button>
             <button
               className="bg-white text-gray-600 px-3 py-1 rounded text-sm font-semibold"
-              onClick={() => setIsConfirm({})}
+              onClick={() => handleConfirm(false)}
             >
               No
             </button>
           </div>
         </div>
       )}
-
-      {/* Message Content */}
-      <p className="text-gray-800 text-sm m-3 mt-12 break-words whitespace-pre-wrap">
-        {item.message}
-      </p>
     </div>
   );
 }
