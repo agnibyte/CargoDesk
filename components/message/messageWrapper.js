@@ -340,7 +340,7 @@ export default function MessageWrapper({
           <div className={styles.contactSection}>
             <Link
               href="/messager/manage-contacts"
-              className={styles.importButton}
+              className={`${commonStyle.commonButtonOutline} w-full text-center mb-3 !p-2 transition-all duration-200`}
             >
               Manage Contacts
             </Link>
