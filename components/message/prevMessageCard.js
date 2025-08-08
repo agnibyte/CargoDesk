@@ -74,7 +74,7 @@ export default function PrevMessageCard({
       ) : (
         <div className="flex justify-between items-center relative z-10 text-white m-3">
           <span className="font-semibold text-sm">
-            Are you sure want delete this contact?
+            Are you sure want delete this template?
           </span>
           <div className="flex gap-2 ml-4">
             <button
