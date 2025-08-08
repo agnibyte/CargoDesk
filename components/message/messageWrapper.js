@@ -215,6 +215,23 @@ export default function MessageWrapper({
     // setPrevTemplatePopup(false);
   };
 
+  const renderPrevMsgCard = (item, i) => {
+    return (
+      <PrevMessageCard
+        key={i}
+        item={item}
+        handleChange={handleChange}
+        copied={copied}
+        handleCopy={handleCopy}
+        handleDelete={handleDelete}
+        deleteMsgLoading={deleteMsgLoading}
+        toDelete={toDelete}
+        setIsConfirm={setIsConfirm}
+        isConfirm={isConfirm}
+      />
+    );
+  };
+
   return (
     <>
       <form
@@ -308,17 +325,7 @@ export default function MessageWrapper({
                     <div className="flex flex-wrap content-start gap-4 h-[40vh]  overflow-y-auto">
                       {savedMsgTemplets.map((item, i) => (
                         <React.Fragment key={i}>
-                          <PrevMessageCard
-                            item={item}
-                            handleChange={handleChange}
-                            copied={copied}
-                            handleCopy={handleCopy}
-                            handleDelete={handleDelete}
-                            deleteMsgLoading={deleteMsgLoading}
-                            toDelete={toDelete}
-                            setIsConfirm={setIsConfirm}
-                            isConfirm={isConfirm}
-                          />
+                          {renderPrevMsgCard(item, i)}
                         </React.Fragment>
                       ))}
                     </div>
@@ -573,18 +580,7 @@ export default function MessageWrapper({
               ) : (
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 h-[65vh] md:h-[60vh] overflow-y-auto">
                   {savedMsgTemplets.map((item, i) => (
-                    <PrevMessageCard
-                      key={i}
-                      item={item}
-                      handleChange={handleChange}
-                      copied={copied}
-                      handleCopy={handleCopy}
-                      handleDelete={handleDelete}
-                      deleteMsgLoading={deleteMsgLoading}
-                      toDelete={toDelete}
-                      setIsConfirm={setIsConfirm}
-                      isConfirm={isConfirm}
-                    />
+                    <>{renderPrevMsgCard(item, i)}</>
                   ))}
                 </div>
               )}
