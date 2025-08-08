@@ -322,7 +322,7 @@ export default function MessageWrapper({
                       No templates saved yet.
                     </div>
                   ) : (
-                    <div className="flex flex-wrap content-start gap-4 h-[40vh]  overflow-y-auto">
+                    <div className="flex flex-wrap content-start gap-4 h-[20vh]  overflow-y-auto">
                       {savedMsgTemplets.map((item, i) => (
                         <React.Fragment key={i}>
                           {renderPrevMsgCard(item, i)}
@@ -527,7 +527,7 @@ export default function MessageWrapper({
         setModalOpen={setPrevTemplatePopup}
         backDrop={false}
         // modalTitle={prevTemlateHeading}
-        modalSize="w-11/12 md:w-[50%] h-[75vh]"
+        modalSize="w-11/12 md:w-[50%] h-[82vh]"
       >
         <>
           <div className="flex justify-between items-center px-4 pt-2 pb-4 border-b-1 border-gray-200">
