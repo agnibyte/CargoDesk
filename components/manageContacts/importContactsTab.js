@@ -13,6 +13,8 @@ import { BsPersonVcard } from "react-icons/bs";
 import Image from "next/image";
 import ContactsPreviewList from "../message/import/contactsPreviewList";
 import GoogleContacts from "../message/googleContacts";
+import toast from "react-hot-toast";
+import { showToast } from "@/utilities/toastService";
 
 const tabs = [
   { id: "google", label: "Google" },
@@ -25,13 +27,32 @@ export default function ImportContactsTab({ pageData, setContactsList }) {
   const [activeTab, setActiveTab] = useState(tabs[0].id);
   const [apiSuccess, setApiSuccess] = useState(false);
 
+  const handleClick = (type = "success") => {
+    showToast({
+      message: "Saved successfully!",
+      type,
+      position: "bottom-right",
+    });
+  };
+
   return (
     <>
       <div className="mx-auto px-4 py-6 bg-white shadow-xl min-h-[60vh]">
         {/* <h2 className="text-2xl font-medium mb-6 text-gray-800">
           Import Contacts
         </h2> */}
-
+        <button
+          className="bg-blue-500 text-white px-4 py-2 rounded"
+          onClick={() => handleClick("success")}
+        >
+          Show Toast
+        </button>
+        <button
+          className="bg-red-500 text-white px-4 py-2 rounded"
+          onClick={() => handleClick("error")}
+        >
+          Show Error Toast
+        </button>
         <div className="flex flex-col md:flex-row gap-6">
           {/* Sidebar Tabs */}
           <div className="flex md:flex-col justify-start gap-2">
