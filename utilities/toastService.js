@@ -43,9 +43,6 @@ export const showToast = ({
       ...iconTheme,
     },
   };
-  if (type === "loading") {
-    return toast.loading(message, { ...options });
-  }
 
   if (type === "success") {
     return toast.success(message, { ...options });
