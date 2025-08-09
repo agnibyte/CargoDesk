@@ -10,6 +10,7 @@ import GoogleContacts from "./googleContacts";
 import { RiSendPlaneFill } from "react-icons/ri";
 import Link from "next/link";
 import { ImSpinner9 } from "react-icons/im";
+import { showToast } from "@/utilities/toastService";
 
 export default function MessageWrapper({
   pageData,
@@ -68,7 +69,15 @@ export default function MessageWrapper({
         ...prev,
       ]);
       setNewTemplateText("");
+      showToast({
+        message: response.message,
+        type: "success",
+      });
     } else {
+      showToast({
+        message: response.message,
+        type: "error",
+      });
     }
     setAddMsgLoading(false);
   };
@@ -91,7 +100,9 @@ export default function MessageWrapper({
     setFormData((prev) => ({ ...prev, [field]: value }));
     setValue(field, value, { shouldValidate: true });
 
-    if (field === "contacts" && value.length > 0) setContactsError(false);
+    if (field === "contacts" && value.length > 0) {
+      setContactsError(false);
+    }
     setPrevTemplatePopup(false);
   };
 
@@ -137,8 +148,12 @@ export default function MessageWrapper({
       ),
     ].filter(Boolean); // remove nulls just in case
     if (contactNumbers.length === 0) {
-      setContactsError(true);
-      setContactsErrorMsg("No contacts found in selection.");
+      // setContactsError(true);
+      // setContactsErrorMsg("No contacts found in selection.");
+      showToast({
+        message: "No contacts found in selection.",
+        type: "error",
+      });
       setLoading(false);
 
       return;
@@ -155,7 +170,11 @@ export default function MessageWrapper({
       if (response.status) {
         setSendMsgApiError("");
       } else {
-        setSendMsgApiError(response.message);
+        // setSendMsgApiError(response.message);
+        showToast({
+          message: response.message,
+          type: "error",
+        });
       }
     } catch (err) {
       console.error("Message sending failed", err);

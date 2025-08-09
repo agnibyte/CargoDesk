@@ -4,6 +4,7 @@ import formStyle from "@/styles/formStyles.module.scss";
 import { getConstant } from "@/utilities/utils";
 import { postApiData } from "@/utilities/services/apiService";
 import commonStyle from "@/styles/common/common.module.scss";
+import { showToast } from "@/utilities/toastService";
 
 export default function ManualAddForm({
   pageData,
@@ -77,21 +78,33 @@ export default function ManualAddForm({
 
       const response = await postApiData("ADD_NEW_CONTACT", payload);
       if (response.status) {
-        setSuccessMsg(response.message);
+        // setSuccessMsg(response.message);
+        showToast({
+          message: response.message,
+          type: "success",
+        });
         setContactsList((prev) => [...prev, payload]);
-        setTimeout(() => {
-          setSuccessMsg("");
-        }, 3000);
+        // setTimeout(() => {
+        //   setSuccessMsg("");
+        // }, 3000);
 
         reset();
         setFormData(defaultFormData);
       } else {
-        setApiError(response.message);
+        // setApiError(response.message);
+        showToast({
+          message: response.message,
+          type: "error",
+        });
       }
       // setContacts((prev) => [...prev, formData]);
       // console.log("Submitted Data:", formData);
     } catch (error) {
-      setApiError("Something went wrong. Please try again.");
+      // setApiError("Something went wrong. Please try again.");
+      showToast({
+        message: "Something went wrong. Please try again.",
+        type: "error",
+      });
     } finally {
       setLoading(false);
     }
@@ -110,10 +123,14 @@ export default function ManualAddForm({
 
       const response = await postApiData("UPDATE_CONTACT", editPayload);
       if (response.status) {
-        setSuccessMsg(response.message);
-        setTimeout(() => {
-          setSuccessMsg("");
-        }, 3000);
+        // setSuccessMsg(response.message);
+        // setTimeout(() => {
+        //   setSuccessMsg("");
+        // }, 3000);
+        showToast({
+          message: response.message,
+          type: "success",
+        });
 
         reset();
         setFormData(defaultFormData);
@@ -124,21 +141,29 @@ export default function ManualAddForm({
           )
         );
       } else {
-        setApiError(response.message);
+        // setApiError(response.message);
+        showToast({
+          message: response.message,
+          type: "error",
+        });
       }
       // setContacts((prev) => [...prev, formData]);
       // console.log("Submitted Data:", formData);
     } catch (error) {
       console.log("error", error);
-      setApiError("Something went wrong. Please try again.");
+      // setApiError("Something went wrong. Please try again.");
+      showToast({
+        message: "Something went wrong. Please try again.",
+        type: "error",
+      });
     } finally {
       setLoading(false);
     }
   };
   const onSubmit = (data) => {
     setLoading(true);
-    setApiError(null);
-    setSuccessMsg(null);
+    // setApiError(null);
+    // setSuccessMsg(null);
     if (isEdit) {
       editContact();
     } else addNewContact();

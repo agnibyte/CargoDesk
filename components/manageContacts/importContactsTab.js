@@ -31,7 +31,6 @@ export default function ImportContactsTab({ pageData, setContactsList }) {
     showToast({
       message: "Saved successfully!",
       type,
-      position: "bottom-right",
     });
   };
 

@@ -4,8 +4,8 @@ import toast from "react-hot-toast";
 export const showToast = ({
   message,
   type = "success", // success | error | loading | custom
-  position = "top-right",
-  duration = 3000,
+  position = "bottom-right",
+  duration = 5000,
   style = {},
   iconTheme = {},
   customRender = null, // JSX for fully custom toast
@@ -34,7 +34,7 @@ export const showToast = ({
       background: backgroundColor,
       color,
       borderRadius: "8px",
-      padding: "12px 16px",
+      padding: "12px 26px",
       ...style,
     },
     iconTheme: {

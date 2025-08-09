@@ -7,6 +7,7 @@ import { getConstant } from "@/utilities/utils";
 import { allContactsTableHeadCells } from "@/utilities/masterData";
 import ManualAddForm from "../message/import/manualAddForm";
 import { postApiData } from "@/utilities/services/apiService";
+import { showToast } from "@/utilities/toastService";
 
 export default function AllContactsTab({
   pageData,
@@ -28,7 +29,7 @@ export default function AllContactsTab({
       contacts: selected,
     };
     setDeleteLoad(true);
-    setDeleteError("");
+    // setDeleteError("");
     try {
       // Simulate API call to delete contacts
       const response = await postApiData("DELETE_BULK_CONTACTS", payload);
@@ -41,9 +42,14 @@ export default function AllContactsTab({
       }
     } catch (error) {
       console.error("Error occurred during deletion:", error);
-      setDeleteError(
-        "Error occurred while deleting contacts, Please try again later"
-      );
+      // setDeleteError(
+      //   "Error occurred while deleting contacts, Please try again later"
+      // );
+      showToast({
+        message:
+          "Error occurred while deleting contacts, Please try again later",
+        type: "error",
+      });
     }
     setDeleteLoad(false);
   };
