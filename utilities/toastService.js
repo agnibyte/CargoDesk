@@ -15,19 +15,16 @@ export const showToast = ({
   let iconPrimary = "#1c1b1b";
   let iconSecondary = "#fff";
 
-  //   primary: ,
-  //   secondary: "#ff6c47",
-
   if (type === "error") {
-    backgroundColor = "#ff6c47"; // red-500
+    backgroundColor = "#fa582f"; // red-500
     color = "#fff";
     iconPrimary = "#fff";
-    iconSecondary = "#ff6c47";
+    iconSecondary = "#fa582f";
   } else if (type === "success") {
-    backgroundColor = "#10B981"; // emerald-500
+    backgroundColor = "#05b36a";
     color = "#fff";
     iconPrimary = "#fff";
-    iconSecondary = "#10B981";
+    iconSecondary = "#05b36a";
   }
 
   const options = {
