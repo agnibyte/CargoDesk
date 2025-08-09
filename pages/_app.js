@@ -5,6 +5,7 @@ import {
   checkBotUserAgent,
   checkUserDeviceTypeByUserAgent,
 } from "@/utilities/utils";
+import { Toaster } from "react-hot-toast";
 
 export default function MyApp({ Component, pageProps, isBotAgent, isMobile }) {
   const selectLayout = (component) => {
@@ -30,6 +31,8 @@ export default function MyApp({ Component, pageProps, isBotAgent, isMobile }) {
             {...pageProps}
           />
         )}
+
+        <Toaster />
       </>
     </>
   );

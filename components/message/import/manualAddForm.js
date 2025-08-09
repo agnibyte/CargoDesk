@@ -143,6 +143,7 @@ export default function ManualAddForm({
       editContact();
     } else addNewContact();
   };
+
   return (
     <form
       className={`w-full bg-white p-5 ${
