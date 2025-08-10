@@ -4,6 +4,7 @@ import { faMicrophone, faPlusCircle } from "@fortawesome/free-solid-svg-icons";
 import { Tooltip } from "@mui/material";
 // import styles from "./inputWithVoice.module.scss";
 import styles from "@/styles/formStyles.module.scss";
+import { showToast } from "@/utilities/toastService";
 
 export const InputWithVoice = ({ label, note, setNote }) => {
   const [isListening, setIsListening] = useState(false);
@@ -11,7 +12,11 @@ export const InputWithVoice = ({ label, note, setNote }) => {
 
   const handleSpeechRecognition = () => {
     if (!("webkitSpeechRecognition" in window)) {
-      setError("Speech recognition is not supported in this browser.");
+      // setError("Speech recognition is not supported in this browser.");
+      showToast({
+        message: "Speech recognition is not supported in this browser.",
+        type: "error",
+      });
       return;
     }
 
@@ -36,7 +41,11 @@ export const InputWithVoice = ({ label, note, setNote }) => {
     };
 
     recognition.onerror = (event) => {
-      setError("Error occurred in recognition: " + event.error);
+      // setError("Error occurred in recognition: " + event.error);
+      showToast({
+        message: "Error occurred in recognition: " + event.error,
+        type: "error",
+      });
       setIsListening(false);
     };
 

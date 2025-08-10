@@ -4,8 +4,8 @@ import toast from "react-hot-toast";
 export const showToast = ({
   message,
   type = "success", // success | error | loading | custom
-  position = "top-right",
-  duration = 3000,
+  position = "bottom-right",
+  duration = 5000,
   style = {},
   iconTheme = {},
   customRender = null, // JSX for fully custom toast
@@ -15,19 +15,16 @@ export const showToast = ({
   let iconPrimary = "#1c1b1b";
   let iconSecondary = "#fff";
 
-  //   primary: ,
-  //   secondary: "#ff6c47",
-
   if (type === "error") {
-    backgroundColor = "#ff6c47"; // red-500
+    backgroundColor = "#fa582f"; // red-500
     color = "#fff";
     iconPrimary = "#fff";
-    iconSecondary = "#ff6c47";
+    iconSecondary = "#fa582f";
   } else if (type === "success") {
-    backgroundColor = "#10B981"; // emerald-500
+    backgroundColor = "#05b36a";
     color = "#fff";
     iconPrimary = "#fff";
-    iconSecondary = "#10B981";
+    iconSecondary = "#05b36a";
   }
 
   const options = {
@@ -37,7 +34,7 @@ export const showToast = ({
       background: backgroundColor,
       color,
       borderRadius: "8px",
-      padding: "12px 16px",
+      padding: "12px 26px",
       ...style,
     },
     iconTheme: {
@@ -46,9 +43,6 @@ export const showToast = ({
       ...iconTheme,
     },
   };
-  if (type === "loading") {
-    return toast.loading(message, { ...options });
-  }
 
   if (type === "success") {
     return toast.success(message, { ...options });

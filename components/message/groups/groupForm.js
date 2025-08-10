@@ -5,6 +5,7 @@ import { postApiData } from "@/utilities/services/apiService";
 import { getConstant } from "@/utilities/utils";
 import commonStyle from "@/styles/common/common.module.scss";
 import GroupMemberSelection from "./groupMemberSelection";
+import { showToast } from "@/utilities/toastService";
 
 export default function GroupForm({
   pageData,
@@ -75,8 +76,12 @@ export default function GroupForm({
       );
 
       if (response.status) {
-        setSuccessMsg(response.message);
-        setTimeout(() => setSuccessMsg(""), 3000);
+        // setSuccessMsg(response.message);
+        showToast({
+          message: response.message,
+          type: "success",
+        });
+        // setTimeout(() => setSuccessMsg(""), 3000);
         reset();
         setFormData(defaultFormData);
 
@@ -85,11 +90,19 @@ export default function GroupForm({
           { ...addNewPayload, id: response.id },
         ]);
       } else {
-        setApiError(response.message);
+        // setApiError(response.message);
+        showToast({
+          message: response.message,
+          type: "error",
+        });
       }
     } catch (error) {
       console.error("Create group error:", error);
-      setApiError("Something went wrong. Please try again.");
+      // setApiError("Something went wrong. Please try again.");
+      showToast({
+        message: "Something went wrong. Please try again.",
+        type: "error",
+      });
     } finally {
       setLoading(false);
     }
@@ -119,8 +132,12 @@ export default function GroupForm({
       );
 
       if (response.status) {
-        setSuccessMsg(response.message);
-        setTimeout(() => setSuccessMsg(""), 3000);
+        // setSuccessMsg(response.message);
+        // setTimeout(() => setSuccessMsg(""), 3000);
+        showToast({
+          message: response.message,
+          type: "success",
+        });
         reset();
         setFormData(defaultFormData);
 
@@ -133,11 +150,19 @@ export default function GroupForm({
         );
         setGroupModal(false);
       } else {
-        setApiError(response.message);
+        // setApiError(response.message);
+        showToast({
+          message: response.message,
+          type: "error",
+        });
       }
     } catch (error) {
       console.error("Update group error:", error);
-      setApiError("Something went wrong. Please try again.");
+      // setApiError("Something went wrong. Please try again.");
+      showToast({
+        message: "Something went wrong. Please try again.",
+        type: "error",
+      });
     } finally {
       setLoading(false);
     }
@@ -154,8 +179,8 @@ export default function GroupForm({
 
   const onSubmit = () => {
     setLoading(true);
-    setApiError(null);
-    setSuccessMsg(null);
+    // setApiError(null);
+    // setSuccessMsg(null);
     submitGroup();
   };
 

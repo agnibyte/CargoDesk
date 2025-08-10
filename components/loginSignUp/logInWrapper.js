@@ -4,6 +4,7 @@ import axios from "axios";
 import { loginValidation } from "@/utilities/validations/auth";
 import { postApiData } from "@/utilities/services/apiService";
 import { useRouter } from "next/router";
+import { showToast } from "@/utilities/toastService";
 
 export default function LoginWrapper() {
   const {
@@ -57,13 +58,25 @@ export default function LoginWrapper() {
       // handle auth token or redirect
       console.log("response", response);
       if (response.status) {
-        setSuccessMsg(response.message);
+        // setSuccessMsg(response.message);
+        showToast({
+          message: response.message,
+          type: "success",
+        });
         router.push("/"); // Redirect to home page after successful login
       } else {
-        setApiError(response.message);
+        // setApiError(response.message);
+        showToast({
+          message: response.message,
+          type: "error",
+        });
       }
     } catch (err) {
-      setApiError("Invalid email_id or password");
+      // setApiError("Invalid email_id or password");
+      showToast({
+        message: "Invalid email_id or password",
+        type: "error",
+      });
     } finally {
       setLoading(false);
     }

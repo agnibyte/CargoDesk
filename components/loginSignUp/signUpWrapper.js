@@ -4,6 +4,7 @@ const crypto = require("crypto");
 import { loginValidation } from "@/utilities/validations/auth";
 import { postApiData } from "@/utilities/services/apiService";
 import { hashWithSHA256 } from "@/utilities/utils";
+import { showToast } from "@/utilities/toastService";
 export default function SignUpWrapper() {
   const {
     register,
@@ -38,14 +39,26 @@ export default function SignUpWrapper() {
       const response = await postApiData("ADD_NEW_USER", newUser);
       if (response.status) {
         setSuccessMessage(response.message);
+        showToast({
+          message: response.message,
+          type: "success",
+        });
       } else {
-        setErrorMessage(response.message);
+        // setErrorMessage(response.message);
+        showToast({
+          message: response.message,
+          type: "error",
+        });
       }
       console.log("User added:", response.data);
       // reset();
     } catch (error) {
       console.error("Failed to add user:", error);
-      setErrorMessage("Failed to add user. Please try again.");
+      // setErrorMessage("Failed to add user. Please try again.");
+      showToast({
+        message: "Failed to add user. Please try again.",
+        type: "error",
+      });
     }
     setLoading(false);
   };

@@ -1,4 +1,5 @@
 import { postApiData } from "@/utilities/services/apiService";
+import { showToast } from "@/utilities/toastService";
 import { getConstant } from "@/utilities/utils";
 import React, { useState } from "react";
 import { ImBin } from "react-icons/im";
@@ -18,6 +19,10 @@ export default function ContactsPreviewList({
 
   const handleDelete = (index) => {
     console.log("Deleting contact:", contacts[index]);
+    showToast({
+      message: "Contact successfully removed from preview list.",
+      type: "success",
+    });
     setContacts(contacts.filter((_, i) => i !== index));
     setConfirmIndex(null); // Hide confirmation
   };
