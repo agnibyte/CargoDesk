@@ -542,12 +542,12 @@ export default function MessageWrapper({
         modalOpen={prevTemplatePoup}
         setModalOpen={setPrevTemplatePopup}
         backDrop={false}
-        // modalTitle={prevTemlateHeading}
-        modalSize="w-11/12 md:w-[50%] h-[75vh]"
+        modalSize="w-11/12 md:w-[50%] max-h-[80vh] flex flex-col"
       >
         <>
-          <div className="flex justify-between items-center px-4 pt-2 pb-4 border-b-1 border-gray-200">
-            <h2 className="font-semibold text-gray-800">
+          {/* Header */}
+          <div className="flex justify-between items-center px-4 py-3 border-b border-gray-200 bg-white sticky top-0 z-10">
+            <h2 className="font-semibold text-gray-800 text-lg">
               Saved Message Templates
             </h2>
             <button
@@ -559,49 +559,50 @@ export default function MessageWrapper({
             </button>
           </div>
 
-          {showAddMsgTemplet ? (
-            <div className="px-4 space-y-4 mt-4">
-              <textarea
-                rows={4}
-                className="w-full border border-gray-300 rounded-lg px-4 py-3 shadow-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-600"
-                placeholder="Type your message to save as a template"
-                value={newTemplateText}
-                name="newTemplateText"
-                onChange={(e) => setNewTemplateText(e.target.value)}
-              />
-              <div className="flex justify-end">
-                <button
-                  type="button"
-                  className={`${commonStyle.commonButton} px-5 py-2 rounded-md transition-colors duration-200`}
-                  onClick={handleSaveTemplate}
-                  disabled={!newTemplateText.trim()}
-                >
-                  {addMsgLoading ? (
-                    <span className="flex items-center gap-2">
-                      <ImSpinner9 className="animate-spin" />
-                      Please wait
-                    </span>
-                  ) : (
-                    "Save Template"
-                  )}
-                </button>
+          {/* Scrollable body */}
+          <div className="flex-1 overflow-y-auto p-4">
+            {showAddMsgTemplet ? (
+              <div className="space-y-4">
+                <textarea
+                  rows={4}
+                  className="w-full border border-gray-300 rounded-lg px-4 py-3 shadow-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-600"
+                  placeholder="Type your message to save as a template"
+                  value={newTemplateText}
+                  name="newTemplateText"
+                  onChange={(e) => setNewTemplateText(e.target.value)}
+                />
+                <div className="flex justify-end">
+                  <button
+                    type="button"
+                    className={`${commonStyle.commonButton} px-5 py-2 rounded-md transition-colors duration-200`}
+                    onClick={handleSaveTemplate}
+                    disabled={!newTemplateText.trim()}
+                  >
+                    {addMsgLoading ? (
+                      <span className="flex items-center gap-2">
+                        <ImSpinner9 className="animate-spin" />
+                        Please wait
+                      </span>
+                    ) : (
+                      "Save Template"
+                    )}
+                  </button>
+                </div>
               </div>
-            </div>
-          ) : (
-            <div className="p-4">
-              {savedMsgTemplets?.length === 0 ? (
-                <div className="text-gray-500 text-center mt-10">
-                  No templates saved yet.
-                </div>
-              ) : (
-                <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 h-[65vh] md:h-[60vh] overflow-y-auto">
-                  {savedMsgTemplets.map((item, i) => (
-                    <>{renderPrevMsgCard(item, i)}</>
-                  ))}
-                </div>
-              )}
-            </div>
-          )}
+            ) : savedMsgTemplets?.length === 0 ? (
+              <div className="text-gray-500 text-center mt-10">
+                No templates saved yet.
+              </div>
+            ) : (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                {savedMsgTemplets.map((item, i) => (
+                  <React.Fragment key={i}>
+                    {renderPrevMsgCard(item, i)}
+                  </React.Fragment>
+                ))}
+              </div>
+            )}
+          </div>
         </>
       </CommonModal>
     </>

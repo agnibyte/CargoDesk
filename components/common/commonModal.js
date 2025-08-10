@@ -70,7 +70,7 @@ export default function CommonModal({
             )}
 
             {/* Modal Body */}
-            <div className="">
+            <div className="flex-1 overflow-auto">
               {React.cloneElement(children, { toggleModal })}
             </div>
           </div>
