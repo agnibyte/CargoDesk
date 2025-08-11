@@ -19,7 +19,7 @@ export default function MessageWrapper({
   savedTemplates,
 }) {
   const [contactsList] = useState(contacts);
-  const [groupsList] = useState(groups); // test data
+  const [groupsList] = useState(groups);
 
   const {
     register,
