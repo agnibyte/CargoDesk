@@ -1,15 +1,19 @@
 @use "./_variable.scss" as *;
 @use "./_mixin.scss" as *;
+
 .modal-small {
   width: 388px;
+
   @media (max-width: 540px) {
     margin: 0 auto;
   }
+
   @media (max-width: $phones) {
     width: auto;
     margin: 0.5rem;
   }
 }
+
 .modal-xl {
   max-width: 1200px;
 }
@@ -26,6 +30,7 @@
   background-color: transparent;
   border: none;
   cursor: pointer;
+
   + {
     .modal-header {
       padding-left: 2.6rem;
@@ -36,19 +41,22 @@
 .modal {
   box-shadow: 0 4px 8px $actualPrice;
   border: none;
+
   .modal-title {
     font-size: 16px;
     font-weight: 700;
     color: $bodyColorPrimary;
   }
+
   h5 {
     display: flex;
     align-items: center;
   }
+
   .btn-close {
     height: 40px;
     width: 40px;
-    position: absolute; 
+    position: absolute;
     // bottom: calc(100% + 20px);
     border-radius: 50px;
     display: flex;
@@ -63,6 +71,7 @@
     opacity: 1;
     box-shadow: none;
     z-index: 1;
+
     &:before,
     &:after {
       content: "";
@@ -74,24 +83,30 @@
       -webkit-transform-origin: center;
       transform-origin: center;
     }
+
     &:before {
       transform: rotate(45deg) translateY(0);
       transform-origin: center;
     }
+
     &:after {
       transform: rotate(-45deg) translateY(0);
       transform-origin: center;
     }
+
     span {
       display: none !important;
     }
+
     &:hover {
       background-color: #dddd;
     }
+
     @media (max-width: $phones) {
       right: 8px;
     }
   }
+
   // .modal-content {
   //   border: none;
   //   box-shadow: 0 4px 8px $actualPrice;
@@ -110,7 +125,8 @@
 
 .modal-body {
   padding: 24px;
-  .title-header{
+
+  .title-header {
     .modal-subtitle {
       position: relative;
       display: flex;
@@ -119,6 +135,7 @@
       font-weight: 400;
       color: $bodyColorPrimary;
       margin-bottom: 20px;
+
       &::after {
         content: "";
         background-color: #edf0f5;
@@ -129,56 +146,59 @@
       }
     }
   }
- 
-  .blackButton{min-width: 280px;}
-  
+
+  .blackButton {
+    min-width: 280px;
+  }
+
 }
 
 .deleteModal {
-    padding: 20px;
-    font-size: 16px;
-    line-height: 1.5;
-    color: #333;
+  padding: 20px;
+  font-size: 16px;
+  line-height: 1.5;
+  color: #333;
 
-    .conformationMsg {
-      margin-bottom: 20px;
-      font-weight: 500;
-    }
+  .conformationMsg {
+    margin-bottom: 20px;
+    font-weight: 500;
+  }
 
-    .buttonsWrapper {
-      display: flex;
-      justify-content: flex-end;
-      gap: 10px;
+  .buttonsWrapper {
+    display: flex;
+    justify-content: flex-end;
+    gap: 10px;
 
-      .btn {
-        padding: 8px 16px;
-        font-size: 14px;
-        border-radius: 4px;
-        border: none;
-        cursor: pointer;
-        transition: background-color 0.2s ease;
+    .btn {
+      padding: 8px 16px;
+      font-size: 14px;
+      border-radius: 4px;
+      border: none;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
 
-        &.cancel {
-          background-color: #e2e2e2;
-          color: #333;
+      &.cancel {
+        background-color: #e2e2e2;
+        color: #333;
 
-          &:hover {
-            background-color: #e0e0e0;
-          }
+        &:hover {
+          background-color: #e0e0e0;
         }
+      }
 
-        &.delete {
-          background-color: #ff4d4f;
-          color: white;
+      &.delete {
+        background-color: #ff4d4f;
+        color: white;
 
-          &:hover {
-            background-color: #d9363e;
-          }
+        &:hover {
+          background-color: #d9363e;
         }
       }
     }
-    @media (max-width: $surfaceDuo) {
+  }
+
+  @media (max-width: $surfaceDuo) {
     padding: 0px;
-    }
-  
+  }
+
 }
