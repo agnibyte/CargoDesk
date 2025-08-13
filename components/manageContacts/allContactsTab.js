@@ -96,7 +96,7 @@ export default function AllContactsTab({
       )}
 
       <CommonModal
-        modalTitle={"Delete Document"}
+        modalTitle={"Delete Contacts"}
         modalOpen={deletePopup}
         setModalOpen={setDeletePopup}
         modalSize={"w-11/12 md:w-3/8"}

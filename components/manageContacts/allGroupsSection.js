@@ -106,14 +106,14 @@ export default function AllGroupsSection({
       )}
 
       <CommonModal
-        modalTitle={"Delete Document"}
+        modalTitle={"Delete Groups"}
         modalOpen={deletePopup}
         setModalOpen={setDeletePopup}
         modalSize={"w-11/12 md:w-3/8"}
       >
         <div className={modalStyle.deleteModal}>
           <p className={modalStyle.conformationMsg}>
-            Are you sure you want to delete selected contacts?
+            Are you sure you want to delete selected Groungs?
           </p>
           <div className={modalStyle.buttonsWrapper}>
             <button
