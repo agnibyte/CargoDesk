@@ -16,7 +16,6 @@ export default function ManageContactsWrapper({
 }) {
   const [contactsList, setContactsList] = useState(contacts);
   const [groupsList, setGroupsList] = useState(groups);
-
   const [searchTerm, setSearchTerm] = useState("");
 
   const router = useRouter();
