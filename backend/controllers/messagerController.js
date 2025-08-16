@@ -6,22 +6,22 @@ import {
   getUserMessageTemplatesModel,
 } from "../models/messangerModel";
 
-const accountSid = process.env.ACCOUNT_SID;
-const authToken = process.env.AUTH_TOKEN;
-
-const client = new Twilio(accountSid, authToken);
-
 export default async function sendMessage(req, res) {
+  const accountSid = process.env.ACCOUNT_SID;
+  const authToken = process.env.AUTH_TOKEN;
+
+  const client = new Twilio(accountSid, authToken);
+
   if (req.method !== "POST") {
     return res.status(405).json({ error: "Method Not Allowed" });
   }
 
   const { message, contacts } = req.body;
-  const response = {
-    status: false,
-  };
 
-  // Validation
+  // Initial response structure
+  const response = { status: false };
+
+  // Input validation
   if (
     !message ||
     !contacts ||
@@ -33,22 +33,37 @@ export default async function sendMessage(req, res) {
   }
 
   try {
+    // Send messages one by one
     for (const contact of contacts) {
+      const formattedContact = "+91" + contact.trim();
+      console.log(
+        "accountSid, authToken",
+        accountSid,
+        authToken,
+        formattedContact,
+        process.env.TWILIO_SENDER_PHONE_NO,
+        message
+      );
+
+      if (!formattedContact.startsWith("+")) {
+        throw new Error(`Invalid phone number format: ${formattedContact}`);
+      }
+
       await client.messages.create({
         body: message,
-        from: process.env.TWILIO_SENDER_PHONE_NO, // ensure this is in E.164 format, e.g. +1234567890
-        to: contact.trim(),
+        from: process.env.TWILIO_SENDER_PHONE_NO, // Must be in E.164 format
+        to: formattedContact,
       });
     }
 
     response.status = true;
     response.message = "Messages sent successfully";
-
     return res.status(200).json(response);
   } catch (error) {
     console.error("Error sending message:", error);
+
     response.message = "Failed to send message";
-    response.error = error.message;
+    response.error = error?.message || "Unknown error";
     return res.status(500).json(response);
   }
 }
