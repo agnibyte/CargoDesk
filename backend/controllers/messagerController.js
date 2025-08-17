@@ -38,11 +38,8 @@ export default async function sendMessage(req, res) {
       const formattedContact = "+91" + contact.trim();
       console.log(
         "accountSid, authToken",
-        accountSid,
-        authToken,
-        formattedContact,
-        process.env.TWILIO_SENDER_PHONE_NO,
-        message
+        { accountSid, authToken, formattedContact, message },
+        process.env.TWILIO_SENDER_PHONE_NO
       );
 
       if (!formattedContact.startsWith("+")) {
