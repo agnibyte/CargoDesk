@@ -79,7 +79,6 @@ const Dashboard = ({ pageData }) => {
   };
 
   const onClickAddReminder = () => {
-    console.log("onclickkk");
     setIsEdit(false);
     setReminderModal(true);
   };
