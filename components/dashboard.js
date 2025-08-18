@@ -107,16 +107,6 @@ const Dashboard = ({ pageData }) => {
         <div className="flex flex-col shadow-lg rounded-lg">
           <div className="card-header flex justify-between items-center p-2">
             <h2 className="text-white my-1.5">Dashboard</h2>
-            {/* <button
-              onClick={onClickAddReminder}
-              className="d-flex align-items-center addButton btn btn-primary"
-            >
-              <FontAwesomeIcon
-                icon={faPlusCircle}
-                className="me-2"
-              />
-              Add Reminder
-            </button> */}
           </div>
           <div className={dashboardStyle["mainTabel"]}>
             <TabComponent
