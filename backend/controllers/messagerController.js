@@ -36,11 +36,6 @@ export default async function sendMessage(req, res) {
     // Send messages one by one
     for (const contact of contacts) {
       const formattedContact = "+91" + contact.trim();
-      console.log(
-        "accountSid, authToken",
-        { accountSid, authToken, formattedContact, message },
-        process.env.TWILIO_SENDER_PHONE_NO
-      );
 
       if (!formattedContact.startsWith("+")) {
         throw new Error(`Invalid phone number format: ${formattedContact}`);
@@ -48,7 +43,7 @@ export default async function sendMessage(req, res) {
 
       await client.messages.create({
         body: message,
-        from: process.env.TWILIO_SENDER_PHONE_NO, // Must be in E.164 format
+        from: process.env.TWILIO_SENDER_PHONE_NO,
         to: formattedContact,
       });
     }
