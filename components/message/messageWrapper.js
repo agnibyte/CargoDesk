@@ -169,6 +169,10 @@ export default function MessageWrapper({
 
       if (response.status) {
         setSendMsgApiError("");
+        showToast({
+          message: response.message,
+          type: "success",
+        });
       } else {
         // setSendMsgApiError(response.message);
         showToast({
@@ -264,7 +268,7 @@ export default function MessageWrapper({
               <h3 className={styles.heading}>Message</h3>
               <button
                 type="button"
-                className=" md:hidden relative inline-flex items-center justify-center p-0.5 mb-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-green-400 to-blue-600 group-hover:from-green-400 group-hover:to-blue-600 hover:text-white dark:text-white"
+                className=" md:hidden relative inline-flex items-center justify-center p-0.5 mb-2 overflow-hidden text-sm font-medium text-gray-900 rounded-lg group bg-gradient-to-br from-blue-700 to-blue-600 group-hover:from-blue-700 group-hover:to-blue-600 hover:text-white dark:text-white"
                 onClick={() => setPrevTemplatePopup(true)}
               >
                 <span className="relative px-5 py-2 transition-all ease-in duration-75 bg-white text-blue-600  rounded-md group-hover:bg-transparent group-hover:dark:bg-transparent group-hover:text-white">
@@ -373,18 +377,16 @@ export default function MessageWrapper({
               />
 
               <button
-                className={`${styles.toggleBtn} ${
-                  selectedTab === "contacts" ? styles.active : ""
-                }`}
+                className={`${styles.toggleBtn} ${selectedTab === "contacts" ? styles.active : ""
+                  }`}
                 onClick={() => handleToggle("contacts")}
                 type="button"
               >
                 Contacts ({contactsList.length})
               </button>
               <button
-                className={`${styles.toggleBtn} ${
-                  selectedTab === "groups" ? styles.active : ""
-                }`}
+                className={`${styles.toggleBtn} ${selectedTab === "groups" ? styles.active : ""
+                  }`}
                 onClick={() => handleToggle("groups")}
                 type="button"
               >
@@ -399,11 +401,10 @@ export default function MessageWrapper({
                     {contactsList.map((contact) => (
                       <label
                         key={contact.id}
-                        className={`${styles.contactItem} ${
-                          formData.contacts.find((c) => c.id === contact.id)
+                        className={`${styles.contactItem} ${formData.contacts.find((c) => c.id === contact.id)
                             ? styles.selected
                             : ""
-                        }`}
+                          }`}
                       >
                         <input
                           type="checkbox"
@@ -444,11 +445,10 @@ export default function MessageWrapper({
                     {groupsList.map((contact) => (
                       <div
                         key={contact.id}
-                        className={`${styles.contactItem} ${
-                          formData.groups.find((g) => g.id === contact.id)
+                        className={`${styles.contactItem} ${formData.groups.find((g) => g.id === contact.id)
                             ? styles.selected
                             : ""
-                        }`}
+                          }`}
                         onClick={() => handleGroupClick(contact)}
                       >
                         <span className={styles.contactName}>
@@ -515,7 +515,7 @@ export default function MessageWrapper({
 
           <button
             type="submit"
-            className={styles.sendButnWrap + " hidden md:block mt-6"}
+            className={styles.sendButnWrap + " !hidden md:!flex mt-6"}
             disabled={
               loading ||
               (formData.contacts.length === 0 && formData.groups.length === 0)
