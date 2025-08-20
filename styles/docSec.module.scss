@@ -22,6 +22,7 @@
 
   .label {
     font-size: 18px;
+    color: #686868;
   }
 
   .h5 {
@@ -58,10 +59,11 @@
   }
 
   &.selected {
-    background: #c7c7c7; // Change background for selected state
-    color: #fff;
+    background: #c7c7c7;
 
     .label {
+      color: #000000;
+
       &.text-primary {
         color: #fff; // Change text color to white
       }
