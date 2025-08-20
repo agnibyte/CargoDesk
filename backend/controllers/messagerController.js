@@ -34,19 +34,19 @@ export default async function sendMessage(req, res) {
 
   try {
     // Send messages one by one
-    for (const contact of contacts) {
-      const formattedContact = "+91" + contact.trim();
+    // for (const contact of contacts) {
+    //   const formattedContact = "+91" + contact.trim();
 
-      if (!formattedContact.startsWith("+")) {
-        throw new Error(`Invalid phone number format: ${formattedContact}`);
-      }
+    //   if (!formattedContact.startsWith("+")) {
+    //     throw new Error(`Invalid phone number format: ${formattedContact}`);
+    //   }
 
-      await client.messages.create({
-        body: message,
-        from: process.env.TWILIO_SENDER_PHONE_NO,
-        to: formattedContact,
-      });
-    }
+    //   await client.messages.create({
+    //     body: message,
+    //     from: process.env.TWILIO_SENDER_PHONE_NO,
+    //     to: formattedContact,
+    //   });
+    // }
 
     response.status = true;
     response.message = "Messages sent successfully";
