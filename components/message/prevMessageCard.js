@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { LuCopy, LuCopyCheck } from "react-icons/lu";
 import { BsPlusCircle } from "react-icons/bs";
-import { ImBin } from "react-icons/im";
+import { MdOutlineDeleteOutline } from "react-icons/md";
 import { FiEdit } from "react-icons/fi";
 
 export default function PrevMessageCard({
@@ -27,9 +27,8 @@ export default function PrevMessageCard({
 
   return (
     <div
-      className={`contact-card relative w-full lg:w-[48%] border overflow-hidden border-gray-300 rounded-md shadow-sm transition-all duration-300 ${
-        isConfirm.id == item.id && "confirmContactDelete  "
-      }`}
+      className={`contact-card relative w-full lg:w-[48%] border overflow-hidden border-gray-300 rounded-md shadow-sm transition-all duration-300 ${isConfirm.id == item.id && "confirmContactDelete  "
+        }`}
     >
       {isConfirm.id != item.id ? (
         <>
@@ -74,7 +73,7 @@ export default function PrevMessageCard({
               className="flex items-center gap-1 text-xs bg-red-200 text-red-900 px-2 py-1 rounded-md hover:bg-red-300 transition"
               type="button"
             >
-              <ImBin size={14} />
+              <MdOutlineDeleteOutline size={14} />
               {deleteMsgLoading && toDelete == item.id
                 ? "Deleting..."
                 : "Delete"}
