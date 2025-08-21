@@ -4,167 +4,167 @@ import { useForm } from "react-hook-form";
 import { useState } from "react";
 
 export default function EmiForm() {
-  const defaultFormData = {
-    loanName: "",
-    loanAmount: "",
-    emiAmount: "",
-    tenure: "",
-    startDate: "",
-    paymentMode: "",
-    dueDate: "",
-    status: "Active", // default value
-  };
+    const defaultFormData = {
+        loanName: "",
+        loanAmount: "",
+        emiAmount: "",
+        tenure: "",
+        startDate: "",
+        paymentMode: "",
+        dueDate: "",
+        status: "Active", // default value
+    };
 
-  const [formData, setFormData] = useState(defaultFormData);
+    const [formData, setFormData] = useState(defaultFormData);
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors },
-    reset,
-  } = useForm({
-    defaultValues: defaultFormData,
-  });
+    const {
+        register,
+        handleSubmit,
+        formState: { errors },
+        reset,
+    } = useForm({
+        defaultValues: defaultFormData,
+    });
 
-  const onSubmit = (data) => {
-    console.log("Submitted EMI Data:", data);
-    setFormData(data);
-    reset(defaultFormData);
-  };
+    const onSubmit = (data) => {
+        console.log("Submitted EMI Data:", data);
+        setFormData(data);
+        reset(defaultFormData);
+    };
 
-  return (
-    <div className="max-w-lg mx-auto mt-10 p-6 bg-white rounded-2xl shadow-md">
-      <h2 className="text-xl font-bold mb-4">Add EMI</h2>
+    return (
+        <div className="max-w-lg mx-auto mt-10 p-6 bg-white rounded-2xl shadow-md">
+            <h2 className="text-xl font-bold mb-4">Add EMI</h2>
 
-      <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
-        {/* Loan Name */}
-        <div>
-          <label className="block text-sm font-medium">Loan/Item Name</label>
-          <input
-            type="text"
-            {...register("loanName", { required: "Loan Name is required" })}
-            className="w-full p-2 border rounded"
-          />
-          {errors.loanName && (
-            <p className="text-red-500 text-sm">{errors.loanName.message}</p>
-          )}
+            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+                {/* Loan Name */}
+                <div>
+                    <label className="block text-sm font-medium">Loan/Item Name</label>
+                    <input
+                        type="text"
+                        {...register("loanName", { required: "Loan Name is required" })}
+                        className="w-full p-2 border rounded"
+                    />
+                    {errors.loanName && (
+                        <p className="text-red-500 text-sm">{errors.loanName.message}</p>
+                    )}
+                </div>
+
+                {/* Loan Amount */}
+                <div>
+                    <label className="block text-sm font-medium">Loan Amount</label>
+                    <input
+                        type="number"
+                        {...register("loanAmount", {
+                            required: "Loan Amount is required",
+                            min: { value: 1, message: "Must be greater than 0" },
+                        })}
+                        className="w-full p-2 border rounded"
+                    />
+                    {errors.loanAmount && (
+                        <p className="text-red-500 text-sm">{errors.loanAmount.message}</p>
+                    )}
+                </div>
+
+                {/* EMI Amount */}
+                <div>
+                    <label className="block text-sm font-medium">EMI Amount</label>
+                    <input
+                        type="number"
+                        {...register("emiAmount", {
+                            required: "EMI Amount is required",
+                            min: { value: 1, message: "Must be greater than 0" },
+                        })}
+                        className="w-full p-2 border rounded"
+                    />
+                    {errors.emiAmount && (
+                        <p className="text-red-500 text-sm">{errors.emiAmount.message}</p>
+                    )}
+                </div>
+
+                {/* Tenure */}
+                <div>
+                    <label className="block text-sm font-medium">Tenure (months)</label>
+                    <input
+                        type="number"
+                        {...register("tenure", {
+                            required: "Tenure is required",
+                            min: { value: 1, message: "Must be at least 1 month" },
+                        })}
+                        className="w-full p-2 border rounded"
+                    />
+                    {errors.tenure && (
+                        <p className="text-red-500 text-sm">{errors.tenure.message}</p>
+                    )}
+                </div>
+
+                {/* Start Date */}
+                <div>
+                    <label className="block text-sm font-medium">Start Date</label>
+                    <input
+                        type="date"
+                        {...register("startDate", { required: "Start Date is required" })}
+                        className="w-full p-2 border rounded"
+                    />
+                    {errors.startDate && (
+                        <p className="text-red-500 text-sm">{errors.startDate.message}</p>
+                    )}
+                </div>
+
+                {/* Payment Mode */}
+                <div>
+                    <label className="block text-sm font-medium">Payment Mode</label>
+                    <select
+                        {...register("paymentMode", { required: "Payment Mode is required" })}
+                        className="w-full p-2 border rounded"
+                    >
+                        <option value="">Select Payment Mode</option>
+                        <option value="Bank Transfer">Bank Transfer</option>
+                        <option value="Debit Card">Debit Card</option>
+                        <option value="Credit Card">Credit Card</option>
+                        <option value="UPI">UPI</option>
+                        <option value="Cash">Cash</option>
+                    </select>
+                    {errors.paymentMode && (
+                        <p className="text-red-500 text-sm">{errors.paymentMode.message}</p>
+                    )}
+                </div>
+
+                {/* Due Date */}
+                <div>
+                    <label className="block text-sm font-medium">Due Date (Monthly)</label>
+                    <input
+                        type="date"
+                        {...register("dueDate", { required: "Due Date is required" })}
+                        className="w-full p-2 border rounded"
+                    />
+                    {errors.dueDate && (
+                        <p className="text-red-500 text-sm">{errors.dueDate.message}</p>
+                    )}
+                </div>
+
+                {/* Status */}
+                <div>
+                    <label className="block text-sm font-medium">Status</label>
+                    <select
+                        {...register("status")}
+                        defaultValue="Active"
+                        className="w-full p-2 border rounded"
+                    >
+                        <option value="Active">Active</option>
+                        <option value="Closed">Closed</option>
+                        <option value="Overdue">Overdue</option>
+                    </select>
+                </div>
+
+                {/* Submit */}
+                <button
+                    type="submit"
+                    className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
+                >
+                    Save EMI
+                </button>
+            </form>
         </div>
-
-        {/* Loan Amount */}
-        <div>
-          <label className="block text-sm font-medium">Loan Amount</label>
-          <input
-            type="number"
-            {...register("loanAmount", {
-              required: "Loan Amount is required",
-              min: { value: 1, message: "Must be greater than 0" },
-            })}
-            className="w-full p-2 border rounded"
-          />
-          {errors.loanAmount && (
-            <p className="text-red-500 text-sm">{errors.loanAmount.message}</p>
-          )}
-        </div>
-
-        {/* EMI Amount */}
-        <div>
-          <label className="block text-sm font-medium">EMI Amount</label>
-          <input
-            type="number"
-            {...register("emiAmount", {
-              required: "EMI Amount is required",
-              min: { value: 1, message: "Must be greater than 0" },
-            })}
-            className="w-full p-2 border rounded"
-          />
-          {errors.emiAmount && (
-            <p className="text-red-500 text-sm">{errors.emiAmount.message}</p>
-          )}
-        </div>
-
-        {/* Tenure */}
-        <div>
-          <label className="block text-sm font-medium">Tenure (months)</label>
-          <input
-            type="number"
-            {...register("tenure", {
-              required: "Tenure is required",
-              min: { value: 1, message: "Must be at least 1 month" },
-            })}
-            className="w-full p-2 border rounded"
-          />
-          {errors.tenure && (
-            <p className="text-red-500 text-sm">{errors.tenure.message}</p>
-          )}
-        </div>
-
-        {/* Start Date */}
-        <div>
-          <label className="block text-sm font-medium">Start Date</label>
-          <input
-            type="date"
-            {...register("startDate", { required: "Start Date is required" })}
-            className="w-full p-2 border rounded"
-          />
-          {errors.startDate && (
-            <p className="text-red-500 text-sm">{errors.startDate.message}</p>
-          )}
-        </div>
-
-        {/* Payment Mode */}
-        <div>
-          <label className="block text-sm font-medium">Payment Mode</label>
-          <select
-            {...register("paymentMode", { required: "Payment Mode is required" })}
-            className="w-full p-2 border rounded"
-          >
-            <option value="">Select Payment Mode</option>
-            <option value="Bank Transfer">Bank Transfer</option>
-            <option value="Debit Card">Debit Card</option>
-            <option value="Credit Card">Credit Card</option>
-            <option value="UPI">UPI</option>
-            <option value="Cash">Cash</option>
-          </select>
-          {errors.paymentMode && (
-            <p className="text-red-500 text-sm">{errors.paymentMode.message}</p>
-          )}
-        </div>
-
-        {/* Due Date */}
-        <div>
-          <label className="block text-sm font-medium">Due Date (Monthly)</label>
-          <input
-            type="date"
-            {...register("dueDate", { required: "Due Date is required" })}
-            className="w-full p-2 border rounded"
-          />
-          {errors.dueDate && (
-            <p className="text-red-500 text-sm">{errors.dueDate.message}</p>
-          )}
-        </div>
-
-        {/* Status */}
-        <div>
-          <label className="block text-sm font-medium">Status</label>
-          <select
-            {...register("status")}
-            defaultValue="Active"
-            className="w-full p-2 border rounded"
-          >
-            <option value="Active">Active</option>
-            <option value="Closed">Closed</option>
-            <option value="Overdue">Overdue</option>
-          </select>
-        </div>
-
-        {/* Submit */}
-        <button
-          type="submit"
-          className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
-        >
-          Save EMI
-        </button>
-      </form>
-    </div>
-  );
+    );
 }
