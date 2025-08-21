@@ -237,217 +237,172 @@ export default function EmiSection() {
           </Grid>
         </Grid>
 
-        {/* Truck Details */}
-        <Typography
-          variant="h6"
-          sx={{ mt: 4 }}
-        >
-          Truck Details
-        </Typography>
+        {/* Truck Purchase Date */}
         <Grid
-          container
-          spacing={2}
+          item
+          xs={12}
+          sm={6}
+          md={4}
         >
-          {/* Truck Model */}
-          <Grid
-            item
-            xs={12}
-            sm={6}
-            md={4}
-          >
-            <TextField
-              label="Truck Model"
-              fullWidth
-              variant="outlined"
-              value={truckModel}
-              onChange={(e) => setTruckModel(e.target.value)}
-              placeholder="Enter truck model"
-            />
-          </Grid>
-
-          {/* Truck Number Plate */}
-          <Grid
-            item
-            xs={12}
-            sm={6}
-            md={4}
-          >
-            <TextField
-              label="Truck Number Plate"
-              fullWidth
-              variant="outlined"
-              value={truckNumberPlate}
-              onChange={(e) => setTruckNumberPlate(e.target.value)}
-              placeholder="Enter truck number plate"
-            />
-          </Grid>
-
-          {/* Truck Purchase Date */}
-          <Grid
-            item
-            xs={12}
-            sm={6}
-            md={4}
-          >
-            <TextField
-              label="Truck Purchase Date"
-              fullWidth
-              variant="outlined"
-              type="date"
-              value={truckPurchaseDate}
-              onChange={(e) => setTruckPurchaseDate(e.target.value)}
-              InputLabelProps={{
-                shrink: true,
-              }}
-            />
-          </Grid>
-
-          {/* Truck Driver Name */}
-          <Grid
-            item
-            xs={12}
-            sm={6}
-            md={4}
-          >
-            <TextField
-              label="Truck Driver Name"
-              fullWidth
-              variant="outlined"
-              value={truckDriverName}
-              onChange={(e) => setTruckDriverName(e.target.value)}
-              placeholder="Enter truck driver's name"
-            />
-          </Grid>
-
-          {/* Truck Color */}
-          <Grid
-            item
-            xs={12}
-            sm={6}
-            md={4}
-          >
-            <TextField
-              label="Truck Color"
-              fullWidth
-              variant="outlined"
-              value={truckColor}
-              onChange={(e) => setTruckColor(e.target.value)}
-              placeholder="Enter truck color"
-            />
-          </Grid>
+          <TextField
+            label="Truck Purchase Date"
+            fullWidth
+            variant="outlined"
+            type="date"
+            value={truckPurchaseDate}
+            onChange={(e) => setTruckPurchaseDate(e.target.value)}
+            InputLabelProps={{
+              shrink: true,
+            }}
+          />
         </Grid>
 
+        {/* Truck Driver Name */}
         <Grid
-          container
-          spacing={2}
+          item
+          xs={12}
+          sm={6}
+          md={4}
         >
-          {/* Truck Size Type */}
-          <Grid
-            item
-            xs={12}
-            sm={6}
-            md={4}
-          >
-            <FormControl fullWidth>
-              <InputLabel>Truck Size</InputLabel>
-              <Select
-                value={truckSizeType}
-                onChange={(e) => setTruckSizeType(e.target.value)}
-                label="Truck Size"
-              >
-                <MenuItem value="20ft">20 Foot</MenuItem>
-                <MenuItem value="40ft">40 Foot</MenuItem>
-                <MenuItem value="80ft">80 Foot</MenuItem>
-              </Select>
-            </FormControl>
-          </Grid>
-
-          {/* Truck Type (Container or Coil) */}
-          <Grid
-            item
-            xs={12}
-            sm={6}
-            md={4}
-          >
-            <FormControl fullWidth>
-              <InputLabel>Truck Type</InputLabel>
-              <Select
-                value={truckType}
-                onChange={(e) => setTruckType(e.target.value)}
-                label="Truck Type"
-              >
-                <MenuItem value="Container">Container</MenuItem>
-                <MenuItem value="Coil">Coil</MenuItem>
-              </Select>
-            </FormControl>
-          </Grid>
+          <TextField
+            label="Truck Driver Name"
+            fullWidth
+            variant="outlined"
+            value={truckDriverName}
+            onChange={(e) => setTruckDriverName(e.target.value)}
+            placeholder="Enter truck driver's name"
+          />
         </Grid>
 
-        {/* Submit Button */}
-        <Box sx={{ textAlign: "center", mt: 3 }}>
-          <Button
-            variant="contained"
-            color="primary"
-            onClick={addLoan}
-            disabled={!emiDetails}
-          >
-            Add Loan
-          </Button>
-        </Box>
-      </CardContent>
+        {/* Truck Color */}
+        <Grid
+          item
+          xs={12}
+          sm={6}
+          md={4}
+        >
+          <TextField
+            label="Truck Color"
+            fullWidth
+            variant="outlined"
+            value={truckColor}
+            onChange={(e) => setTruckColor(e.target.value)}
+            placeholder="Enter truck color"
+          />
+        </Grid>
+      </Grid>
 
-      {/* Loan List Table */}
-      <Box sx={{ mt: 4 }}>
-        <Typography variant="h6">Loan List</Typography>
-        {loans.length === 0 ? (
-          <Typography variant="body2">No loans added yet.</Typography>
-        ) : (
-          <TableContainer component={Paper}>
-            <Table
-              sx={{ minWidth: 650 }}
-              aria-label="loan table"
+      <Grid
+        container
+        spacing={2}
+      >
+        {/* Truck Size Type */}
+        <Grid
+          item
+          xs={12}
+          sm={6}
+          md={4}
+        >
+          <FormControl fullWidth>
+            <InputLabel>Truck Size</InputLabel>
+            <Select
+              value={truckSizeType}
+              onChange={(e) => setTruckSizeType(e.target.value)}
+              label="Truck Size"
             >
-              <TableHead>
-                <TableRow>
-                  <TableCell>Sr. No.</TableCell>
-                  <TableCell>Loan Amount</TableCell>
-                  <TableCell>EMI</TableCell>
-                  <TableCell>Total Payment</TableCell>
-                  <TableCell>Total Interest</TableCell>
-                  <TableCell>Truck Model</TableCell>
-                  <TableCell>Truck Type</TableCell>
-                  <TableCell>Due Date</TableCell>
-                </TableRow>
-              </TableHead>
-              <TableBody>
-                {loans.map((loan) => {
-                  const dueDate = moment(loan.dueDate);
-                  const daysRemaining = dueDate.diff(moment(), "days");
-                  const dueIn =
-                    daysRemaining <= 0
-                      ? "Due Today"
-                      : `${daysRemaining} Days Left`;
+              <MenuItem value="20ft">20 Foot</MenuItem>
+              <MenuItem value="40ft">40 Foot</MenuItem>
+              <MenuItem value="80ft">80 Foot</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
 
-                  return (
-                    <TableRow key={loan.srNo}>
-                      <TableCell>{loan.srNo}</TableCell>
-                      <TableCell>₹ {loan.loanAmount}</TableCell>
-                      <TableCell>₹ {loan.emiDetails.emi}</TableCell>
-                      <TableCell>₹ {loan.emiDetails.totalPayment}</TableCell>
-                      <TableCell>₹ {loan.emiDetails.totalInterest}</TableCell>
-                      <TableCell>{loan.truckDetails.truckModel}</TableCell>
-                      <TableCell>{loan.truckDetails.truckType}</TableCell>
-                      <TableCell>
-                        {dueDate.format("YYYY-MM-DD")} - {dueIn}
-                      </TableCell>
-                    </TableRow>
-                  );
-                })}
-              </TableBody>
-            </Table>
-          </TableContainer>
-        )}
+        {/* Truck Type (Container or Coil) */}
+        <Grid
+          item
+          xs={12}
+          sm={6}
+          md={4}
+        >
+          <FormControl fullWidth>
+            <InputLabel>Truck Type</InputLabel>
+            <Select
+              value={truckType}
+              onChange={(e) => setTruckType(e.target.value)}
+              label="Truck Type"
+            >
+              <MenuItem value="Container">Container</MenuItem>
+              <MenuItem value="Coil">Coil</MenuItem>
+            </Select>
+          </FormControl>
+        </Grid>
+      </Grid>
+
+      {/* Submit Button */}
+      <Box sx={{ textAlign: "center", mt: 3 }}>
+        <Button
+          variant="contained"
+          color="primary"
+          onClick={addLoan}
+          disabled={!emiDetails}
+        >
+          Add Loan
+        </Button>
       </Box>
-    </div>
+    </CardContent>
+
+      {/* Loan List Table */ }
+  <Box sx={{ mt: 4 }}>
+    <Typography variant="h6">Loan List</Typography>
+    {loans.length === 0 ? (
+      <Typography variant="body2">No loans added yet.</Typography>
+    ) : (
+      <TableContainer component={Paper}>
+        <Table
+          sx={{ minWidth: 650 }}
+          aria-label="loan table"
+        >
+          <TableHead>
+            <TableRow>
+              <TableCell>Sr. No.</TableCell>
+              <TableCell>Loan Amount</TableCell>
+              <TableCell>EMI</TableCell>
+              <TableCell>Total Payment</TableCell>
+              <TableCell>Total Interest</TableCell>
+              <TableCell>Truck Model</TableCell>
+              <TableCell>Truck Type</TableCell>
+              <TableCell>Due Date</TableCell>
+            </TableRow>
+          </TableHead>
+          <TableBody>
+            {loans.map((loan) => {
+              const dueDate = moment(loan.dueDate);
+              const daysRemaining = dueDate.diff(moment(), "days");
+              const dueIn =
+                daysRemaining <= 0
+                  ? "Due Today"
+                  : `${daysRemaining} Days Left`;
+
+              return (
+                <TableRow key={loan.srNo}>
+                  <TableCell>{loan.srNo}</TableCell>
+                  <TableCell>₹ {loan.loanAmount}</TableCell>
+                  <TableCell>₹ {loan.emiDetails.emi}</TableCell>
+                  <TableCell>₹ {loan.emiDetails.totalPayment}</TableCell>
+                  <TableCell>₹ {loan.emiDetails.totalInterest}</TableCell>
+                  <TableCell>{loan.truckDetails.truckModel}</TableCell>
+                  <TableCell>{loan.truckDetails.truckType}</TableCell>
+                  <TableCell>
+                    {dueDate.format("YYYY-MM-DD")} - {dueIn}
+                  </TableCell>
+                </TableRow>
+              );
+            })}
+          </TableBody>
+        </Table>
+      </TableContainer>
+    )}
+  </Box>
+    </div >
   );
 }
