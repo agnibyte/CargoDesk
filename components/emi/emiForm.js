@@ -12,7 +12,7 @@ export default function EmiForm() {
         startDate: "",
         paymentMode: "",
         dueDate: "",
-        status: "Active", // default value
+        status: "active", // default value
     };
 
     const [formData, setFormData] = useState(defaultFormData);
