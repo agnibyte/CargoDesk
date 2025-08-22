@@ -12,7 +12,7 @@ export default function EmiForm() {
         startDate: "",
         paymentMode: "",
         dueDate: "",
-        status: "active", // default value
+        status: "active",
     };
 
     const [formData, setFormData] = useState(defaultFormData);
@@ -36,7 +36,7 @@ export default function EmiForm() {
         <div className="max-w-lg mx-auto mt-10 p-6 bg-white rounded-2xl shadow-md">
             <h2 className="text-xl font-bold mb-4">Add EMI</h2>
 
-            <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
+            <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Loan Name */}
                 <div>
                     <label className="block text-sm font-medium">Loan/Item Name</label>
@@ -157,14 +157,18 @@ export default function EmiForm() {
                     </select>
                 </div>
 
-                {/* Submit */}
-                <button
-                    type="submit"
-                    className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
-                >
-                    Save EMI
-                </button>
+                {/* Submit Button - span 2 cols */}
+                <div className="md:col-span-2">
+                    <button
+                        type="submit"
+                        className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
+                    >
+                        Save EMI
+                    </button>
+                </div>
             </form>
+
+
         </div>
     );
 }
