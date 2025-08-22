@@ -33,8 +33,7 @@ export default function EmiForm() {
     };
 
     return (
-        <div className="max-w-lg mx-auto mt-10 p-6 bg-white rounded-2xl shadow-md">
-            <h2 className="text-xl font-bold mb-4">Add EMI</h2>
+        <div className="p-6 bg-white rounded-2xl ">
 
             <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Loan Name */}
