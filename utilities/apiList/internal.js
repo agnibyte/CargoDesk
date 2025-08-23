@@ -32,4 +32,9 @@ export const internalList = {
   GET_GROUP_MEMBERS: "/api/contact/get-group-members",
   UPDATE_USERS_GROUP_DETAILS: "/api/contact/update-users-group-details",
   DELETE_BULK_GROUPS: "/api/contact/bulk-delete-groups",
+
+
+  // emi
+  ADD_NEW_EMI: "/api/emi/add-new",
+  GET_ALL_EMI: "/api/emi/get-all",
 };
