@@ -1,11 +1,14 @@
+import { addNewEmiModel } from "../models/emiModel";
 
-export function updateGroupDetails(request) {
+export function addNewEmiController(request) {
     return new Promise((resolve, reject) => {
         const response = {
             status: false,
         };
+        const requestBody = request.body;
 
-        updateGroupInfoModel(request)
+
+        addNewEmiModel(requestBody)
             .then((result) => {
                 if (result.status) {
                     response.status = true;
