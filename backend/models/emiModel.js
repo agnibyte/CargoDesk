@@ -15,7 +15,8 @@ export function addNewEmiModel(data) {
             emi_amount,
             tenure_months,
             start_date,
-            payment_mode, due_date,
+            payment_mode,
+            due_date,
             status: 1,
         };
 
