@@ -3,7 +3,7 @@
 import { useForm } from "react-hook-form";
 import { useState } from "react";
 
-export default function EmiForm() {
+export default function EmiForm({ setEmiList }) {
     const defaultFormData = {
         loanName: "",
         loanAmount: "",
@@ -28,6 +28,9 @@ export default function EmiForm() {
 
     const onSubmit = (data) => {
         console.log("Submitted EMI Data:", data);
+        if (setEmiList) {
+            setEmiList((prevList) => [...prevList, data]);
+        }
         setFormData(data);
         reset(defaultFormData);
     };

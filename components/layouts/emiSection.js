@@ -5,6 +5,7 @@ import CommonModal from "../common/commonModal";
 export default function EmiSection() {
   const [emiModal, setEmiModal] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
+  const [emiList, setEmiList] = useState([]);
 
   return (
     <>
@@ -16,13 +17,14 @@ export default function EmiSection() {
       </button>
 
 
+
       <CommonModal
         modalTitle={isEdit ? "Edit EMI Data" : "Add New EMI Data"}
         modalOpen={emiModal}
         setModalOpen={setEmiModal}
         modalSize={"w-11/12 md:w-3/6"}
       >
-        <EmiForm />
+        <EmiForm setEmiList={setEmiList} />
       </CommonModal>
     </>
   );
