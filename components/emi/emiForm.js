@@ -31,6 +31,7 @@ export default function EmiForm({ setEmiList }) {
         if (setEmiList) {
             setEmiList((prevList) => [...prevList, data]);
         }
+
         setFormData(data);
         reset(defaultFormData);
     };
@@ -57,7 +58,7 @@ export default function EmiForm({ setEmiList }) {
                 <div>
                     <label className="block text-sm font-medium">Loan Amount</label>
                     <input
-                        type="number"
+                        type="text"
                         placeholder="Enter total loan amount"
                         {...register("loanAmount", {
                             required: "Loan Amount is required",
@@ -74,7 +75,7 @@ export default function EmiForm({ setEmiList }) {
                 <div>
                     <label className="block text-sm font-medium">EMI Amount</label>
                     <input
-                        type="number"
+                        type="text"
                         placeholder="Enter monthly EMI amount"
                         {...register("emiAmount", {
                             required: "EMI Amount is required",
@@ -91,7 +92,7 @@ export default function EmiForm({ setEmiList }) {
                 <div>
                     <label className="block text-sm font-medium">Tenure (months)</label>
                     <input
-                        type="number"
+                        type="text"
                         placeholder="e.g. 12"
                         {...register("tenure", {
                             required: "Tenure is required",
