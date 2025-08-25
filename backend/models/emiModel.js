@@ -1,4 +1,10 @@
+const response = {
+    status: false,
+    message: "Something went wrong",
+};
+
 export function addNewEmiModel(data) {
+
     return new Promise((resolve) => {
         const insertQuery = `INSERT INTO emi_master SET ?`;
         const { loan_name, loan_amount, emi_amount, tenure_months, start_date, payment_mode, due_date } = data;
@@ -19,11 +25,11 @@ export function addNewEmiModel(data) {
             .then((result) => {
                 if (result && result.affectedRows > 0) {
                     response.status = true;
-                    response.message = "EMI added successfully";
+                    response.message = "EMI deatails added successfully";
 
                     resolve(response);
                 } else {
-                    response.message = "Failed to add EMI.";
+                    response.message = "Failed to add EMI deatails.";
                     resolve(response);
                 }
             })
@@ -31,7 +37,7 @@ export function addNewEmiModel(data) {
                 console.error("Error adding EMI:", error);
                 if (error.code === "ER_DUP_ENTRY") {
                     response.message =
-                        "EMI already exists. Please check in All EMIs section";
+                        "EMI deatails already exists. Please check in All EMIs section";
                     resolve(response);
                 } else {
                     // Log but DO NOT reject – avoid unhandledRejection
