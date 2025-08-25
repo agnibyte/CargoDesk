@@ -12,7 +12,7 @@ export default function EmiForm({ setEmiList }) {
         startDate: "",
         paymentMode: "",
         dueDate: "",
-        status: "active",
+        // status: "active",
     };
 
     const [formData, setFormData] = useState(defaultFormData);
@@ -153,7 +153,7 @@ export default function EmiForm({ setEmiList }) {
                 </div>
 
                 {/* Status */}
-                <div>
+                {/* <div>
                     <label className="block text-sm font-medium">Status</label>
                     <select
                         {...register("status")}
@@ -164,7 +164,7 @@ export default function EmiForm({ setEmiList }) {
                         <option value="Closed">Closed</option>
                         <option value="Overdue">Overdue</option>
                     </select>
-                </div>
+                </div> */}
 
                 {/* Submit Button - span 2 cols */}
                 <div className="md:col-span-2">
