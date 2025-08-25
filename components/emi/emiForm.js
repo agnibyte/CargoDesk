@@ -31,6 +31,28 @@ export default function EmiForm({ setEmiList }) {
         if (setEmiList) {
             setEmiList((prevList) => [...prevList, data]);
         }
+        // a = {
+        //     "loanName": "car",
+        //     "loanAmount": "10000",
+        //     "emiAmount": "20000",
+        //     "tenure": "12",
+        //     "startDate": "2025-08-23",
+        //     "paymentMode": "Credit Card",
+        //     "dueDate": "2025-11-13",
+        //     "status": "Active"
+        // }
+        const payload = {
+            loan_name: data.loanName,
+            loan_amount: data.loanAmount,
+            emi_amount: data.emiAmount,
+            tenure_months: data.tenure,
+            start_date: data.startDate,
+            payment_mode: data.paymentMode,
+            due_date: data.dueDate,
+            status: data.status ? 1 : 0,
+        }
+        console.log("Payload to be sent to API:", payload);
+
 
         setFormData(data);
         reset(defaultFormData);
