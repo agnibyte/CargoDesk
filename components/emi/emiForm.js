@@ -2,6 +2,7 @@
 
 import { useForm } from "react-hook-form";
 import { useState } from "react";
+import { postApiData } from "@/utilities/services/apiService";
 
 export default function EmiForm({ setEmiList }) {
     const defaultFormData = {
@@ -16,6 +17,8 @@ export default function EmiForm({ setEmiList }) {
     };
 
     const [formData, setFormData] = useState(defaultFormData);
+    const [apiLoading, setApiLoading] = useState(false);
+    const [errorMessage, setErrorMessage] = useState("");
 
     const {
         register,
@@ -26,7 +29,7 @@ export default function EmiForm({ setEmiList }) {
         defaultValues: defaultFormData,
     });
 
-    const onSubmit = (data) => {
+    const onSubmit = async (data) => {
         console.log("Submitted EMI Data:", data);
         if (setEmiList) {
             setEmiList((prevList) => [...prevList, data]);
@@ -52,7 +55,15 @@ export default function EmiForm({ setEmiList }) {
             status: data.status ? 1 : 0,
         }
         console.log("Payload to be sent to API:", payload);
+        const response = await postApiData("ADD_NEW_EMI", payload);
+        console.log("API Response:", response);
 
+        if (response.status) {
+            alert("EMI details added successfully!");
+        }
+        else {
+            alert("Failed to add EMI details: " + response.message);
+        }
 
         setFormData(data);
         reset(defaultFormData);
