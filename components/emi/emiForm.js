@@ -44,6 +44,7 @@ export default function EmiForm({ setEmiList }) {
         //     "dueDate": "2025-11-13",
         //     "status": "Active"
         // }
+        setApiLoading(true);
         const payload = {
             loan_name: data.loanName,
             loan_amount: data.loanAmount,
@@ -66,6 +67,7 @@ export default function EmiForm({ setEmiList }) {
             console.log("Failed to add EMI details: " + response.message);
         }
 
+        setApiLoading(false);
         setFormData(data);
         reset(defaultFormData);
     };
@@ -206,7 +208,7 @@ export default function EmiForm({ setEmiList }) {
                         type="submit"
                         className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
                     >
-                        Save EMI
+                        {apiLoading ? "Submitting..." : "Add EMI"}
                     </button>
                 </div>
             </form>
