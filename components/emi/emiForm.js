@@ -59,10 +59,11 @@ export default function EmiForm({ setEmiList }) {
         console.log("API Response:", response);
 
         if (response.status) {
-            alert("EMI details added successfully!");
+            console.log("EMI details added successfully!");
+
         }
         else {
-            alert("Failed to add EMI details: " + response.message);
+            console.log("Failed to add EMI details: " + response.message);
         }
 
         setFormData(data);
