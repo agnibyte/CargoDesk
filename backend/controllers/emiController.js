@@ -5,10 +5,10 @@ export function addNewEmiController(request) {
         const response = {
             status: false,
         };
-        const requestBody = request.body;
+        ;
         console.log('requestBody', request)
 
-        addNewEmiModel(requestBody)
+        addNewEmiModel(request)
             .then((result) => {
                 if (result.status) {
                     response.status = true;
