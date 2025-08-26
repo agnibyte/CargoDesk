@@ -21,11 +21,9 @@ export function addNewEmiModel(data) {
             due_date,
             status: 1,
         };
-        console.log('payload', payload)
 
         executeQuery(insertQuery, payload)
             .then((result) => {
-                console.log('result', result)
                 if (result && result.affectedRows > 0) {
                     response.status = true;
                     response.message = "EMI deatails added successfully";

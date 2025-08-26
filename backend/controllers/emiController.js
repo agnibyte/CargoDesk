@@ -5,8 +5,6 @@ export function addNewEmiController(request) {
         const response = {
             status: false,
         };
-        ;
-        console.log('requestBody', request)
 
         addNewEmiModel(request)
             .then((result) => {
