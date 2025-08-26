@@ -61,15 +61,15 @@ export default function EmiForm({ setEmiList }) {
 
         if (response.status) {
             console.log("EMI details added successfully!");
-
+            setFormData(data);
+            reset(defaultFormData);
         }
         else {
             console.log("Failed to add EMI details: " + response.message);
         }
 
         setApiLoading(false);
-        setFormData(data);
-        reset(defaultFormData);
+
     };
 
     return (
