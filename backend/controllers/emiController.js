@@ -1,4 +1,4 @@
-import { addNewEmiModel } from "../models/emiModel";
+import { addNewEmiModel, getAllEmisModel } from "../models/emiModel";
 
 export function addNewEmiController(request) {
     return new Promise((resolve, reject) => {
@@ -22,3 +22,29 @@ export function addNewEmiController(request) {
             });
     });
 }
+
+export function getAllEmiDataList(request) {
+    return new Promise((resolve, reject) => {
+        const response = {
+            status: false,
+        };
+
+        getAllEmisModel(request)
+            .then((result) => {
+                if (result.status) {
+                    response.status = true;
+                    response.message = result.message;
+                    response.data = result.data;
+                    resolve(response);
+                } else {
+                    response.message = result.message;
+                    resolve(response);
+                }
+            })
+            .catch((error) => {
+                reject(error);
+            });
+    });
+}
+
+
