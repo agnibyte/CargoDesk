@@ -78,7 +78,7 @@ export default function EmiForm({ setEmiList }) {
             <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 {/* Loan Name */}
                 <div>
-                    <label className="block text-sm font-medium">Loan/Item Name</label>
+                    <label className="block text-sm">Loan/Item Name</label>
                     <input
                         type="text"
                         placeholder="e.g. Car Loan, Mobile EMI"
@@ -92,7 +92,7 @@ export default function EmiForm({ setEmiList }) {
 
                 {/* Loan Amount */}
                 <div>
-                    <label className="block text-sm font-medium">Loan Amount</label>
+                    <label className="block text-sm">Loan Amount</label>
                     <input
                         type="text"
                         placeholder="Enter total loan amount"
@@ -109,7 +109,7 @@ export default function EmiForm({ setEmiList }) {
 
                 {/* EMI Amount */}
                 <div>
-                    <label className="block text-sm font-medium">EMI Amount</label>
+                    <label className="block text-sm">EMI Amount</label>
                     <input
                         type="text"
                         placeholder="Enter monthly EMI amount"
@@ -126,7 +126,7 @@ export default function EmiForm({ setEmiList }) {
 
                 {/* Tenure */}
                 <div>
-                    <label className="block text-sm font-medium">Tenure (months)</label>
+                    <label className="block text-sm">Tenure (months)</label>
                     <input
                         type="text"
                         placeholder="e.g. 12"
@@ -143,7 +143,7 @@ export default function EmiForm({ setEmiList }) {
 
                 {/* Start Date */}
                 <div>
-                    <label className="block text-sm font-medium">Start Date</label>
+                    <label className="block text-sm">Start Date</label>
                     <input
                         type="date"
                         placeholder="Select EMI start date"
@@ -157,7 +157,7 @@ export default function EmiForm({ setEmiList }) {
 
                 {/* Payment Mode */}
                 <div>
-                    <label className="block text-sm font-medium">Payment Mode</label>
+                    <label className="block text-sm">Payment Mode</label>
                     <select
                         {...register("paymentMode", { required: "Payment Mode is required" })}
                         className="w-full p-2 border rounded"
@@ -176,7 +176,7 @@ export default function EmiForm({ setEmiList }) {
 
                 {/* Due Date */}
                 <div>
-                    <label className="block text-sm font-medium">Due Date (Monthly)</label>
+                    <label className="block text-sm">Due Date (Monthly)</label>
                     <input
                         type="date"
                         placeholder="Select EMI due date"
@@ -190,7 +190,7 @@ export default function EmiForm({ setEmiList }) {
 
                 {/* Status */}
                 {/* <div>
-                    <label className="block text-sm font-medium">Status</label>
+                    <label className="block text-sm">Status</label>
                     <select
                         {...register("status")}
                         defaultValue="Active"
