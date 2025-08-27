@@ -48,3 +48,19 @@ export function addNewEmiModel(data) {
             });
     });
 }
+
+
+export function getAllEmisModel() {
+  return new Promise((resolve, reject) => {
+    const selectQuery = `SELECT * FROM emi_details ORDER BY created_at DESC`;
+
+    executeQuery(selectQuery)
+      .then((rows) => {
+        resolve({ status: true, data: rows, message: "EMIs fetched successfully" });
+      })
+      .catch((error) => {
+        console.error("Error fetching EMIs:", error);
+        reject({ status: false, message: "Database error while fetching EMIs" });
+      });
+  });
+}
