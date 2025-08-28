@@ -37,4 +37,6 @@ export const internalList = {
   // emi
   ADD_NEW_EMI: "/api/emi/add-new",
   GET_ALL_EMI: "/api/emi/get-all",
+  UPDATE_EMI_DETAILS: "/api/emi/update-emi-details",
+  DELETE_EMI: "/api/emi/delete",
 };
