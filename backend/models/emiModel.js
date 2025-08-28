@@ -64,3 +64,70 @@ export function getAllEmisModel() {
       });
   });
 }
+
+
+
+// ✅ Update EMI entry
+export function updateEmiModel(id, data) {
+  return new Promise((resolve, reject) => {
+    const updateQuery = `
+      UPDATE emi_master SET
+        loan_name = ?,
+        loan_amount = ?,
+        emi_amount = ?,
+        tenure_months = ?,
+        start_date = ?,
+        payment_mode = ?,
+        due_date = ?,
+        status = ?,
+        updated_at = NOW()
+      WHERE id = ?
+    `;
+
+    const values = [
+      data.loan_name,
+      data.loan_amount,
+      data.emi_amount,
+      data.tenure_months,
+      data.start_date,
+      data.payment_mode,
+      data.due_date,
+      data.status,
+      id,
+    ];
+
+    executeQuery(updateQuery, values)
+      .then((result) => {
+        if (result.affectedRows > 0) {
+          resolve({ status: true, message: "EMI entry updated successfully" });
+        } else {
+          resolve({ status: false, message: "EMI not found or unchanged" });
+        }
+      })
+      .catch((error) => {
+        console.error("Error updating EMI:", error);
+        reject({ status: false, message: "Database error while updating EMI" });
+      });
+  });
+}
+
+// ✅ Delete EMI entry
+export function deleteEmiModel(id) {
+  return new Promise((resolve, reject) => {
+    const deleteQuery = `DELETE FROM emi_master WHERE id = ?`;
+
+    executeQuery(deleteQuery, [id])
+      .then((result) => {
+        if (result.affectedRows > 0) {
+          resolve({ status: true, message: "EMI entry deleted successfully" });
+        } else {
+          resolve({ status: false, message: "EMI not found" });
+        }
+      })
+      .catch((error) => {
+        console.error("Error deleting EMI:", error);
+        reject({ status: false, message: "Database error while deleting EMI" });
+      });
+  });
+}
+
