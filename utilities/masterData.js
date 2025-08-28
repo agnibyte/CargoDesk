@@ -1,3 +1,5 @@
+import { formatPrice } from "./utils";
+
 export const docTableHeadCells = [
   // {
   //   id: "masterNo",
@@ -43,6 +45,66 @@ export const docTableHeadCells = [
     numeric: false,
     disablePadding: false,
     label: "Alert Date",
+  },
+  { id: "action", numeric: false, disablePadding: false, label: "Action" },
+];
+export const emiTableHeadCells = [
+  {
+    id: "id",
+    numeric: false,
+    disablePadding: false,
+    label: "Sr. No.",
+  },
+  {
+    id: "loan_name",
+    numeric: false,
+    disablePadding: false,
+    label: "Loan Name",
+    format: true,
+  },
+  {
+    id: "loan_amount",
+    numeric: false,
+    disablePadding: false,
+    label: "Loan Amount",
+    formatPrice: true,
+  },
+  {
+    id: "emi_amount",
+    numeric: false,
+    disablePadding: false,
+    label: "EMI Amount",
+    formatPrice: true,
+  },
+  {
+    id: "start_date",
+    numeric: false,
+    disablePadding: false,
+    label: "Start Date",
+  },
+  {
+    id: "tenure_months",
+    numeric: false,
+    disablePadding: false,
+    label: "Tenure (Months)",
+  },
+  {
+    id: "payment_mode",
+    numeric: false,
+    disablePadding: false,
+    label: "Payment Mode",
+  },
+  {
+    id: "due_date",
+    numeric: false,
+    disablePadding: false,
+    label: "Due Date",
+  },
+  {
+    id: "status",
+    numeric: false,
+    disablePadding: false,
+    label: "Status",
   },
   { id: "action", numeric: false, disablePadding: false, label: "Action" },
 ];
