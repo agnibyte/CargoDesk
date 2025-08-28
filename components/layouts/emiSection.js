@@ -2,10 +2,28 @@ import React, { useState, useEffect } from "react";
 import moment from "moment";
 import EmiForm from "../emi/emiForm";
 import CommonModal from "../common/commonModal";
+import { postApiData } from "@/utilities/services/apiService";
+
 export default function EmiSection() {
   const [emiModal, setEmiModal] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [emiList, setEmiList] = useState([]);
+
+  const fetchEmiList = async () => {
+    try {
+      const response = await postApiData("GET_ALL_EMI", {});
+      if (response.status && response.data) {
+        setEmiList(response.data);
+      } else {
+        setEmiList([]);
+      }
+    } catch (error) {
+      console.error("Error fetching EMI list:", error);
+    }
+  };
+  useEffect(() => {
+    fetchEmiList();
+  }, []);
 
   return (
     <>
