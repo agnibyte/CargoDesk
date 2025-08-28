@@ -52,7 +52,7 @@ export function addNewEmiModel(data) {
 
 export function getAllEmisModel() {
   return new Promise((resolve, reject) => {
-    const selectQuery = `SELECT * FROM emi_details ORDER BY created_at DESC`;
+    const selectQuery = `SELECT * FROM emi_master ORDER BY created_at DESC`;
 
     executeQuery(selectQuery)
       .then((rows) => {
