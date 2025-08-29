@@ -211,12 +211,13 @@ export async function requireAuth(context, callback) {
   return await callback(decoded);
 }
 // ✅ Common price formatting function
-export function formatPrice(amount, currency = "INR") {
-  if (!amount || isNaN(amount)) return "₹0";
+export function formatPrice(amount, currency = false) {
+  if (!amount || isNaN(amount)) return "0";
+  // currency = "INR"
 
   return new Intl.NumberFormat("en-IN", {
-    style: "currency",
+    style: currency ? "currency" : "decimal",
     currency: currency,
-    maximumFractionDigits: 2,
+    // maximumFractionDigits: 2,
   }).format(amount);
 }
