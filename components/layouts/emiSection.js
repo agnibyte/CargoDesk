@@ -27,6 +27,10 @@ export default function EmiSection() {
     fetchEmiList();
   }, []);
 
+  const onClickEdit = (id) => {
+    setIsEdit(true);
+    setEmiModal(true);
+  };
   return (
     <>
       <h1 className="text-2xl font-bold mb-4">EMI and Truck Details</h1>
@@ -37,7 +41,7 @@ export default function EmiSection() {
       </button>
 
       <DocumentTable
-        rows={appliedFilter}
+        rows={emiList}
         headCells={emiTableHeadCells}
         onClickEdit={onClickEdit}
         selected={selected}
