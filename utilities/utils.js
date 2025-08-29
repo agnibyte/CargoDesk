@@ -210,3 +210,13 @@ export async function requireAuth(context, callback) {
   // ✅ Token is valid, proceed with the callback
   return await callback(decoded);
 }
+// ✅ Common price formatting function
+export function formatPrice(amount, currency = "INR") {
+  if (!amount || isNaN(amount)) return "₹0";
+
+  return new Intl.NumberFormat("en-IN", {
+    style: "currency",
+    currency: currency,
+    maximumFractionDigits: 2,
+  }).format(amount);
+}
