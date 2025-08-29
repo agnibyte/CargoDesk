@@ -3,6 +3,8 @@ import moment from "moment";
 import EmiForm from "../emi/emiForm";
 import CommonModal from "../common/commonModal";
 import { postApiData } from "@/utilities/services/apiService";
+import { emiTableHeadCells } from "@/utilities/masterData";
+import DocumentTable from "../common/tabels/documentTable";
 
 export default function EmiSection() {
   const [emiModal, setEmiModal] = useState(false);
@@ -34,7 +36,19 @@ export default function EmiSection() {
         Add New EMI
       </button>
 
-      <div className="mt-6 overflow-x-auto">
+      <DocumentTable
+        rows={appliedFilter}
+        headCells={emiTableHeadCells}
+        onClickEdit={onClickEdit}
+        selected={selected}
+        setSelected={setSelected}
+        onClickDelete={() => {
+          setDeletePopup(true);
+        }}
+        isFilterApplied={appliedFilter.length > 0}
+
+      />
+      {/* <div className="mt-6 overflow-x-auto">
         <table className="min-w-full bg-white border">
 
           <thead>
@@ -78,7 +92,7 @@ export default function EmiSection() {
           </tbody>
         </table>
 
-      </div>
+      </div> */}
 
 
       <CommonModal
