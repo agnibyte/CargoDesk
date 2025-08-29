@@ -359,7 +359,7 @@ const DocumentTable = ({
                       // Optional formatting logic based on field type
                       if (headCell.id === "vehicleNo")
                         value = formatVehicleNumber(value);
-                      if (headCell.id === "expiryDate")
+                      if (headCell.id === "expiryDate" || headCell.id.includes("date"))
                         value = formatDate(value);
                       if (headCell.id === "alertDate") {
                         value = getDateBeforeDays(
