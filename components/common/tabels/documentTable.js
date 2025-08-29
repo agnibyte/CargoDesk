@@ -17,6 +17,7 @@ import commonStyle from "@/styles/common/common.module.scss";
 
 import {
   formatDate,
+  formatPrice,
   formatVehicleNumber,
   getConstant,
   getDateBeforeDays,
@@ -361,6 +362,8 @@ const DocumentTable = ({
                         value = formatVehicleNumber(value);
                       if (headCell.id === "expiryDate" || headCell.id.includes("date"))
                         value = formatDate(value);
+                      if (headCell.formatPrice)
+                        value = formatPrice(value);
                       if (headCell.id === "alertDate") {
                         value = getDateBeforeDays(
                           row.expiryDate,
