@@ -10,6 +10,8 @@ export default function EmiSection() {
   const [emiModal, setEmiModal] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [emiList, setEmiList] = useState([]);
+  const [selected, setSelected] = useState([]);
+  const [deletePopup, setDeletePopup] = useState(false);
 
   const fetchEmiList = async () => {
     try {
@@ -31,6 +33,7 @@ export default function EmiSection() {
     setIsEdit(true);
     setEmiModal(true);
   };
+
   return (
     <>
       <h1 className="text-2xl font-bold mb-4">EMI and Truck Details</h1>
@@ -49,7 +52,7 @@ export default function EmiSection() {
         onClickDelete={() => {
           setDeletePopup(true);
         }}
-        isFilterApplied={appliedFilter.length > 0}
+      // isFilterApplied={appliedFilter.length > 0}
 
       />
       {/* <div className="mt-6 overflow-x-auto">
