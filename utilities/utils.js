@@ -212,12 +212,12 @@ export async function requireAuth(context, callback) {
 }
 // ✅ Common price formatting function
 export function formatPrice(amount, currency = false) {
-  if (!amount || isNaN(amount)) return "0";
-  // currency = "INR"
+  if (amount === null || amount === undefined || isNaN(amount)) return "0";
 
   return new Intl.NumberFormat("en-IN", {
     style: currency ? "currency" : "decimal",
-    currency: currency,
-    // maximumFractionDigits: 2,
+    currency: currency || "INR",
+    minimumFractionDigits: 0,
+    maximumFractionDigits: 2,
   }).format(amount);
 }
