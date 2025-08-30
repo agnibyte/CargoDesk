@@ -46,6 +46,37 @@ export default function EmiSection() {
     setEmiModal(true);
   };
 
+  const onClickDelete = async (ids) => {
+    const payload = {
+      ids: ids,
+    };
+    setDeleteLoad(true);
+    setDeleteError("");
+    try {
+
+      const response = await postApiData("DELETE_EMI_RECORD", payload);
+      if (response.status) {
+        const updatedEmiList = emiList.filter((item) => !ids.includes(item.id));
+        setEmiList(updatedEmiList);
+        setDeletePopup(false);
+        setSelected([]);
+        showToast("EMI record deleted successfully", "success");
+      } else {
+        showToast(
+          response.message || "Error occurred while deleting record", "error"
+        );
+      }
+    } catch (error) {
+      console.error("Error occurred during form submission:", error);
+      setDeleteError(
+        "Error occurred while deleting record, Please try again later"
+      );
+    }
+    setDeleteLoad(false);
+
+
+
+  }
   return (
     <>
       <h1 className="text-2xl font-bold mb-4">EMI and Truck Details</h1>
@@ -126,14 +157,14 @@ export default function EmiSection() {
 
 
       <CommonModal
-        modalTitle={"Delete Document"}
+        modalTitle={"Delete EMI Record"}
         modalOpen={deletePopup}
         setModalOpen={setDeletePopup}
         modalSize={"w-11/12 md:w-3/8"}
       >
         <div className={modalStyle.deleteModal}>
           <p className={modalStyle.conformationMsg}>
-            Are you sure you want to delete this document?
+            Are you sure you want to delete this?
           </p>
           <div className={modalStyle.buttonsWrapper}>
             <button
