@@ -6,9 +6,9 @@ export default function handler(req, res) {
         const response = {
             status: false,
         };
-        const { id } = request;
+        const { ids } = request;
 
-        deleteEmiModel(id)
+        deleteEmiModel(ids)
             .then((result) => {
                 res.status(200).json(result);
                 resolve(result);
