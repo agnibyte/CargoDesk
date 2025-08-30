@@ -19,6 +19,7 @@ export default function EmiSection() {
   const [deletePopup, setDeletePopup] = useState(false);
   const [deleteLoad, setDeleteLoad] = useState(false);
   const [deleteError, setDeleteError] = useState("");
+  const [modalData, setModalData] = useState({});
 
   const onClickAddDocument = () => {
     setIsEdit(false);
@@ -42,6 +43,8 @@ export default function EmiSection() {
   }, []);
 
   const onClickEdit = (id) => {
+    const selectedItem = emiList.find((item) => item.id == id);
+    setModalData(selectedItem);
     setIsEdit(true);
     setEmiModal(true);
   };
@@ -77,6 +80,8 @@ export default function EmiSection() {
 
 
   }
+
+  console.log('selected', selected)
   return (
     <>
       <h1 className="text-2xl font-bold mb-4">EMI and Truck Details</h1>
@@ -151,7 +156,7 @@ export default function EmiSection() {
         setModalOpen={setEmiModal}
         modalSize={"w-11/12 md:w-3/6"}
       >
-        <EmiForm setEmiList={setEmiList} />
+        <EmiForm setEmiList={setEmiList} modalData={modalData} isEdit={isEdit} />
       </CommonModal>
 
 
