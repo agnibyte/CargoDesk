@@ -1,10 +1,10 @@
 "use client";
 
 import { useForm } from "react-hook-form";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { postApiData } from "@/utilities/services/apiService";
 
-export default function EmiForm({ setEmiList }) {
+export default function EmiForm({ setEmiList, modalData, isEdit, onClose }) {
   const defaultFormData = {
     loanName: "",
     loanAmount: "",
@@ -13,12 +13,10 @@ export default function EmiForm({ setEmiList }) {
     startDate: "",
     paymentMode: "",
     dueDate: "",
-    // status: "active",
+    // status: "Active",
   };
 
-  const [formData, setFormData] = useState(defaultFormData);
   const [apiLoading, setApiLoading] = useState(false);
-  const [errorMessage, setErrorMessage] = useState("");
 
   const {
     register,
@@ -29,22 +27,25 @@ export default function EmiForm({ setEmiList }) {
     defaultValues: defaultFormData,
   });
 
-  const onSubmit = async (data) => {
-    console.log("Submitted EMI Data:", data);
-    if (setEmiList) {
-      setEmiList((prevList) => [...prevList, data]);
+  // ✅ Populate form when editing
+  useEffect(() => {
+    if (isEdit && modalData) {
+      reset({
+        loanName: modalData.loan_name,
+        loanAmount: modalData.loan_amount,
+        emiAmount: modalData.emi_amount,
+        tenure: modalData.tenure_months,
+        startDate: modalData.start_date,
+        paymentMode: modalData.payment_mode,
+        dueDate: modalData.due_date,
+        status: modalData.status === 1 ? "Active" : "Closed",
+      });
     }
-    // a = {
-    //     "loanName": "car",
-    //     "loanAmount": "10000",
-    //     "emiAmount": "20000",
-    //     "tenure": "12",
-    //     "startDate": "2025-08-23",
-    //     "paymentMode": "Credit Card",
-    //     "dueDate": "2025-11-13",
-    //     "status": "Active"
-    // }
+  }, [isEdit, modalData, reset]);
+
+  const onSubmit = async (data) => {
     setApiLoading(true);
+
     const payload = {
       loan_name: data.loanName,
       loan_amount: data.loanAmount,
@@ -53,18 +54,36 @@ export default function EmiForm({ setEmiList }) {
       start_date: data.startDate,
       payment_mode: data.paymentMode,
       due_date: data.dueDate,
-      status: data.status ? 1 : 0,
+      status: data.status === "Active" ? 1 : 0,
     };
-    console.log("Payload to be sent to API:", payload);
-    const response = await postApiData("ADD_NEW_EMI", payload);
-    console.log("API Response:", response);
+
+    let response;
+    if (isEdit) {
+      // ✅ Update EMI
+      payload.id = modalData.id; // pass id for update
+      response = await postApiData("UPDATE_EMI_DETAILS", payload);
+    } else {
+      // ✅ Add new EMI
+      response = await postApiData("ADD_NEW_EMI", payload);
+    }
 
     if (response.status) {
-      console.log("EMI details added successfully!");
-      setFormData(data);
-      // reset(defaultFormData);
+      console.log("isEdit", isEdit);
+      if (isEdit) {
+        setEmiList((prev) =>
+          prev.map((emi) =>
+            emi.id == modalData.id ? { ...emi, ...data } : emi
+          )
+        );
+        console.log("modalData.id ", modalData.id);
+      } else {
+        setEmiList((prev) => [...prev, { ...data, id: response.insertId }]);
+      }
+
+      reset(defaultFormData);
+      if (onClose) onClose(); // close modal after save
     } else {
-      console.log("Failed to add EMI details: " + response.message);
+      console.error("Failed:", response.message);
     }
 
     setApiLoading(false);
@@ -94,7 +113,7 @@ export default function EmiForm({ setEmiList }) {
         <div>
           <label className="block text-sm">Loan Amount</label>
           <input
-            type="text"
+            type="number"
             placeholder="Enter total loan amount"
             {...register("loanAmount", {
               required: "Loan Amount is required",
@@ -111,7 +130,7 @@ export default function EmiForm({ setEmiList }) {
         <div>
           <label className="block text-sm">EMI Amount</label>
           <input
-            type="text"
+            type="number"
             placeholder="Enter monthly EMI amount"
             {...register("emiAmount", {
               required: "EMI Amount is required",
@@ -128,7 +147,7 @@ export default function EmiForm({ setEmiList }) {
         <div>
           <label className="block text-sm">Tenure (months)</label>
           <input
-            type="text"
+            type="number"
             placeholder="e.g. 12"
             {...register("tenure", {
               required: "Tenure is required",
@@ -146,7 +165,6 @@ export default function EmiForm({ setEmiList }) {
           <label className="block text-sm">Start Date</label>
           <input
             type="date"
-            placeholder="Select EMI start date"
             {...register("startDate", { required: "Start Date is required" })}
             className="w-full p-2 border rounded"
           />
@@ -181,7 +199,6 @@ export default function EmiForm({ setEmiList }) {
           <label className="block text-sm">Due Date (Monthly)</label>
           <input
             type="date"
-            placeholder="Select EMI due date"
             {...register("dueDate", { required: "Due Date is required" })}
             className="w-full p-2 border rounded"
           />
@@ -190,27 +207,27 @@ export default function EmiForm({ setEmiList }) {
           )}
         </div>
 
-        {/* Status */}
-        {/* <div>
-                    <label className="block text-sm">Status</label>
-                    <select
-                        {...register("status")}
-                        defaultValue="Active"
-                        className="w-full p-2 border rounded"
-                    >
-                        <option value="Active">Active</option>
-                        <option value="Closed">Closed</option>
-                        <option value="Overdue">Overdue</option>
-                    </select>
-                </div> */}
+        {/* Status (Visible in edit mode) */}
+        {isEdit && (
+          <div>
+            <label className="block text-sm">Status</label>
+            <select
+              {...register("status")}
+              className="w-full p-2 border rounded"
+            >
+              <option value="Active">Active</option>
+              <option value="Closed">Closed</option>
+            </select>
+          </div>
+        )}
 
-        {/* Submit Button - span 2 cols */}
+        {/* Submit */}
         <div className="md:col-span-2">
           <button
             type="submit"
             className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
           >
-            {apiLoading ? "Submitting..." : "Add EMI"}
+            {apiLoading ? "Submitting..." : isEdit ? "Update EMI" : "Add EMI"}
           </button>
         </div>
       </form>

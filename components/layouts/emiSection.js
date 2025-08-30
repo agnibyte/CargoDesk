@@ -155,6 +155,7 @@ export default function EmiSection() {
           setEmiList={setEmiList}
           modalData={modalData}
           isEdit={isEdit}
+          onClose={() => setEmiModal(false)}
         />
       </CommonModal>
 
