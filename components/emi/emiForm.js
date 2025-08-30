@@ -5,191 +5,193 @@ import { useState } from "react";
 import { postApiData } from "@/utilities/services/apiService";
 
 export default function EmiForm({ setEmiList }) {
-    const defaultFormData = {
-        loanName: "",
-        loanAmount: "",
-        emiAmount: "",
-        tenure: "",
-        startDate: "",
-        paymentMode: "",
-        dueDate: "",
-        // status: "active",
+  const defaultFormData = {
+    loanName: "",
+    loanAmount: "",
+    emiAmount: "",
+    tenure: "",
+    startDate: "",
+    paymentMode: "",
+    dueDate: "",
+    // status: "active",
+  };
+
+  const [formData, setFormData] = useState(defaultFormData);
+  const [apiLoading, setApiLoading] = useState(false);
+  const [errorMessage, setErrorMessage] = useState("");
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors },
+    reset,
+  } = useForm({
+    defaultValues: defaultFormData,
+  });
+
+  const onSubmit = async (data) => {
+    console.log("Submitted EMI Data:", data);
+    if (setEmiList) {
+      setEmiList((prevList) => [...prevList, data]);
+    }
+    // a = {
+    //     "loanName": "car",
+    //     "loanAmount": "10000",
+    //     "emiAmount": "20000",
+    //     "tenure": "12",
+    //     "startDate": "2025-08-23",
+    //     "paymentMode": "Credit Card",
+    //     "dueDate": "2025-11-13",
+    //     "status": "Active"
+    // }
+    setApiLoading(true);
+    const payload = {
+      loan_name: data.loanName,
+      loan_amount: data.loanAmount,
+      emi_amount: data.emiAmount,
+      tenure_months: data.tenure,
+      start_date: data.startDate,
+      payment_mode: data.paymentMode,
+      due_date: data.dueDate,
+      status: data.status ? 1 : 0,
     };
+    console.log("Payload to be sent to API:", payload);
+    const response = await postApiData("ADD_NEW_EMI", payload);
+    console.log("API Response:", response);
 
-    const [formData, setFormData] = useState(defaultFormData);
-    const [apiLoading, setApiLoading] = useState(false);
-    const [errorMessage, setErrorMessage] = useState("");
+    if (response.status) {
+      console.log("EMI details added successfully!");
+      setFormData(data);
+      // reset(defaultFormData);
+    } else {
+      console.log("Failed to add EMI details: " + response.message);
+    }
 
-    const {
-        register,
-        handleSubmit,
-        formState: { errors },
-        reset,
-    } = useForm({
-        defaultValues: defaultFormData,
-    });
+    setApiLoading(false);
+  };
 
-    const onSubmit = async (data) => {
-        console.log("Submitted EMI Data:", data);
-        if (setEmiList) {
-            setEmiList((prevList) => [...prevList, data]);
-        }
-        // a = {
-        //     "loanName": "car",
-        //     "loanAmount": "10000",
-        //     "emiAmount": "20000",
-        //     "tenure": "12",
-        //     "startDate": "2025-08-23",
-        //     "paymentMode": "Credit Card",
-        //     "dueDate": "2025-11-13",
-        //     "status": "Active"
-        // }
-        setApiLoading(true);
-        const payload = {
-            loan_name: data.loanName,
-            loan_amount: data.loanAmount,
-            emi_amount: data.emiAmount,
-            tenure_months: data.tenure,
-            start_date: data.startDate,
-            payment_mode: data.paymentMode,
-            due_date: data.dueDate,
-            status: data.status ? 1 : 0,
-        }
-        console.log("Payload to be sent to API:", payload);
-        const response = await postApiData("ADD_NEW_EMI", payload);
-        console.log("API Response:", response);
+  return (
+    <div className="p-6 bg-white rounded-2xl">
+      <form
+        onSubmit={handleSubmit(onSubmit)}
+        className="grid grid-cols-1 md:grid-cols-2 gap-4"
+      >
+        {/* Loan Name */}
+        <div>
+          <label className="block text-sm">Loan/Item Name</label>
+          <input
+            type="text"
+            placeholder="e.g. Car Loan, Mobile EMI"
+            {...register("loanName", { required: "Loan Name is required" })}
+            className="w-full p-2 border rounded"
+          />
+          {errors.loanName && (
+            <p className="text-red-500 text-sm">{errors.loanName.message}</p>
+          )}
+        </div>
 
-        if (response.status) {
-            console.log("EMI details added successfully!");
-            setFormData(data);
-            // reset(defaultFormData);
-        }
-        else {
-            console.log("Failed to add EMI details: " + response.message);
-        }
+        {/* Loan Amount */}
+        <div>
+          <label className="block text-sm">Loan Amount</label>
+          <input
+            type="text"
+            placeholder="Enter total loan amount"
+            {...register("loanAmount", {
+              required: "Loan Amount is required",
+              min: { value: 1, message: "Must be greater than 0" },
+            })}
+            className="w-full p-2 border rounded"
+          />
+          {errors.loanAmount && (
+            <p className="text-red-500 text-sm">{errors.loanAmount.message}</p>
+          )}
+        </div>
 
-        setApiLoading(false);
+        {/* EMI Amount */}
+        <div>
+          <label className="block text-sm">EMI Amount</label>
+          <input
+            type="text"
+            placeholder="Enter monthly EMI amount"
+            {...register("emiAmount", {
+              required: "EMI Amount is required",
+              min: { value: 1, message: "Must be greater than 0" },
+            })}
+            className="w-full p-2 border rounded"
+          />
+          {errors.emiAmount && (
+            <p className="text-red-500 text-sm">{errors.emiAmount.message}</p>
+          )}
+        </div>
 
-    };
+        {/* Tenure */}
+        <div>
+          <label className="block text-sm">Tenure (months)</label>
+          <input
+            type="text"
+            placeholder="e.g. 12"
+            {...register("tenure", {
+              required: "Tenure is required",
+              min: { value: 1, message: "Must be at least 1 month" },
+            })}
+            className="w-full p-2 border rounded"
+          />
+          {errors.tenure && (
+            <p className="text-red-500 text-sm">{errors.tenure.message}</p>
+          )}
+        </div>
 
-    return (
-        <div className="p-6 bg-white rounded-2xl">
+        {/* Start Date */}
+        <div>
+          <label className="block text-sm">Start Date</label>
+          <input
+            type="date"
+            placeholder="Select EMI start date"
+            {...register("startDate", { required: "Start Date is required" })}
+            className="w-full p-2 border rounded"
+          />
+          {errors.startDate && (
+            <p className="text-red-500 text-sm">{errors.startDate.message}</p>
+          )}
+        </div>
 
-            <form onSubmit={handleSubmit(onSubmit)} className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                {/* Loan Name */}
-                <div>
-                    <label className="block text-sm">Loan/Item Name</label>
-                    <input
-                        type="text"
-                        placeholder="e.g. Car Loan, Mobile EMI"
-                        {...register("loanName", { required: "Loan Name is required" })}
-                        className="w-full p-2 border rounded"
-                    />
-                    {errors.loanName && (
-                        <p className="text-red-500 text-sm">{errors.loanName.message}</p>
-                    )}
-                </div>
+        {/* Payment Mode */}
+        <div>
+          <label className="block text-sm">Payment Mode</label>
+          <select
+            {...register("paymentMode", {
+              required: "Payment Mode is required",
+            })}
+            className="w-full p-2 border rounded"
+          >
+            <option value="">-- Select Payment Mode --</option>
+            <option value="Bank Transfer">Bank Transfer</option>
+            <option value="Debit Card">Debit Card</option>
+            <option value="Credit Card">Credit Card</option>
+            <option value="UPI">UPI</option>
+            <option value="Cash">Cash</option>
+          </select>
+          {errors.paymentMode && (
+            <p className="text-red-500 text-sm">{errors.paymentMode.message}</p>
+          )}
+        </div>
 
-                {/* Loan Amount */}
-                <div>
-                    <label className="block text-sm">Loan Amount</label>
-                    <input
-                        type="text"
-                        placeholder="Enter total loan amount"
-                        {...register("loanAmount", {
-                            required: "Loan Amount is required",
-                            min: { value: 1, message: "Must be greater than 0" },
-                        })}
-                        className="w-full p-2 border rounded"
-                    />
-                    {errors.loanAmount && (
-                        <p className="text-red-500 text-sm">{errors.loanAmount.message}</p>
-                    )}
-                </div>
+        {/* Due Date */}
+        <div>
+          <label className="block text-sm">Due Date (Monthly)</label>
+          <input
+            type="date"
+            placeholder="Select EMI due date"
+            {...register("dueDate", { required: "Due Date is required" })}
+            className="w-full p-2 border rounded"
+          />
+          {errors.dueDate && (
+            <p className="text-red-500 text-sm">{errors.dueDate.message}</p>
+          )}
+        </div>
 
-                {/* EMI Amount */}
-                <div>
-                    <label className="block text-sm">EMI Amount</label>
-                    <input
-                        type="text"
-                        placeholder="Enter monthly EMI amount"
-                        {...register("emiAmount", {
-                            required: "EMI Amount is required",
-                            min: { value: 1, message: "Must be greater than 0" },
-                        })}
-                        className="w-full p-2 border rounded"
-                    />
-                    {errors.emiAmount && (
-                        <p className="text-red-500 text-sm">{errors.emiAmount.message}</p>
-                    )}
-                </div>
-
-                {/* Tenure */}
-                <div>
-                    <label className="block text-sm">Tenure (months)</label>
-                    <input
-                        type="text"
-                        placeholder="e.g. 12"
-                        {...register("tenure", {
-                            required: "Tenure is required",
-                            min: { value: 1, message: "Must be at least 1 month" },
-                        })}
-                        className="w-full p-2 border rounded"
-                    />
-                    {errors.tenure && (
-                        <p className="text-red-500 text-sm">{errors.tenure.message}</p>
-                    )}
-                </div>
-
-                {/* Start Date */}
-                <div>
-                    <label className="block text-sm">Start Date</label>
-                    <input
-                        type="date"
-                        placeholder="Select EMI start date"
-                        {...register("startDate", { required: "Start Date is required" })}
-                        className="w-full p-2 border rounded"
-                    />
-                    {errors.startDate && (
-                        <p className="text-red-500 text-sm">{errors.startDate.message}</p>
-                    )}
-                </div>
-
-                {/* Payment Mode */}
-                <div>
-                    <label className="block text-sm">Payment Mode</label>
-                    <select
-                        {...register("paymentMode", { required: "Payment Mode is required" })}
-                        className="w-full p-2 border rounded"
-                    >
-                        <option value="">-- Select Payment Mode --</option>
-                        <option value="Bank Transfer">Bank Transfer</option>
-                        <option value="Debit Card">Debit Card</option>
-                        <option value="Credit Card">Credit Card</option>
-                        <option value="UPI">UPI</option>
-                        <option value="Cash">Cash</option>
-                    </select>
-                    {errors.paymentMode && (
-                        <p className="text-red-500 text-sm">{errors.paymentMode.message}</p>
-                    )}
-                </div>
-
-                {/* Due Date */}
-                <div>
-                    <label className="block text-sm">Due Date (Monthly)</label>
-                    <input
-                        type="date"
-                        placeholder="Select EMI due date"
-                        {...register("dueDate", { required: "Due Date is required" })}
-                        className="w-full p-2 border rounded"
-                    />
-                    {errors.dueDate && (
-                        <p className="text-red-500 text-sm">{errors.dueDate.message}</p>
-                    )}
-                </div>
-
-                {/* Status */}
-                {/* <div>
+        {/* Status */}
+        {/* <div>
                     <label className="block text-sm">Status</label>
                     <select
                         {...register("status")}
@@ -202,17 +204,16 @@ export default function EmiForm({ setEmiList }) {
                     </select>
                 </div> */}
 
-                {/* Submit Button - span 2 cols */}
-                <div className="md:col-span-2">
-                    <button
-                        type="submit"
-                        className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
-                    >
-                        {apiLoading ? "Submitting..." : "Add EMI"}
-                    </button>
-                </div>
-            </form>
-
+        {/* Submit Button - span 2 cols */}
+        <div className="md:col-span-2">
+          <button
+            type="submit"
+            className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
+          >
+            {apiLoading ? "Submitting..." : "Add EMI"}
+          </button>
         </div>
-    );
+      </form>
+    </div>
+  );
 }
