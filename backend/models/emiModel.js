@@ -1,52 +1,52 @@
 import executeQuery from "@/helpers/dbConnection";
 
 const response = {
-    status: false,
-    message: "Something went wrong",
+  status: false,
+  message: "Something went wrong",
 };
 
 export function addNewEmiModel(data) {
 
-    return new Promise((resolve) => {
-        const insertQuery = `INSERT INTO emi_master SET ?`;
-        const { loan_name, loan_amount, emi_amount, tenure_months, start_date, payment_mode, due_date } = data;
+  return new Promise((resolve) => {
+    const insertQuery = `INSERT INTO emi_master SET ?`;
+    const { loan_name, loan_amount, emi_amount, tenure_months, start_date, payment_mode, due_date } = data;
 
-        const payload = {
-            loan_name,
-            loan_amount,
-            emi_amount,
-            tenure_months,
-            start_date,
-            payment_mode,
-            due_date,
-            status: 1,
-        };
+    const payload = {
+      loan_name,
+      loan_amount,
+      emi_amount,
+      tenure_months,
+      start_date,
+      payment_mode,
+      due_date,
+      status: 1,
+    };
 
-        executeQuery(insertQuery, payload)
-            .then((result) => {
-                if (result && result.affectedRows > 0) {
-                    response.status = true;
-                    response.message = "EMI deatails added successfully";
+    executeQuery(insertQuery, payload)
+      .then((result) => {
+        if (result && result.affectedRows > 0) {
+          response.status = true;
+          response.message = "EMI deatails added successfully";
 
-                    resolve(response);
-                } else {
-                    response.message = "Failed to add EMI deatails.";
-                    resolve(response);
-                }
-            })
-            .catch((error) => {
-                console.error("Error adding EMI:", error);
-                if (error.code === "ER_DUP_ENTRY") {
-                    response.message =
-                        "EMI deatails already exists. Please check in All EMIs section";
-                    resolve(response);
-                } else {
-                    // Log but DO NOT reject – avoid unhandledRejection
-                    response.message = "Database error while adding contact.";
-                    reject(response);
-                }
-            });
-    });
+          resolve(response);
+        } else {
+          response.message = "Failed to add EMI deatails.";
+          resolve(response);
+        }
+      })
+      .catch((error) => {
+        console.error("Error adding EMI:", error);
+        if (error.code === "ER_DUP_ENTRY") {
+          response.message =
+            "EMI deatails already exists. Please check in All EMIs section";
+          resolve(response);
+        } else {
+          // Log but DO NOT reject – avoid unhandledRejection
+          response.message = "Database error while adding contact.";
+          reject(response);
+        }
+      });
+  });
 }
 
 
@@ -112,22 +112,33 @@ export function updateEmiModel(id, data) {
 }
 
 // ✅ Delete EMI entry
-export function deleteEmiModel(id) {
+export function deleteEmiModel(ids) {
   return new Promise((resolve, reject) => {
-    const deleteQuery = `DELETE FROM emi_master WHERE id = ?`;
+    if (!Array.isArray(ids) || ids.length === 0) {
+      return reject({ status: false, message: "No IDs provided for deletion" });
+    }
 
-    executeQuery(deleteQuery, [id])
+    const deleteQuery = `DELETE FROM emi_master WHERE id IN (?)`;
+
+    executeQuery(deleteQuery, [ids])
       .then((result) => {
         if (result.affectedRows > 0) {
-          resolve({ status: true, message: "EMI entry deleted successfully" });
+          resolve({
+            status: true,
+            message: `${result.affectedRows} EMI entr${result.affectedRows > 1 ? "ies" : "y"} deleted successfully`,
+          });
         } else {
-          resolve({ status: false, message: "EMI not found" });
+          resolve({ status: false, message: "No EMI entries found for given IDs" });
         }
       })
       .catch((error) => {
-        console.error("Error deleting EMI:", error);
-        reject({ status: false, message: "Database error while deleting EMI" });
+        console.error("Error deleting EMIs:", error);
+        reject({
+          status: false,
+          message: "Database error while deleting EMIs",
+        });
       });
   });
 }
+
 
