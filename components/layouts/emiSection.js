@@ -10,7 +10,6 @@ import commonStyle from "@/styles/common/common.module.scss";
 import { getConstant } from "@/utilities/utils";
 import { showToast } from "@/utilities/toastService";
 
-
 export default function EmiSection() {
   const [emiModal, setEmiModal] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
@@ -56,7 +55,6 @@ export default function EmiSection() {
     setDeleteLoad(true);
     setDeleteError("");
     try {
-
       const response = await postApiData("DELETE_EMI_RECORD", payload);
       if (response.status) {
         const updatedEmiList = emiList.filter((item) => !ids.includes(item.id));
@@ -66,7 +64,8 @@ export default function EmiSection() {
         showToast("EMI record deleted successfully", "success");
       } else {
         showToast(
-          response.message || "Error occurred while deleting record", "error"
+          response.message || "Error occurred while deleting record",
+          "error"
         );
       }
     } catch (error) {
@@ -76,16 +75,14 @@ export default function EmiSection() {
       );
     }
     setDeleteLoad(false);
+  };
 
-
-
-  }
-
-  console.log('selected', selected)
+  console.log("selected", selected);
   return (
     <>
       <h1 className="text-2xl font-bold mb-4">EMI and Truck Details</h1>
-      <button className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
+      <button
+        className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
         onClick={() => setEmiModal(true)}
       >
         Add New EMI
@@ -100,8 +97,7 @@ export default function EmiSection() {
         onClickDelete={() => {
           setDeletePopup(true);
         }}
-      // isFilterApplied={appliedFilter.length > 0}
-
+        // isFilterApplied={appliedFilter.length > 0}
       />
       {/* <div className="mt-6 overflow-x-auto">
         <table className="min-w-full bg-white border">
@@ -149,17 +145,18 @@ export default function EmiSection() {
 
       </div> */}
 
-
       <CommonModal
         modalTitle={isEdit ? "Edit EMI Data" : "Add New EMI Data"}
         modalOpen={emiModal}
         setModalOpen={setEmiModal}
         modalSize={"w-11/12 md:w-3/6"}
       >
-        <EmiForm setEmiList={setEmiList} modalData={modalData} isEdit={isEdit} />
+        <EmiForm
+          setEmiList={setEmiList}
+          modalData={modalData}
+          isEdit={isEdit}
+        />
       </CommonModal>
-
-
 
       <CommonModal
         modalTitle={"Delete EMI Record"}
@@ -185,7 +182,6 @@ export default function EmiSection() {
               {deleteLoad ? getConstant("LOADING_TEXT") : "Yes"}
             </button>
           </div>
-
         </div>
       </CommonModal>
     </>
