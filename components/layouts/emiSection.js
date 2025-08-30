@@ -5,6 +5,11 @@ import CommonModal from "../common/commonModal";
 import { postApiData } from "@/utilities/services/apiService";
 import { emiTableHeadCells } from "@/utilities/masterData";
 import DocumentTable from "../common/tabels/documentTable";
+import modalStyle from "@/styles/modal.module.scss";
+import commonStyle from "@/styles/common/common.module.scss";
+import { getConstant } from "@/utilities/utils";
+import { showToast } from "@/utilities/toastService";
+
 
 export default function EmiSection() {
   const [emiModal, setEmiModal] = useState(false);
@@ -12,6 +17,13 @@ export default function EmiSection() {
   const [emiList, setEmiList] = useState([]);
   const [selected, setSelected] = useState([]);
   const [deletePopup, setDeletePopup] = useState(false);
+  const [deleteLoad, setDeleteLoad] = useState(false);
+  const [deleteError, setDeleteError] = useState("");
+
+  const onClickAddDocument = () => {
+    setIsEdit(false);
+    setEmiModal(true);
+  };
 
   const fetchEmiList = async () => {
     try {
@@ -109,6 +121,36 @@ export default function EmiSection() {
         modalSize={"w-11/12 md:w-3/6"}
       >
         <EmiForm setEmiList={setEmiList} />
+      </CommonModal>
+
+
+
+      <CommonModal
+        modalTitle={"Delete Document"}
+        modalOpen={deletePopup}
+        setModalOpen={setDeletePopup}
+        modalSize={"w-11/12 md:w-3/8"}
+      >
+        <div className={modalStyle.deleteModal}>
+          <p className={modalStyle.conformationMsg}>
+            Are you sure you want to delete this document?
+          </p>
+          <div className={modalStyle.buttonsWrapper}>
+            <button
+              className={`${modalStyle.btn} ${modalStyle.cancel}`}
+              onClick={() => setDeletePopup(false)}
+            >
+              No
+            </button>
+            <button
+              className={`${modalStyle.btn} ${modalStyle.delete}`}
+              onClick={() => onClickDelete(selected)}
+            >
+              {deleteLoad ? getConstant("LOADING_TEXT") : "Yes"}
+            </button>
+          </div>
+
+        </div>
       </CommonModal>
     </>
   );
