@@ -93,7 +93,7 @@ export default function EmiForm({ setEmiList, modalData, isEdit, onClose }) {
     <div className="p-6 bg-white rounded-2xl">
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="flex  flex-col flex-wrap gap-4"
+        className="flex flex-col gap-4"
       >
         {/* Loan Name */}
         <div className="w-full">
@@ -109,9 +109,9 @@ export default function EmiForm({ setEmiList, modalData, isEdit, onClose }) {
           )}
         </div>
 
-        {/* Loan Amount */}
-        <div className="flex gap-4 flex-wrap md:flex-nowrap w-full">
-          <div className="w-1/2">
+        {/* Loan Amount & EMI */}
+        <div className="flex flex-col md:flex-row gap-4 w-full">
+          <div className="w-full md:w-1/2">
             <label className="block text-sm">Loan Amount</label>
             <input
               type="number"
@@ -128,7 +128,7 @@ export default function EmiForm({ setEmiList, modalData, isEdit, onClose }) {
               </p>
             )}
           </div>
-          <div className="w-1/2">
+          <div className="w-full md:w-1/2">
             <label className="block text-sm">EMI Amount</label>
             <input
               type="number"
@@ -147,77 +147,81 @@ export default function EmiForm({ setEmiList, modalData, isEdit, onClose }) {
           </div>
         </div>
 
-        {/* Tenure */}
-        <div className="w-1/2">
-          <label className="block text-sm">Tenure (months)</label>
-          <input
-            type="number"
-            placeholder="e.g. 12"
-            {...register("tenure_months", {
-              required: "Tenure is required",
-              min: { value: 1, message: "Must be at least 1 month" },
-            })}
-            className="w-full p-2 border rounded"
-          />
-          {errors.tenure_months && (
-            <p className="text-red-500 text-sm">
-              {errors.tenure_months.message}
-            </p>
-          )}
+        {/* Tenure & Start Date */}
+        <div className="flex flex-col md:flex-row gap-4 w-full">
+          <div className="w-full md:w-1/2">
+            <label className="block text-sm">Tenure (months)</label>
+            <input
+              type="number"
+              placeholder="e.g. 12"
+              {...register("tenure_months", {
+                required: "Tenure is required",
+                min: { value: 1, message: "Must be at least 1 month" },
+              })}
+              className="w-full p-2 border rounded"
+            />
+            {errors.tenure_months && (
+              <p className="text-red-500 text-sm">
+                {errors.tenure_months.message}
+              </p>
+            )}
+          </div>
+          <div className="w-full md:w-1/2">
+            <label className="block text-sm">Start Date</label>
+            <input
+              type="date"
+              {...register("start_date", {
+                required: "Start Date is required",
+              })}
+              className="w-full p-2 border rounded"
+            />
+            {errors.start_date && (
+              <p className="text-red-500 text-sm">
+                {errors.start_date.message}
+              </p>
+            )}
+          </div>
         </div>
 
-        {/* Start Date */}
-        <div className="w-1/2">
-          <label className="block text-sm">Start Date</label>
-          <input
-            type="date"
-            {...register("start_date", { required: "Start Date is required" })}
-            className="w-full p-2 border rounded"
-          />
-          {errors.start_date && (
-            <p className="text-red-500 text-sm">{errors.start_date.message}</p>
-          )}
+        {/* Payment Mode & Due Date */}
+        <div className="flex flex-col md:flex-row gap-4 w-full">
+          <div className="w-full md:w-1/2">
+            <label className="block text-sm">Payment Mode</label>
+            <select
+              {...register("payment_mode", {
+                required: "Payment Mode is required",
+              })}
+              className="w-full p-2 border rounded"
+            >
+              <option value="">-- Select Payment Mode --</option>
+              <option value="Bank Transfer">Bank Transfer</option>
+              <option value="Debit Card">Debit Card</option>
+              <option value="Credit Card">Credit Card</option>
+              <option value="UPI">UPI</option>
+              <option value="Cash">Cash</option>
+            </select>
+            {errors.payment_mode && (
+              <p className="text-red-500 text-sm">
+                {errors.payment_mode.message}
+              </p>
+            )}
+          </div>
+          <div className="w-full md:w-1/2">
+            <label className="block text-sm">Due Date (Monthly)</label>
+            <input
+              type="date"
+              {...register("due_date", { required: "Due Date is required" })}
+              className="w-full p-2 border rounded"
+            />
+            {errors.due_date && (
+              <p className="text-red-500 text-sm">{errors.due_date.message}</p>
+            )}
+          </div>
         </div>
 
-        {/* Payment Mode */}
-        <div className="w-1/2">
-          <label className="block text-sm">Payment Mode</label>
-          <select
-            {...register("payment_mode", {
-              required: "Payment Mode is required",
-            })}
-            className="w-full p-2 border rounded"
-          >
-            <option value="">-- Select Payment Mode --</option>
-            <option value="Bank Transfer">Bank Transfer</option>
-            <option value="Debit Card">Debit Card</option>
-            <option value="Credit Card">Credit Card</option>
-            <option value="UPI">UPI</option>
-            <option value="Cash">Cash</option>
-          </select>
-          {errors.payment_mode && (
-            <p className="text-red-500 text-sm">
-              {errors.payment_mode.message}
-            </p>
-          )}
-        </div>
-
-        {/* Due Date */}
-        <div className="w-1/2">
-          <label className="block text-sm">Due Date (Monthly)</label>
-          <input
-            type="date"
-            {...register("due_date", { required: "Due Date is required" })}
-            className="w-full p-2 border rounded"
-          />
-          {errors.due_date && (
-            <p className="text-red-500 text-sm">{errors.due_date.message}</p>
-          )}
-        </div>
-
-        {/* Status (Visible in edit mode) */}
+        {/* Status (Edit mode only) */}
         {isEdit && (
-          <div className="w-1/2">
+          <div className="w-full">
             <label className="block text-sm">Status</label>
             <select
               {...register("status")}
@@ -230,7 +234,7 @@ export default function EmiForm({ setEmiList, modalData, isEdit, onClose }) {
         )}
 
         {/* Submit */}
-        <div className="md:col-span-2">
+        <div className="w-full">
           <button
             type="submit"
             className="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700"
