@@ -156,7 +156,9 @@ export default function EmiForm({ setEmiList, modalData, isEdit, onClose }) {
             className="w-full p-2 border rounded"
           />
           {errors.tenure_months && (
-            <p className="text-red-500 text-sm">{errors.tenure_months.message}</p>
+            <p className="text-red-500 text-sm">
+              {errors.tenure_months.message}
+            </p>
           )}
         </div>
 
@@ -190,7 +192,9 @@ export default function EmiForm({ setEmiList, modalData, isEdit, onClose }) {
             <option value="Cash">Cash</option>
           </select>
           {errors.payment_mode && (
-            <p className="text-red-500 text-sm">{errors.payment_mode.message}</p>
+            <p className="text-red-500 text-sm">
+              {errors.payment_mode.message}
+            </p>
           )}
         </div>
 
