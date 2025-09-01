@@ -93,10 +93,10 @@ export default function EmiForm({ setEmiList, modalData, isEdit, onClose }) {
     <div className="p-6 bg-white rounded-2xl">
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="grid grid-cols-1 md:grid-cols-2 gap-4"
+        className="flex  flex-col flex-wrap gap-4"
       >
         {/* Loan Name */}
-        <div>
+        <div className="w-full">
           <label className="block text-sm">Loan/Item Name</label>
           <input
             type="text"
@@ -110,41 +110,45 @@ export default function EmiForm({ setEmiList, modalData, isEdit, onClose }) {
         </div>
 
         {/* Loan Amount */}
-        <div>
-          <label className="block text-sm">Loan Amount</label>
-          <input
-            type="number"
-            placeholder="Enter total loan amount"
-            {...register("loan_amount", {
-              required: "Loan Amount is required",
-              min: { value: 1, message: "Must be greater than 0" },
-            })}
-            className="w-full p-2 border rounded"
-          />
-          {errors.loan_amount && (
-            <p className="text-red-500 text-sm">{errors.loan_amount.message}</p>
-          )}
-        </div>
-
-        {/* EMI Amount */}
-        <div>
-          <label className="block text-sm">EMI Amount</label>
-          <input
-            type="number"
-            placeholder="Enter monthly EMI amount"
-            {...register("emi_amount", {
-              required: "EMI Amount is required",
-              min: { value: 1, message: "Must be greater than 0" },
-            })}
-            className="w-full p-2 border rounded"
-          />
-          {errors.emi_amount && (
-            <p className="text-red-500 text-sm">{errors.emi_amount.message}</p>
-          )}
+        <div className="flex gap-4 flex-wrap md:flex-nowrap w-full">
+          <div className="w-1/2">
+            <label className="block text-sm">Loan Amount</label>
+            <input
+              type="number"
+              placeholder="Enter total loan amount"
+              {...register("loan_amount", {
+                required: "Loan Amount is required",
+                min: { value: 1, message: "Must be greater than 0" },
+              })}
+              className="w-full p-2 border rounded"
+            />
+            {errors.loan_amount && (
+              <p className="text-red-500 text-sm">
+                {errors.loan_amount.message}
+              </p>
+            )}
+          </div>
+          <div className="w-1/2">
+            <label className="block text-sm">EMI Amount</label>
+            <input
+              type="number"
+              placeholder="Enter monthly EMI amount"
+              {...register("emi_amount", {
+                required: "EMI Amount is required",
+                min: { value: 1, message: "Must be greater than 0" },
+              })}
+              className="w-full p-2 border rounded"
+            />
+            {errors.emi_amount && (
+              <p className="text-red-500 text-sm">
+                {errors.emi_amount.message}
+              </p>
+            )}
+          </div>
         </div>
 
         {/* Tenure */}
-        <div>
+        <div className="w-1/2">
           <label className="block text-sm">Tenure (months)</label>
           <input
             type="number"
@@ -163,7 +167,7 @@ export default function EmiForm({ setEmiList, modalData, isEdit, onClose }) {
         </div>
 
         {/* Start Date */}
-        <div>
+        <div className="w-1/2">
           <label className="block text-sm">Start Date</label>
           <input
             type="date"
@@ -176,7 +180,7 @@ export default function EmiForm({ setEmiList, modalData, isEdit, onClose }) {
         </div>
 
         {/* Payment Mode */}
-        <div>
+        <div className="w-1/2">
           <label className="block text-sm">Payment Mode</label>
           <select
             {...register("payment_mode", {
@@ -199,7 +203,7 @@ export default function EmiForm({ setEmiList, modalData, isEdit, onClose }) {
         </div>
 
         {/* Due Date */}
-        <div>
+        <div className="w-1/2">
           <label className="block text-sm">Due Date (Monthly)</label>
           <input
             type="date"
@@ -213,7 +217,7 @@ export default function EmiForm({ setEmiList, modalData, isEdit, onClose }) {
 
         {/* Status (Visible in edit mode) */}
         {isEdit && (
-          <div>
+          <div className="w-1/2">
             <label className="block text-sm">Status</label>
             <select
               {...register("status")}
