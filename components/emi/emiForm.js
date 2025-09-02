@@ -102,7 +102,7 @@ export default function EmiForm({ setEmiList, modalData, isEdit, onClose }) {
             type="text"
             placeholder="e.g. Car Loan, Mobile EMI"
             {...register("loan_name", { required: "Loan Name is required" })}
-            className="w-full p-2 border rounded"
+            className="w-full p-2 rounded border border-gray-500 focus:outline-none "
           />
           {errors.loan_name && (
             <p className="text-red-500 text-sm">{errors.loan_name.message}</p>
@@ -120,7 +120,7 @@ export default function EmiForm({ setEmiList, modalData, isEdit, onClose }) {
                 required: "Loan Amount is required",
                 min: { value: 1, message: "Must be greater than 0" },
               })}
-              className="w-full p-2 border rounded"
+              className="w-full p-2 rounded border border-gray-500 focus:outline-none "
             />
             {errors.loan_amount && (
               <p className="text-red-500 text-sm">
@@ -137,7 +137,7 @@ export default function EmiForm({ setEmiList, modalData, isEdit, onClose }) {
                 required: "EMI Amount is required",
                 min: { value: 1, message: "Must be greater than 0" },
               })}
-              className="w-full p-2 border rounded"
+              className="w-full p-2 rounded border border-gray-500 focus:outline-none "
             />
             {errors.emi_amount && (
               <p className="text-red-500 text-sm">
@@ -158,7 +158,7 @@ export default function EmiForm({ setEmiList, modalData, isEdit, onClose }) {
                 required: "Tenure is required",
                 min: { value: 1, message: "Must be at least 1 month" },
               })}
-              className="w-full p-2 border rounded"
+              className="w-full p-2 rounded border border-gray-500 focus:outline-none "
             />
             {errors.tenure_months && (
               <p className="text-red-500 text-sm">
@@ -173,7 +173,7 @@ export default function EmiForm({ setEmiList, modalData, isEdit, onClose }) {
               {...register("start_date", {
                 required: "Start Date is required",
               })}
-              className="w-full p-2 border rounded"
+              className="w-full p-2 rounded border border-gray-500 focus:outline-none "
             />
             {errors.start_date && (
               <p className="text-red-500 text-sm">
@@ -191,7 +191,7 @@ export default function EmiForm({ setEmiList, modalData, isEdit, onClose }) {
               {...register("payment_mode", {
                 required: "Payment Mode is required",
               })}
-              className="w-full p-2 border rounded"
+              className="w-full p-2 rounded border border-gray-500 focus:outline-none "
             >
               <option value="">-- Select Payment Mode --</option>
               <option value="Bank Transfer">Bank Transfer</option>
@@ -211,7 +211,7 @@ export default function EmiForm({ setEmiList, modalData, isEdit, onClose }) {
             <input
               type="date"
               {...register("due_date", { required: "Due Date is required" })}
-              className="w-full p-2 border rounded"
+              className="w-full p-2 rounded border border-gray-500 focus:outline-none "
             />
             {errors.due_date && (
               <p className="text-red-500 text-sm">{errors.due_date.message}</p>
@@ -225,7 +225,7 @@ export default function EmiForm({ setEmiList, modalData, isEdit, onClose }) {
             <label className="block text-sm">Status</label>
             <select
               {...register("status")}
-              className="w-full p-2 border rounded"
+              className="w-full p-2 rounded border border-gray-500 focus:outline-none "
             >
               <option value="Active">Active</option>
               <option value="Closed">Closed</option>
