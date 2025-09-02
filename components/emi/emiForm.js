@@ -102,7 +102,7 @@ export default function EmiForm({ setEmiList, modalData, isEdit, onClose }) {
             type="text"
             placeholder="e.g. Car Loan, Mobile EMI"
             {...register("loan_name", { required: "Loan Name is required" })}
-            className="w-full p-2 rounded border border-gray-500 focus:outline-none "
+            className="w-full p-2 rounded border border-gray-500 focus:outline-blue-400 "
           />
           {errors.loan_name && (
             <p className="text-red-500 text-sm">{errors.loan_name.message}</p>
@@ -120,7 +120,7 @@ export default function EmiForm({ setEmiList, modalData, isEdit, onClose }) {
                 required: "Loan Amount is required",
                 min: { value: 1, message: "Must be greater than 0" },
               })}
-              className="w-full p-2 rounded border border-gray-500 focus:outline-none "
+              className="w-full p-2 rounded border border-gray-500 focus:outline-blue-400 "
             />
             {errors.loan_amount && (
               <p className="text-red-500 text-sm">
@@ -137,7 +137,7 @@ export default function EmiForm({ setEmiList, modalData, isEdit, onClose }) {
                 required: "EMI Amount is required",
                 min: { value: 1, message: "Must be greater than 0" },
               })}
-              className="w-full p-2 rounded border border-gray-500 focus:outline-none "
+              className="w-full p-2 rounded border border-gray-500 focus:outline-blue-400 "
             />
             {errors.emi_amount && (
               <p className="text-red-500 text-sm">
@@ -153,12 +153,12 @@ export default function EmiForm({ setEmiList, modalData, isEdit, onClose }) {
             <label className="block text-sm">Tenure (months)</label>
             <input
               type="number"
-              placeholder="e.g. 12"
+              placeholder="Enter tenure in months"
               {...register("tenure_months", {
                 required: "Tenure is required",
                 min: { value: 1, message: "Must be at least 1 month" },
               })}
-              className="w-full p-2 rounded border border-gray-500 focus:outline-none "
+              className="w-full p-2 rounded border border-gray-500 focus:outline-blue-400 "
             />
             {errors.tenure_months && (
               <p className="text-red-500 text-sm">
@@ -167,31 +167,12 @@ export default function EmiForm({ setEmiList, modalData, isEdit, onClose }) {
             )}
           </div>
           <div className="w-full md:w-1/2">
-            <label className="block text-sm">Start Date</label>
-            <input
-              type="date"
-              {...register("start_date", {
-                required: "Start Date is required",
-              })}
-              className="w-full p-2 rounded border border-gray-500 focus:outline-none "
-            />
-            {errors.start_date && (
-              <p className="text-red-500 text-sm">
-                {errors.start_date.message}
-              </p>
-            )}
-          </div>
-        </div>
-
-        {/* Payment Mode & Due Date */}
-        <div className="flex flex-col md:flex-row gap-4 w-full">
-          <div className="w-full md:w-1/2">
             <label className="block text-sm">Payment Mode</label>
             <select
               {...register("payment_mode", {
                 required: "Payment Mode is required",
               })}
-              className="w-full p-2 rounded border border-gray-500 focus:outline-none "
+              className="w-full p-2 rounded border border-gray-500 focus:outline-blue-400 "
             >
               <option value="">-- Select Payment Mode --</option>
               <option value="Bank Transfer">Bank Transfer</option>
@@ -206,12 +187,30 @@ export default function EmiForm({ setEmiList, modalData, isEdit, onClose }) {
               </p>
             )}
           </div>
+        </div>
+
+        <div className="flex flex-col md:flex-row gap-4 w-full">
+          <div className="w-full md:w-1/2">
+            <label className="block text-sm">Start Date</label>
+            <input
+              type="date"
+              {...register("start_date", {
+                required: "Start Date is required",
+              })}
+              className="w-full p-2 rounded border border-gray-500 focus:outline-blue-400 "
+            />
+            {errors.start_date && (
+              <p className="text-red-500 text-sm">
+                {errors.start_date.message}
+              </p>
+            )}
+          </div>
           <div className="w-full md:w-1/2">
             <label className="block text-sm">Due Date (Monthly)</label>
             <input
               type="date"
               {...register("due_date", { required: "Due Date is required" })}
-              className="w-full p-2 rounded border border-gray-500 focus:outline-none "
+              className="w-full p-2 rounded border border-gray-500 focus:outline-blue-400 "
             />
             {errors.due_date && (
               <p className="text-red-500 text-sm">{errors.due_date.message}</p>
@@ -225,7 +224,7 @@ export default function EmiForm({ setEmiList, modalData, isEdit, onClose }) {
             <label className="block text-sm">Status</label>
             <select
               {...register("status")}
-              className="w-full p-2 rounded border border-gray-500 focus:outline-none "
+              className="w-full p-2 rounded border border-gray-500 focus:outline-blue-400 "
             >
               <option value="Active">Active</option>
               <option value="Closed">Closed</option>
