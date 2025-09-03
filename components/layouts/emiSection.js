@@ -9,6 +9,9 @@ import modalStyle from "@/styles/modal.module.scss";
 import commonStyle from "@/styles/common/common.module.scss";
 import { getConstant } from "@/utilities/utils";
 import { showToast } from "@/utilities/toastService";
+import { FaPlusCircle } from "react-icons/fa";
+import emiSecStyle from "@/styles/emiSec.module.scss";
+
 
 export default function EmiSection() {
   const [emiModal, setEmiModal] = useState(false);
@@ -87,6 +90,18 @@ export default function EmiSection() {
       >
         Add New EMI
       </button>
+      <div className={` mt-4 ml-5`}>
+        <div className="flex justify-between items-center">
+          <h5>All Records</h5>
+          <button
+            onClick={onClickAddDocument}
+            className={"flex items-center " + emiSecStyle.addButton}
+          >
+            <FaPlusCircle className="mr-3 text-[12px] md:text-[16px]" />
+            Add EmI
+          </button>
+        </div>
+      </div>
 
       <DocumentTable
         rows={emiList}
