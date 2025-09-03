@@ -89,7 +89,7 @@ export default function EmiSection() {
       >
         Add New EMI
       </button> */}
-      <div className={` mt- ml-5`}>
+      <div className={` my-3 ml-5`}>
         <div className="flex justify-between items-center">
           <h5>EMI Records</h5>
           <button
