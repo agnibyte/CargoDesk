@@ -12,7 +12,6 @@ import { showToast } from "@/utilities/toastService";
 import { FaPlusCircle } from "react-icons/fa";
 import emiSecStyle from "@/styles/emiSec.module.scss";
 
-
 export default function EmiSection() {
   const [emiModal, setEmiModal] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
@@ -83,22 +82,22 @@ export default function EmiSection() {
   console.log("selected", selected);
   return (
     <>
-      <h1 className="text-2xl font-bold mb-4">EMI and Truck Details</h1>
-      <button
+      {/* <h1 className="text-2xl font-bold mb-4">dd</h1> */}
+      {/* <button
         className="mt-4 px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600"
         onClick={() => setEmiModal(true)}
       >
         Add New EMI
-      </button>
-      <div className={` mt-4 ml-5`}>
+      </button> */}
+      <div className={` mt- ml-5`}>
         <div className="flex justify-between items-center">
-          <h5>All Records</h5>
+          <h5>EMI Records</h5>
           <button
             onClick={onClickAddDocument}
             className={"flex items-center " + emiSecStyle.addButton}
           >
             <FaPlusCircle className="mr-3 text-[12px] md:text-[16px]" />
-            Add EmI
+            Add EMI
           </button>
         </div>
       </div>
