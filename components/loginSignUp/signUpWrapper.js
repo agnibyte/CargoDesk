@@ -50,7 +50,6 @@ export default function SignUpWrapper() {
           type: "error",
         });
       }
-      console.log("User added:", response.data);
       // reset();
     } catch (error) {
       console.error("Failed to add user:", error);

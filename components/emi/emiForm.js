@@ -68,14 +68,12 @@ export default function EmiForm({ setEmiList, modalData, isEdit, onClose }) {
     }
 
     if (response.status) {
-      console.log("isEdit", isEdit);
       if (isEdit) {
         setEmiList((prev) =>
           prev.map((emi) =>
             emi.id == modalData.id ? { ...emi, ...data } : emi
           )
         );
-        console.log("modalData.id ", modalData.id);
       } else {
         setEmiList((prev) => [
           ...prev,

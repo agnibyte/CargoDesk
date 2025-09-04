@@ -37,7 +37,6 @@ export function verifyUserController(request) {
     };
     const user_id = request.user_id;
     const password = request.password; //test
-    console.log("user_id, password", request);
     verifyUserModel(user_id, password)
       .then((result) => {
         if (result.status) {

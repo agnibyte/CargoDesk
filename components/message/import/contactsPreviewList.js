@@ -18,7 +18,6 @@ export default function ContactsPreviewList({
   const [errorMsg, setErrorMsg] = useState("");
 
   const handleDelete = (index) => {
-    console.log("Deleting contact:", contacts[index]);
     showToast({
       message: "Contact successfully removed from preview list.",
       type: "success",

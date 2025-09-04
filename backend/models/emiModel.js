@@ -31,7 +31,6 @@ export function addNewEmiModel(data) {
 
     executeQuery(insertQuery, payload)
       .then((result) => {
-        console.log("result", result);
         if (result && result.affectedRows > 0) {
           response.status = true;
           response.id = result.insertId;

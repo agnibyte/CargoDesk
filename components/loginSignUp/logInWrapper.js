@@ -56,7 +56,6 @@ export default function LoginWrapper() {
       };
       const response = await postApiData("VERIFY_USER_LOGIN", payload);
       // handle auth token or redirect
-      console.log("response", response);
       if (response.status) {
         // setSuccessMsg(response.message);
         showToast({

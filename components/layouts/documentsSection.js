@@ -35,7 +35,7 @@ export default function DocumentsSection({
     setIsEdit(true);
   };
   var dateString = moment.unix("1757008114").format("MM/DD/YYYY");
-  console.log('dateString', dateString)
+  // console.log('dateString', dateString)
 
   const onClickDelete = async (ids) => {
     const payload = {
