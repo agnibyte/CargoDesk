@@ -79,7 +79,6 @@ export default function EmiSection() {
     setDeleteLoad(false);
   };
 
-  console.log("selected", selected);
   return (
     <>
       {/* <h1 className="text-2xl font-bold mb-4">dd</h1> */}
