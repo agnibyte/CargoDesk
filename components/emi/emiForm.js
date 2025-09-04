@@ -3,6 +3,7 @@
 import { useForm } from "react-hook-form";
 import { useEffect, useState } from "react";
 import { postApiData } from "@/utilities/services/apiService";
+import { showToast } from "@/utilities/toastService";
 
 export default function EmiForm({ setEmiList, modalData, isEdit, onClose }) {
   const defaultFormData = {
@@ -74,7 +75,9 @@ export default function EmiForm({ setEmiList, modalData, isEdit, onClose }) {
             emi.id == modalData.id ? { ...emi, ...data } : emi
           )
         );
+        showToast(response.message, "success");
       } else {
+        showToast(response.message, "success");
         setEmiList((prev) => [
           ...prev,
           { ...data, id: response.id, status: 1 },
@@ -85,6 +88,7 @@ export default function EmiForm({ setEmiList, modalData, isEdit, onClose }) {
       if (onClose) onClose(); // close modal after save
     } else {
       console.error("Failed:", response.message);
+      showToast(response.message, "error");
     }
 
     setApiLoading(false);
