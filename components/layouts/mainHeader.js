@@ -210,7 +210,7 @@ export default function MainHeader({ pageData = {} }) {
               priority
             />
             <div className="hidden sm:block">
-              <h1 className="text-xl font-bold text-gray-900">Dashboard</h1>
+              <h1 className="text-xl font-bold text-gray-900">CargoDesk</h1>
               {currentPageTitle && (
                 <p className="text-xs text-gray-500">{currentPageTitle}</p>
               )}
