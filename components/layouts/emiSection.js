@@ -111,7 +111,6 @@ export default function EmiSection() {
         onClickDelete={() => {
           setDeletePopup(true);
         }}
-        // isFilterApplied={appliedFilter.length > 0}
       />
       {/* <div className="mt-6 overflow-x-auto">
         <table className="min-w-full bg-white border">
