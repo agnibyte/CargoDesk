@@ -34,6 +34,8 @@ export default function DocumentsSection({
     setReminderModal(true);
     setIsEdit(true);
   };
+  var dateString = moment.unix("1757008114").format("MM/DD/YYYY");
+  console.log('dateString', dateString)
 
   const onClickDelete = async (ids) => {
     const payload = {
