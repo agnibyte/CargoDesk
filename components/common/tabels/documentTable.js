@@ -260,6 +260,7 @@ const DocumentTable = ({
   const handleChangeRowsPerPage = (event) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
+    window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
   useEffect(() => {
@@ -360,10 +361,12 @@ const DocumentTable = ({
                       // Optional formatting logic based on field type
                       if (headCell.id === "vehicleNo")
                         value = formatVehicleNumber(value);
-                      if (headCell.id === "expiryDate" || headCell.id.includes("date"))
+                      if (
+                        headCell.id === "expiryDate" ||
+                        headCell.id.includes("date")
+                      )
                         value = formatDate(value);
-                      if (headCell.formatPrice)
-                        value = formatPrice(value);
+                      if (headCell.formatPrice) value = formatPrice(value);
                       if (headCell.id === "alertDate") {
                         value = getDateBeforeDays(
                           row.expiryDate,
