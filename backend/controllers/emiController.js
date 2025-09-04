@@ -9,10 +9,7 @@ export function addNewEmiController(request) {
     addNewEmiModel(request)
       .then((result) => {
         if (result.status) {
-          response.status = true;
-          response.message = result.message;
-
-          resolve(response);
+          resolve(result);
         } else {
           response.message = result.message;
           resolve(response);

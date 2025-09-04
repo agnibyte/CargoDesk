@@ -6,10 +6,17 @@ const response = {
 };
 
 export function addNewEmiModel(data) {
-
   return new Promise((resolve) => {
     const insertQuery = `INSERT INTO emi_master SET ?`;
-    const { loan_name, loan_amount, emi_amount, tenure_months, start_date, payment_mode, due_date } = data;
+    const {
+      loan_name,
+      loan_amount,
+      emi_amount,
+      tenure_months,
+      start_date,
+      payment_mode,
+      due_date,
+    } = data;
 
     const payload = {
       loan_name,
@@ -24,8 +31,10 @@ export function addNewEmiModel(data) {
 
     executeQuery(insertQuery, payload)
       .then((result) => {
+        console.log("result", result);
         if (result && result.affectedRows > 0) {
           response.status = true;
+          response.id = result.insertId;
           response.message = "EMI deatails added successfully";
 
           resolve(response);
@@ -49,23 +58,27 @@ export function addNewEmiModel(data) {
   });
 }
 
-
 export function getAllEmisModel() {
   return new Promise((resolve, reject) => {
     const selectQuery = `SELECT * FROM emi_master ORDER BY created_at DESC`;
 
     executeQuery(selectQuery)
       .then((rows) => {
-        resolve({ status: true, data: rows, message: "EMIs fetched successfully" });
+        resolve({
+          status: true,
+          data: rows,
+          message: "EMIs fetched successfully",
+        });
       })
       .catch((error) => {
         console.error("Error fetching EMIs:", error);
-        reject({ status: false, message: "Database error while fetching EMIs" });
+        reject({
+          status: false,
+          message: "Database error while fetching EMIs",
+        });
       });
   });
 }
-
-
 
 // ✅ Update EMI entry
 export function updateEmiModel(id, data) {
@@ -125,10 +138,15 @@ export function deleteEmiModel(ids) {
         if (result.affectedRows > 0) {
           resolve({
             status: true,
-            message: `${result.affectedRows} EMI entr${result.affectedRows > 1 ? "ies" : "y"} deleted successfully`,
+            message: `${result.affectedRows} EMI entr${
+              result.affectedRows > 1 ? "ies" : "y"
+            } deleted successfully`,
           });
         } else {
-          resolve({ status: false, message: "No EMI entries found for given IDs" });
+          resolve({
+            status: false,
+            message: "No EMI entries found for given IDs",
+          });
         }
       })
       .catch((error) => {
@@ -140,5 +158,3 @@ export function deleteEmiModel(ids) {
       });
   });
 }
-
-
