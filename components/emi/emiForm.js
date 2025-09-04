@@ -77,7 +77,10 @@ export default function EmiForm({ setEmiList, modalData, isEdit, onClose }) {
         );
         console.log("modalData.id ", modalData.id);
       } else {
-        setEmiList((prev) => [...prev, { ...data, id: response.id }]);
+        setEmiList((prev) => [
+          ...prev,
+          { ...data, id: response.id, status: 1 },
+        ]);
       }
 
       reset(defaultFormData);
