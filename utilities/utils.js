@@ -41,8 +41,7 @@ export const getDateBeforeDays = (date, days) => {
   return moment(date).subtract(days, "days").format("DD MMM, YYYY");
 };
 
-export const truncateString = (input) => {
-  const maxLength = 20;
+export const truncateString = (input, maxLength = 20) => {
   if (!input) return "";
   const words = input.split(" ");
   if (words.length > 3 || input.length > maxLength) {

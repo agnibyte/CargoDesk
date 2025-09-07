@@ -11,6 +11,7 @@ import { RiSendPlaneFill } from "react-icons/ri";
 import Link from "next/link";
 import { ImSpinner9 } from "react-icons/im";
 import { showToast } from "@/utilities/toastService";
+import { truncateString } from "@/utilities/utils";
 
 export default function MessageWrapper({
   pageData,
@@ -377,16 +378,18 @@ export default function MessageWrapper({
               />
 
               <button
-                className={`${styles.toggleBtn} ${selectedTab === "contacts" ? styles.active : ""
-                  }`}
+                className={`${styles.toggleBtn} ${
+                  selectedTab === "contacts" ? styles.active : ""
+                }`}
                 onClick={() => handleToggle("contacts")}
                 type="button"
               >
                 Contacts ({contactsList.length})
               </button>
               <button
-                className={`${styles.toggleBtn} ${selectedTab === "groups" ? styles.active : ""
-                  }`}
+                className={`${styles.toggleBtn} ${
+                  selectedTab === "groups" ? styles.active : ""
+                }`}
                 onClick={() => handleToggle("groups")}
                 type="button"
               >
@@ -401,10 +404,11 @@ export default function MessageWrapper({
                     {contactsList.map((contact) => (
                       <label
                         key={contact.id}
-                        className={`${styles.contactItem} ${formData.contacts.find((c) => c.id === contact.id)
+                        className={`${styles.contactItem} ${
+                          formData.contacts.find((c) => c.id === contact.id)
                             ? styles.selected
                             : ""
-                          }`}
+                        }`}
                       >
                         <input
                           type="checkbox"
@@ -416,8 +420,11 @@ export default function MessageWrapper({
                         />
 
                         <div className="flex justify-between items-start w-full">
-                          <span className={styles.contactName}>
-                            {contact.name}
+                          <span
+                            className={styles.contactName}
+                            title={contact.name}
+                          >
+                            {truncateString(contact.name)}
                           </span>
                           <span className={styles.contactNo}>
                             {contact.contactNo}
@@ -445,14 +452,18 @@ export default function MessageWrapper({
                     {groupsList.map((contact) => (
                       <div
                         key={contact.id}
-                        className={`${styles.contactItem} ${formData.groups.find((g) => g.id === contact.id)
+                        className={`${styles.contactItem} ${
+                          formData.groups.find((g) => g.id === contact.id)
                             ? styles.selected
                             : ""
-                          }`}
+                        }`}
                         onClick={() => handleGroupClick(contact)}
                       >
-                        <span className={styles.contactName}>
-                          {contact.groupName}
+                        <span
+                          className={styles.contactName}
+                          title={contact.groupName}
+                        >
+                          {truncateString(contact.groupName)}
                         </span>
                         <div className="w-5 h-5 rounded-full text-white bg-gray-400 flex items-center justify-center">
                           {contact.contactIds.length}
