@@ -80,6 +80,41 @@ export default function LoginWrapper() {
       setLoading(false);
     }
   };
+  const tempLogIn = async () => {
+    setLoading(true);
+    setApiError("");
+
+    try {
+      const payload = {
+        email_id: formData.email_id.trim(),
+        password: formData.password.trim(),
+      };
+      const response = await postApiData("VERIFY_USER_LOGIN", payload);
+      // handle auth token or redirect
+      if (response.status) {
+        // setSuccessMsg(response.message);
+        showToast({
+          message: response.message,
+          type: "success",
+        });
+        router.push("/"); // Redirect to home page after successful login
+      } else {
+        // setApiError(response.message);
+        showToast({
+          message: response.message,
+          type: "error",
+        });
+      }
+    } catch (err) {
+      // setApiError("Invalid email_id or password");
+      showToast({
+        message: "Invalid email_id or password",
+        type: "error",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   const sectionTitle = {
     login: "Login",
