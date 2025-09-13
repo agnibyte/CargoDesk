@@ -86,8 +86,8 @@ export default function LoginWrapper() {
 
     try {
       const payload = {
-        email_id: formData.email_id.trim(),
-        password: formData.password.trim(),
+        email_id: "suraj@agnibyte.com",
+        password: "Agnibyte@2025",
       };
       const response = await postApiData("VERIFY_USER_LOGIN", payload);
       // handle auth token or redirect
@@ -225,6 +225,14 @@ export default function LoginWrapper() {
               disabled={loading}
             >
               {loading ? "Logging in..." : "Log In"}
+            </button>
+            <button
+              type="button"
+              onClick={tempLogIn}
+              className="w-full bg-white text-black font-semibold py-2 rounded hover:bg-opacity-80 transition cursor-pointer mb-3 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white/50 focus-visible:ring-offset-2"
+              disabled={loading}
+            >
+              {loading ? "Logging in..." : "Temp Log In"}
             </button>
 
             {/* Success Message */}
