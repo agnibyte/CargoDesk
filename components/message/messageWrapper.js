@@ -357,7 +357,7 @@ export default function MessageWrapper({
           </div>
         </div>
 
-        <div className="flex flex-col">
+        <div className="flex flex-col justify-between">
           <div className={styles.contactSection}>
             <Link
               href="/messager/manage-contacts"
