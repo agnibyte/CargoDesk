@@ -212,13 +212,17 @@ const DocumentTable = ({
   selected,
   setSelected,
   searchTerm = "",
-  rowsPerPageOptions = [5, 10, 25],
+  rowsPerPageOptions = [],
 }) => {
+  const defaultRowsPerPage = [5, 10, 25];
+  const rowsPerPageOpts =
+    rowsPerPageOptions.length > 0 ? rowsPerPageOptions : defaultRowsPerPage;
+
   const [order, setOrder] = useState("asc");
   const [orderBy, setOrderBy] = useState(headCells[0].id);
   const [page, setPage] = useState(0);
   const [dense, setDense] = useState(false);
-  const [rowsPerPage, setRowsPerPage] = useState(rowsPerPageOptions[0]);
+  const [rowsPerPage, setRowsPerPage] = useState(rowsPerPageOpts[0]);
 
   const handleRequestSort = (event, property) => {
     const isAsc = orderBy === property && order === "asc";
@@ -421,7 +425,7 @@ const DocumentTable = ({
           </Table>
         </TableContainer>
         <TablePagination
-          rowsPerPageOptions={rowsPerPageOptions}
+          rowsPerPageOptions={rowsPerPageOpts}
           component="div"
           count={rows.length}
           rowsPerPage={rowsPerPage}
