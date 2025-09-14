@@ -2,6 +2,7 @@ import React, { useState } from "react";
 import CommonModal from "../common/commonModal";
 import { postApiData } from "@/utilities/services/apiService";
 import DocumentsSection from "../layouts/documentsSection";
+import AddDocumentForm from "../common/molecules/addDocumentForm";
 
 export default function DocumetsWrapper({ pageData }) {
   const [reminderModal, setReminderModal] = useState(false);
@@ -9,7 +10,9 @@ export default function DocumetsWrapper({ pageData }) {
   const [updateLoading, setUpdateLoading] = useState(false);
   const [addLoading, setAddLoading] = useState(false);
   const [reminderData, setReminderData] = useState("");
-  const [documentTableData, setDocumentTableData] = useState([]);
+  const [documentTableData, setDocumentTableData] = useState(
+    pageData.documents || []
+  );
 
   const onClickAddReminder = () => {
     setIsEdit(false);
