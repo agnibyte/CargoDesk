@@ -76,6 +76,7 @@ export default function DocumetsWrapper({ pageData }) {
         tableData={documentTableData}
         setTableData={setDocumentTableData}
         onClickAddDocument={onClickAddReminder}
+        rowsPerPageOptions={[10, 25, 50]}
       />
 
       <CommonModal

@@ -19,6 +19,7 @@ export default function DocumentsSection({
   tableData,
   setTableData,
   onClickAddDocument = () => {},
+  rowsPerPageOptions = [],
 }) {
   const [documentsTypeList, setDocumentsTypeList] = useState([]);
   const [deletePopup, setDeletePopup] = useState(false);
@@ -144,6 +145,7 @@ export default function DocumentsSection({
           setDeletePopup(true);
         }}
         isFilterApplied={appliedFilter.length > 0}
+        rowsPerPageOptions={rowsPerPageOptions}
         // renderActions={(id) => (
         //   <div className="d-flex justify-content-center">
         //     <button check
