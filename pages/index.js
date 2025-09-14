@@ -66,6 +66,7 @@ export async function getServerSideProps(context) {
 
   // Token is valid → fetch user details from DB
   const [userDetails] = await Promise.all([getUserDetailsById(decoded.userId)]);
+  console.log("userDetails", userDetails);
 
   if (!userDetails?.status || !userDetails.data) {
     // User not found → clear cookie & redirect

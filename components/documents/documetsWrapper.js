@@ -1,6 +1,7 @@
 import React, { useState } from "react";
 import CommonModal from "../common/commonModal";
 import { postApiData } from "@/utilities/services/apiService";
+import DocumentsSection from "../layouts/documentsSection";
 
 export default function DocumetsWrapper({ pageData }) {
   const [reminderModal, setReminderModal] = useState(false);
