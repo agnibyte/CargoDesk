@@ -33,6 +33,7 @@ export const docTableHeadCells = [
     disablePadding: false,
     label: "Document Type",
     format: true,
+    upperCase: true,
   },
   {
     id: "expiryDate",

@@ -16,6 +16,7 @@ import { FiEdit } from "react-icons/fi";
 import commonStyle from "@/styles/common/common.module.scss";
 
 import {
+  convertToUpperCase,
   formatDate,
   formatPrice,
   formatVehicleNumber,
@@ -372,6 +373,7 @@ const DocumentTable = ({
                       )
                         value = formatDate(value);
                       if (headCell.formatPrice) value = formatPrice(value);
+                      if (headCell.upperCase) value = convertToUpperCase(value);
                       if (headCell.id === "alertDate") {
                         value = getDateBeforeDays(
                           row.expiryDate,
