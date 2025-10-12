@@ -220,3 +220,10 @@ export function formatPrice(amount, currency = false) {
     maximumFractionDigits: 2,
   }).format(amount);
 }
+
+export function convertToUpperCase(text) {
+  if (typeof text !== "string") {
+    throw new Error("Input must be a string");
+  }
+  return text.toUpperCase();
+}
