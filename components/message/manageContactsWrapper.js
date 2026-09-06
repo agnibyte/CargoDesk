@@ -36,7 +36,7 @@ export default function ManageContactsWrapper({
   ];
 
   const [selectedTab, setSelectedTab] = useState(
-    pageData.tab || contactsTabs[0].value
+    pageData.tab || contactsTabs[0].value,
   );
 
   const handleTabClick = (tabId) => {
@@ -58,91 +58,90 @@ export default function ManageContactsWrapper({
   });
 
   return (
-    <>
-      <div className={dashboardStyle.dashboardContainer}>
-        <div className="m-5">
-          <div className="flex flex-col shadow-lg rounded-lg">
-            <div className="flex flex-col shadow-lg rounded-lg">
-              <div className="card-header flex flex-col md:flex-row md:justify-between md:items-center p-4 gap-3 bg-gradient-to-r from-[#f27121] via-[#e94057] to-[#8a2387] rounded-t-lg">
-                <h2 className="text-white text-lg font-semibold">
-                  Manage Contacts
-                </h2>
-
-                {selectedTab === "allContacts" && (
-                  <div className="relative w-full md:w-1/3">
-                    <input
-                      type="text"
-                      placeholder="Search contacts..."
-                      className="w-full py-2 pl-10 pr-4 rounde border-b border-gray-300 focus:outline-none focus:border-blue-600   shadow-sm text-sm"
-                      onChange={handleSearch}
-                      value={searchTerm}
-                    />
-                    <span className="absolute left-3 top-2.5 text-gray-400">
-                      <FiSearch />
-                    </span>
-
-                    {searchTerm && (
-                      <button
-                        type="button"
-                        onClick={() => setSearchTerm("")}
-                        className="absolute right-3 top-1/2 transform -translate-y-1/2 text-gray-400 hover:text-white focus:outline-none"
-                      >
-                        <FiX size={18} />
-                      </button>
-                    )}
-                  </div>
-                )}
-              </div>
-            </div>
-
-            <div className={dashboardStyle["mainTabel"]}>
-              <TabComponent
-                tabsData={contactsTabs}
-                setSelectedTab={handleTabClick}
-                selectedTab={selectedTab}
-              />
-            </div>
-          </div>
-          {selectedTab == "allContacts" ? (
-            <>
-              <AllContactsTab
-                pageData={pageData}
-                contactsList={filteredContacts}
-                setContactsList={setContactsList}
-                searchTerm={searchTerm}
-                setSelectedTab={setSelectedTab}
-              />
-            </>
-          ) : selectedTab == "allGroups" ? (
-            <>
-              <AllGroupsSection
-                pageData={pageData}
-                contactsList={filteredContacts}
-                setContactsList={setContactsList}
-                searchTerm={searchTerm}
-                groupsList={groupsList}
-                setGroupsList={setGroupsList}
-                setSelectedTab={setSelectedTab}
-              />
-            </>
-          ) : selectedTab == "import" ? (
-            <>
-              <ImportContactsTab
-                pageData={pageData}
-                setContactsList={setContactsList}
-              />
-            </>
-          ) : selectedTab == "createGroup" ? (
-            <>
-              <CreateGroupTab
-                pageData={pageData}
-                setGroupsList={setGroupsList}
-                contactsList={contactsList}
-              />
-            </>
-          ) : null}
+    <div className="w-full space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div>
+          <span className="text-xs font-bold tracking-widest text-slate-400 uppercase">
+            MESSENGER
+          </span>
+          <h1 className="text-2xl sm:text-3xl font-extrabold text-slate-900 tracking-tight mt-1 mb-1">
+            Manage Contacts & Groups
+          </h1>
+          <p className="text-xs sm:text-sm text-slate-500 font-medium">
+            Add, import, organize, and create groups for seamless messaging.
+          </p>
         </div>
+
+        {selectedTab === "allContacts" && (
+          <div className="relative w-full sm:w-72">
+            <FiSearch className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+            <input
+              type="text"
+              placeholder="Search contacts..."
+              className="w-full pl-10 pr-4 py-2 text-xs md:text-sm bg-white border border-slate-200 hover:border-slate-300 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 outline-none transition-all shadow-2xs"
+              onChange={handleSearch}
+              value={searchTerm}
+            />
+            {searchTerm && (
+              <button
+                type="button"
+                onClick={() => setSearchTerm("")}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-700 focus:outline-none"
+              >
+                <FiX size={16} />
+              </button>
+            )}
+          </div>
+        )}
       </div>
-    </>
+
+      <div className="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-4 md:p-6 space-y-5">
+        <div className="border-b border-slate-200/80">
+          <TabComponent
+            tabsData={contactsTabs}
+            setSelectedTab={handleTabClick}
+            selectedTab={selectedTab}
+          />
+        </div>
+        {selectedTab == "allContacts" ? (
+          <>
+            <AllContactsTab
+              pageData={pageData}
+              contactsList={filteredContacts}
+              setContactsList={setContactsList}
+              searchTerm={searchTerm}
+              setSelectedTab={setSelectedTab}
+            />
+          </>
+        ) : selectedTab == "allGroups" ? (
+          <>
+            <AllGroupsSection
+              pageData={pageData}
+              contactsList={filteredContacts}
+              setContactsList={setContactsList}
+              searchTerm={searchTerm}
+              groupsList={groupsList}
+              setGroupsList={setGroupsList}
+              setSelectedTab={setSelectedTab}
+            />
+          </>
+        ) : selectedTab == "import" ? (
+          <>
+            <ImportContactsTab
+              pageData={pageData}
+              setContactsList={setContactsList}
+            />
+          </>
+        ) : selectedTab == "createGroup" ? (
+          <>
+            <CreateGroupTab
+              pageData={pageData}
+              setGroupsList={setGroupsList}
+              contactsList={contactsList}
+            />
+          </>
+        ) : null}
+      </div>
+    </div>
   );
 }
