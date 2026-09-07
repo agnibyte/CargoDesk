@@ -450,7 +450,10 @@ export default function MessageWrapper({
               </div>
 
               {/* Textarea Box with Blue Border */}
-              <div className="relative rounded-2xl border border-blue-400 focus-within:ring-2 focus-within:ring-blue-500/20 bg-white p-4 transition-all">
+              <div
+                className="relative rounded-2xl border border-blue-400 focus-within:ring-2 focus-within:ring-blue-500/20 bg-white p-4 transition-all"
+                id="messageInput"
+              >
                 <textarea
                   rows={5}
                   value={formData.message}

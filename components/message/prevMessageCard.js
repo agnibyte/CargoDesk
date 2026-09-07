@@ -1,3 +1,4 @@
+import { scrollSectionIntoView } from "@/utilities/utils";
 import React, { useState, useRef, useEffect } from "react";
 import {
   FiCopy,
@@ -49,11 +50,11 @@ export default function PrevMessageCard({
 
   const theme = pastelThemes[index % pastelThemes.length];
   const isCurrentlyConfirming = Boolean(
-    isConfirm && (isConfirm.id == item.id || isConfirm == item.id)
+    isConfirm && (isConfirm.id == item.id || isConfirm == item.id),
   );
   const isDeletingThis = Boolean(
     deleteMsgLoading &&
-      (toDelete == item.id || (toDelete && toDelete.id == item.id))
+    (toDelete == item.id || (toDelete && toDelete.id == item.id)),
   );
 
   // Extract title (first line or truncated first 20 chars) and body preview
@@ -75,6 +76,7 @@ export default function PrevMessageCard({
 
   const handleUse = () => {
     handleChange("message", item.message);
+    scrollSectionIntoView("messageInput");
     if (setIsConfirm) setIsConfirm(false);
   };
 
@@ -89,7 +91,8 @@ export default function PrevMessageCard({
 
   return (
     <div
-      className={`contact-card group relative overflow-hidden bg-white rounded-2xl p-4 border shadow-2xs hover:shadow-md transition-all duration-300 flex flex-col justify-between min-h-[135px] ${
+      onClick={handleUse}
+      className={`contact-card group relative overflow-hidden bg-white rounded-2xl p-4 border shadow-2xs hover:shadow-md transition-all duration-300 flex flex-col justify-between cursor-pointer min-h-[135px] ${
         isCurrentlyConfirming
           ? "confirmContactDelete border-red-600"
           : `border-slate-200/70 ${theme.hoverBorder}`
@@ -172,7 +175,10 @@ export default function PrevMessageCard({
             <div className="relative shrink-0" ref={menuRef}>
               <button
                 type="button"
-                onClick={() => setMenuOpen(!menuOpen)}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setMenuOpen(!menuOpen);
+                }}
                 className="p-1 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
                 title="Options"
               >
@@ -185,6 +191,8 @@ export default function PrevMessageCard({
                     type="button"
                     onClick={() => {
                       setMenuOpen(false);
+                      e.stopPropagation();
+
                       handleUse();
                     }}
                     className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50 cursor-pointer"
@@ -196,6 +204,8 @@ export default function PrevMessageCard({
                     type="button"
                     onClick={() => {
                       setMenuOpen(false);
+                      e.stopPropagation();
+
                       handleCopy(item);
                     }}
                     className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-slate-700 hover:bg-slate-50 cursor-pointer"
@@ -205,7 +215,10 @@ export default function PrevMessageCard({
                   </button>
                   <button
                     type="button"
-                    onClick={onConfirmDelete}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onConfirmDelete();
+                    }}
                     className="w-full flex items-center gap-2 px-3 py-1.5 text-xs text-rose-600 hover:bg-rose-50 cursor-pointer"
                   >
                     <FiTrash2 className="w-3.5 h-3.5 text-rose-500" />
@@ -218,7 +231,7 @@ export default function PrevMessageCard({
 
           {/* Bottom Row: Actions [+ Use] [Copy] [Delete] */}
           {/* <div className="flex items-center gap-2 pt-2 border-t border-slate-100/80"> */}
-            {/* + Use Button
+          {/* + Use Button
             <button
               type="button"
               onClick={handleUse}
@@ -229,7 +242,7 @@ export default function PrevMessageCard({
               <span>Use</span>
             </button> */}
 
-            {/* Copy Button 
+          {/* Copy Button 
             <button
               type="button"
               onClick={() => handleCopy(item)}
@@ -249,7 +262,7 @@ export default function PrevMessageCard({
               )}
             </button>*/}
 
-            {/* Delete Button
+          {/* Delete Button
             <button
               type="button"
               onClick={onConfirmDelete}
