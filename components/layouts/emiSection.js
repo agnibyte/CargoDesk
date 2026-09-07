@@ -12,6 +12,7 @@ import { FiPlus } from "react-icons/fi";
 export default function EmiSection() {
   const [emiModal, setEmiModal] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
+  const [loading, setLoading] = useState(true);
   const [emiList, setEmiList] = useState([]);
   const [selected, setSelected] = useState([]);
   const [deletePopup, setDeletePopup] = useState(false);
@@ -26,6 +27,7 @@ export default function EmiSection() {
   };
 
   const fetchEmiList = async () => {
+    setLoading(true);
     try {
       const response = await postApiData("GET_ALL_EMI", {});
       if (response.status && response.data) {
@@ -35,6 +37,8 @@ export default function EmiSection() {
       }
     } catch (error) {
       console.error("Error fetching EMI list:", error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -87,9 +91,13 @@ export default function EmiSection() {
           <h2 className="text-lg md:text-xl font-bold text-slate-900 tracking-tight">
             EMI Records
           </h2>
-          <span className="inline-flex items-center justify-center bg-blue-100 text-blue-600 text-xs font-bold px-2.5 py-0.5 rounded-full">
-            {emiList.length}
-          </span>
+          {loading ? (
+            <span className="inline-flex items-center justify-center bg-blue-100/70 w-8 h-5 rounded-full animate-pulse" />
+          ) : (
+            <span className="inline-flex items-center justify-center bg-blue-100 text-blue-600 text-xs font-bold px-2.5 py-0.5 rounded-full">
+              {emiList.length}
+            </span>
+          )}
         </div>
 
         <button
@@ -107,6 +115,7 @@ export default function EmiSection() {
         onClickEdit={onClickEdit}
         selected={selected}
         setSelected={setSelected}
+        isLoading={loading}
         onClickDelete={(ids) => {
           setSelected(Array.isArray(ids) ? ids : [ids]);
           setDeletePopup(true);
