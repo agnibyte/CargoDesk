@@ -351,19 +351,84 @@ export default function DocumentTable({
                       let cellValue = row[headCell.id];
 
                       // Vehicle No.
-                      if (headCell.id === "vehicleNo") {
+                      if (headCell.id === "vehicleNo" || headCell.id === "vehicle_number") {
                         return (
                           <td
                             key={headCell.id}
                             className="py-3.5 px-4 font-semibold text-slate-800 tracking-tight whitespace-nowrap"
                           >
-                            {formatVehicleNumber(cellValue) || "-"}
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200 uppercase tracking-wider">
+                              {formatVehicleNumber(cellValue) || cellValue || "-"}
+                            </span>
+                          </td>
+                        );
+                      }
+
+                      // Loan & Financier
+                      if (headCell.id === "loan_name") {
+                        return (
+                          <td key={headCell.id} className="py-3.5 px-4 whitespace-nowrap">
+                            <div className="font-semibold text-slate-800 text-sm">
+                              {cellValue || "-"}
+                            </div>
+                            {row.bank_name && (
+                              <div className="text-[11px] font-medium text-blue-600 flex items-center gap-1">
+                                <span>🏦</span>
+                                <span>{row.bank_name}</span>
+                              </div>
+                            )}
+                          </td>
+                        );
+                      }
+
+                      // Tenure / EMIs Paid
+                      if (headCell.id === "tenure_months") {
+                        const paid = row.emis_paid !== undefined && row.emis_paid !== null ? parseInt(row.emis_paid, 10) : 0;
+                        const total = cellValue ? parseInt(cellValue, 10) : 0;
+                        const pct = total > 0 ? Math.min(100, Math.round((paid / total) * 100)) : 0;
+
+                        return (
+                          <td key={headCell.id} className="py-3.5 px-4 whitespace-nowrap">
+                            <div className="text-xs font-semibold text-slate-700">
+                              {paid} / {total} <span className="text-[11px] font-normal text-slate-400">Mo</span>
+                            </div>
+                            {total > 0 && (
+                              <div className="w-20 bg-slate-100 rounded-full h-1.5 mt-1 overflow-hidden">
+                                <div
+                                  className="bg-blue-600 h-1.5 rounded-full transition-all"
+                                  style={{ width: `${pct}%` }}
+                                />
+                              </div>
+                            )}
+                          </td>
+                        );
+                      }
+
+                      // Status Badge
+                      if (headCell.id === "status") {
+                        const isActive = cellValue === 1 || cellValue === "1" || cellValue === "Active";
+                        return (
+                          <td key={headCell.id} className="py-3.5 px-4 whitespace-nowrap">
+                            <span
+                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${
+                                isActive
+                                  ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
+                                  : "bg-slate-100 text-slate-600 border border-slate-200"
+                              }`}
+                            >
+                              <span
+                                className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
+                                  isActive ? "bg-emerald-500" : "bg-slate-400"
+                                }`}
+                              />
+                              {isActive ? "Active" : "Closed"}
+                            </span>
                           </td>
                         );
                       }
 
                       // Note
-                      if (headCell.id === "note") {
+                      if (headCell.id === "note" || headCell.id === "notes") {
                         return (
                           <td
                             key={headCell.id}
@@ -385,7 +450,7 @@ export default function DocumentTable({
                       }
 
                       // Expiry Date (Calendar Icon)
-                      if (headCell.id === "expiryDate" || headCell.id === "due_date") {
+                      if (headCell.id === "expiryDate" || headCell.id === "due_date" || headCell.id === "start_date") {
                         return (
                           <td
                             key={headCell.id}
