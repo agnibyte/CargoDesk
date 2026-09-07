@@ -164,7 +164,7 @@ export default function Sidebar({
         </div>
 
         {/* Main Navigation List */}
-        <div className="flex-1 overflow-y-auto overflow-x-hidden px-3 py-5 space-y-1.5 scrollbar-thin scrollbar-thumb-slate-800 w-full">
+        <div className="flex-1 overflow-y-auto overflow-x-hidden px-3 py-5 space-y-1.5 sidebar-scrollbar w-full">
           <div className="space-y-1 w-full">
             {mainNavItems.map((item) => {
               const active = isActive(item);
