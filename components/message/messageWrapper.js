@@ -226,13 +226,14 @@ export default function MessageWrapper({
   };
 
   const handleDelete = async (msg) => {
+    if (!msg || !msg.id || deleteMsgLoading) return;
     setToDelete(msg);
-    const payload = { id: pageData?.user?.userId, msgId: msg.id };
     setDeleteMsgLoading(true);
+    const payload = { id: pageData?.user?.userId, msgId: msg.id };
 
     try {
       const response = await postApiData("DELETE_MSG_TEMPLATE", payload);
-      if (response.status) {
+      if (response?.status) {
         setSavedMsgTemplets((prev) => prev.filter((m) => m.id !== msg.id));
         setIsConfirm(false);
         showToast({
@@ -241,15 +242,20 @@ export default function MessageWrapper({
         });
       } else {
         showToast({
-          message: response.message || "Failed to delete template",
+          message: response?.message || "Failed to delete template",
           type: "error",
         });
       }
     } catch (err) {
       console.error("Delete template failed", err);
+      showToast({
+        message: "An unexpected error occurred while deleting template",
+        type: "error",
+      });
+    } finally {
+      setDeleteMsgLoading(false);
+      setToDelete(false);
     }
-    setDeleteMsgLoading(false);
-    setToDelete(false);
   };
 
   const CLIENT_BATCH_SIZE = 50; // Configurable client-side batch size for chunked sending
