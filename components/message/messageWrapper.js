@@ -65,7 +65,8 @@ export default function MessageWrapper({
   const [recipientSearch, setRecipientSearch] = useState("");
 
   // Mobile collapsed state for Saved Templates (< 1024px)
-  const [isTemplatesExpandedMobile, setIsTemplatesExpandedMobile] = useState(false);
+  const [isTemplatesExpandedMobile, setIsTemplatesExpandedMobile] =
+    useState(false);
 
   // Emoji & Variable dropdown toggles
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
@@ -1042,9 +1043,9 @@ export default function MessageWrapper({
                         const isSelected = !!formData.contacts.find(
                           (c) => c.id === contact.id,
                         );
-                        const initial = (contact.name || "C")
-                          .charAt(0)
-                          .toUpperCase();
+                        const initial = Array.from(
+                          contact.name || "C",
+                        )[0].toUpperCase();
 
                         return (
                           <label
