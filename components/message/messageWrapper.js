@@ -3,7 +3,7 @@ import { useForm } from "react-hook-form";
 import Link from "next/link";
 import { postApiData } from "@/utilities/services/apiService";
 import PrevMessageCard from "./prevMessageCard";
-import MessagePageHeader from "./messagePageHeader";
+import PageHeader from "@/components/common/pageHeader";
 import { showToast } from "@/utilities/toastService";
 import {
   FiSearch,
@@ -429,10 +429,11 @@ export default function MessageWrapper({
   return (
     <div className="w-full">
       {/* Page Header */}
-      <MessagePageHeader
-        eyebrow="MESSENGER"
+      <PageHeader
+        eyebrow=""
         title="Send a Message"
         subtitle="Type a new message or use a saved template to quickly communicate with your contacts or groups."
+        imageSrc="/imges/layouts/newdDshboard.png"
       />
 
       <form onSubmit={handleSubmit(onSubmit)}>
