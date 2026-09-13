@@ -40,4 +40,11 @@ export const internalList = {
   GET_ALL_EMI: "/api/emi/get-all",
   UPDATE_EMI_DETAILS: "/api/emi/update-emi-details",
   DELETE_EMI_RECORD: "/api/emi/delete",
+
+  // fleets
+  GET_ALL_FLEETS: "/api/fleet/get-all",
+  ADD_NEW_FLEET: "/api/fleet/add-new",
+  UPDATE_FLEET: "/api/fleet/update",
+  DELETE_FLEETS: "/api/fleet/delete",
 };
+

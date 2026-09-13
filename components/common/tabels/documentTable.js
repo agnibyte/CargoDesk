@@ -404,24 +404,135 @@ export default function DocumentTable({
                         );
                       }
 
-                      // Status Badge
-                      if (headCell.id === "status") {
-                        const isActive = cellValue === 1 || cellValue === "1" || cellValue === "Active";
+                      // Driver Name with Contact
+                      if (headCell.id === "driver_name") {
+                        return (
+                          <td key={headCell.id} className="py-3.5 px-4 whitespace-nowrap">
+                            <div className="font-semibold text-slate-800 text-sm">
+                              {cellValue || "Unassigned"}
+                            </div>
+                            {row.driver_contact && (
+                              <div className="text-[11px] font-medium text-slate-500">
+                                📞 {row.driver_contact}
+                              </div>
+                            )}
+                          </td>
+                        );
+                      }
+
+                      // Vehicle Model
+                      if (headCell.id === "vehicle_model") {
+                        return (
+                          <td key={headCell.id} className="py-3.5 px-4 whitespace-nowrap">
+                            <div className="font-semibold text-slate-800 text-sm">
+                              {cellValue || "-"}
+                            </div>
+                            {row.manufacturing_year && (
+                              <div className="text-[11px] font-medium text-slate-400">
+                                Model: {row.manufacturing_year}
+                              </div>
+                            )}
+                          </td>
+                        );
+                      }
+
+                      // Vehicle Type Badge
+                      if (headCell.id === "vehicle_type") {
+                        return (
+                          <td key={headCell.id} className="py-3.5 px-4 whitespace-nowrap">
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200/80">
+                              {cellValue || "-"}
+                            </span>
+                          </td>
+                        );
+                      }
+
+                      // Fuel Type Badge
+                      if (headCell.id === "fuel_type") {
+                        const isEv = cellValue === "Electric (EV)" || cellValue === "EV";
+                        const isCng = cellValue === "CNG";
                         return (
                           <td key={headCell.id} className="py-3.5 px-4 whitespace-nowrap">
                             <span
-                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold ${
-                                isActive
-                                  ? "bg-emerald-50 text-emerald-700 border border-emerald-200"
-                                  : "bg-slate-100 text-slate-600 border border-slate-200"
+                              className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium border ${
+                                isEv
+                                  ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                                  : isCng
+                                  ? "bg-teal-50 text-teal-700 border-teal-200"
+                                  : "bg-slate-100 text-slate-700 border-slate-200"
                               }`}
                             >
+                              {cellValue || "-"}
+                            </span>
+                          </td>
+                        );
+                      }
+
+                      // Capacity
+                      if (headCell.id === "capacity") {
+                        return (
+                          <td key={headCell.id} className="py-3.5 px-4 whitespace-nowrap font-medium text-slate-700">
+                            {cellValue ? (
+                              <span className="inline-flex items-center gap-1 font-semibold text-slate-800">
+                                <span>⚖️</span>
+                                <span>{cellValue}</span>
+                              </span>
+                            ) : (
+                              "-"
+                            )}
+                          </td>
+                        );
+                      }
+
+                      // Ownership Type
+                      if (headCell.id === "ownership_type") {
+                        return (
+                          <td key={headCell.id} className="py-3.5 px-4 whitespace-nowrap">
+                            <span className="text-xs font-medium text-slate-600 bg-slate-50 px-2 py-1 rounded-md border border-slate-200/80">
+                              {cellValue || "-"}
+                            </span>
+                          </td>
+                        );
+                      }
+
+                      // Status Badge
+                      if (headCell.id === "status") {
+                        const normalized = (cellValue || "").toString().toLowerCase();
+                        const isActive = cellValue === 1 || cellValue === "1" || normalized === "active";
+                        const isInTransit = normalized === "in transit" || normalized === "in_transit";
+                        const isMaintenance = normalized === "maintenance" || normalized === "in maintenance";
+
+                        let badgeClasses = "bg-slate-100 text-slate-600 border-slate-200";
+                        let dotClass = "bg-slate-400";
+                        let displayLabel = cellValue || "Inactive";
+
+                        if (isActive) {
+                          badgeClasses = "bg-emerald-50 text-emerald-700 border-emerald-200";
+                          dotClass = "bg-emerald-500";
+                          displayLabel = "Active";
+                        } else if (isInTransit) {
+                          badgeClasses = "bg-blue-50 text-blue-700 border-blue-200";
+                          dotClass = "bg-blue-500 animate-pulse";
+                          displayLabel = "In Transit";
+                        } else if (isMaintenance) {
+                          badgeClasses = "bg-amber-50 text-amber-700 border-amber-200";
+                          dotClass = "bg-amber-500";
+                          displayLabel = "Maintenance";
+                        } else if (cellValue === 0 || cellValue === "0" || normalized === "closed" || normalized === "inactive") {
+                          badgeClasses = "bg-slate-100 text-slate-600 border-slate-200";
+                          dotClass = "bg-slate-400";
+                          displayLabel = cellValue === "Closed" ? "Closed" : "Inactive";
+                        }
+
+                        return (
+                          <td key={headCell.id} className="py-3.5 px-4 whitespace-nowrap">
+                            <span
+                              className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${badgeClasses}`}
+                            >
                               <span
-                                className={`w-1.5 h-1.5 rounded-full mr-1.5 ${
-                                  isActive ? "bg-emerald-500" : "bg-slate-400"
-                                }`}
+                                className={`w-1.5 h-1.5 rounded-full mr-1.5 ${dotClass}`}
                               />
-                              {isActive ? "Active" : "Closed"}
+                              {displayLabel}
                             </span>
                           </td>
                         );

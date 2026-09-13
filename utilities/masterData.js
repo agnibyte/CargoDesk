@@ -115,6 +115,97 @@ export const emiTableHeadCells = [
   },
   { id: "action", numeric: false, disablePadding: false, label: "Action" },
 ];
+
+export const fleetTableHeadCells = [
+  {
+    id: "id",
+    numeric: false,
+    disablePadding: false,
+    label: "Sr. No.",
+  },
+  {
+    id: "vehicle_number",
+    numeric: false,
+    disablePadding: false,
+    label: "Vehicle No.",
+  },
+  {
+    id: "vehicle_model",
+    numeric: false,
+    disablePadding: false,
+    label: "Model & Make",
+  },
+  {
+    id: "vehicle_type",
+    numeric: false,
+    disablePadding: false,
+    label: "Type",
+  },
+  {
+    id: "capacity",
+    numeric: false,
+    disablePadding: false,
+    label: "Capacity",
+  },
+  {
+    id: "driver_name",
+    numeric: false,
+    disablePadding: false,
+    label: "Assigned Driver",
+  },
+  {
+    id: "fuel_type",
+    numeric: false,
+    disablePadding: false,
+    label: "Fuel",
+  },
+  {
+    id: "ownership_type",
+    numeric: false,
+    disablePadding: false,
+    label: "Ownership",
+  },
+  {
+    id: "status",
+    numeric: false,
+    disablePadding: false,
+    label: "Status",
+  },
+  { id: "action", numeric: false, disablePadding: false, label: "Action" },
+];
+
+export const FLEET_VEHICLE_TYPES = [
+  "Heavy Truck (16-25T)",
+  "Multi-Axle Trailer (28-40T)",
+  "Container Body (20-32 FT)",
+  "Tanker (Chemical/Oil)",
+  "Tipper / Dumper",
+  "Flatbed Trailer",
+  "Medium Goods Vehicle (7-12T)",
+  "Light Commercial Vehicle (Pickup)",
+];
+
+export const FLEET_FUEL_TYPES = [
+  "Diesel",
+  "CNG",
+  "Electric (EV)",
+  "LNG",
+  "Petrol",
+];
+
+export const FLEET_OWNERSHIP_TYPES = [
+  "Owned",
+  "Leased / Financed",
+  "Attached / Vendor",
+];
+
+export const FLEET_STATUS_OPTIONS = [
+  "Active",
+  "In Transit",
+  "Maintenance",
+  "Inactive",
+];
+
 export const menuItems = [
   {
     title: "Dashboard",
