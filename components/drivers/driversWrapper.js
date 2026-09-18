@@ -2,28 +2,29 @@ import React, { useEffect, useState, useMemo } from "react";
 import PageHeader from "../common/pageHeader";
 import DocumentTable from "../common/tabels/documentTable";
 import CommonModal from "../common/commonModal";
-import FleetForm from "./fleetForm";
-import { fleetTableHeadCells } from "@/utilities/masterData";
+import DriverForm from "./driverForm";
+import DriverDocumentsViewer from "./driverDocumentsViewer";
+import { driverTableHeadCells } from "@/utilities/masterData";
 import { postApiData } from "@/utilities/services/apiService";
 import { showToast } from "@/utilities/toastService";
-import { getConstant } from "@/utilities/utils";
 import {
-  FiTruck,
+  FiUsers,
   FiPlus,
   FiSearch,
   FiFilter,
   FiX,
   FiActivity,
-  FiTool,
+  FiClock,
   FiCheckCircle,
   FiAlertCircle,
   FiTrash2,
 } from "react-icons/fi";
+import { HiOutlineUserGroup } from "react-icons/hi";
 import { ImSpinner9 } from "react-icons/im";
 
-export default function FleetsWrapper({ pageData }) {
-  const [fleetList, setFleetList] = useState(pageData?.fleets || []);
-  const [fleetModal, setFleetModal] = useState(false);
+export default function DriversWrapper({ pageData }) {
+  const [driverList, setDriverList] = useState(pageData?.drivers || []);
+  const [driverModal, setDriverModal] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
   const [modalData, setModalData] = useState(null);
   const [selected, setSelected] = useState([]);
@@ -32,58 +33,60 @@ export default function FleetsWrapper({ pageData }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [filterMenuOpen, setFilterMenuOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(!pageData?.fleets);
+  const [isLoading, setIsLoading] = useState(!pageData?.drivers);
+  const [docsModalOpen, setDocsModalOpen] = useState(false);
+  const [selectedDriverForDocs, setSelectedDriverForDocs] = useState(null);
 
-  // Fetch fleets if not provided via SSR
+  // Fetch drivers if not provided via SSR
   useEffect(() => {
-    if (!pageData?.fleets) {
+    if (!pageData?.drivers) {
       setIsLoading(true);
-      postApiData("GET_ALL_FLEETS")
+      postApiData("GET_ALL_DRIVERS")
         .then((res) => {
           if (res?.status && Array.isArray(res.data)) {
-            setFleetList(res.data);
+            setDriverList(res.data);
           }
         })
-        .catch((err) => console.error("Error fetching fleet list:", err))
+        .catch((err) => console.error("Error fetching driver list:", err))
         .finally(() => setIsLoading(false));
     }
   }, [pageData]);
 
   // Compute summary stats
   const stats = useMemo(() => {
-    const total = fleetList.length;
+    const total = driverList.length;
     let active = 0;
-    let inTransit = 0;
-    let maintenance = 0;
+    let onDuty = 0;
+    let onLeave = 0;
     let inactive = 0;
 
-    fleetList.forEach((item) => {
+    driverList.forEach((item) => {
       const s = (item.status || "").toLowerCase();
       if (s === "active" || item.status === 1 || item.status === "1") {
         active += 1;
-      } else if (s === "in transit" || s === "in_transit") {
-        inTransit += 1;
-      } else if (s === "maintenance" || s === "in maintenance") {
-        maintenance += 1;
+      } else if (s === "on duty" || s === "on_duty" || s === "in transit" || s === "in_transit") {
+        onDuty += 1;
+      } else if (s === "on leave" || s === "on_leave" || s === "leave") {
+        onLeave += 1;
       } else {
         inactive += 1;
       }
     });
 
-    return { total, active, inTransit, maintenance, inactive };
-  }, [fleetList]);
+    return { total, active, onDuty, onLeave, inactive };
+  }, [driverList]);
 
   // Filtered display data
   const finalDisplayData = useMemo(() => {
-    let result = fleetList;
+    let result = driverList;
 
     // Filter by status
     if (statusFilter !== "all") {
       result = result.filter((item) => {
         const s = (item.status || "").toLowerCase();
         if (statusFilter === "active") return s === "active" || item.status === 1;
-        if (statusFilter === "in_transit") return s === "in transit" || s === "in_transit";
-        if (statusFilter === "maintenance") return s === "maintenance" || s === "in maintenance";
+        if (statusFilter === "on_duty") return s === "on duty" || s === "on_duty" || s === "in transit";
+        if (statusFilter === "on_leave") return s === "on leave" || s === "on_leave";
         if (statusFilter === "inactive") return s === "inactive" || s === "closed" || item.status === 0;
         return true;
       });
@@ -93,66 +96,82 @@ export default function FleetsWrapper({ pageData }) {
     if (searchTerm.trim()) {
       const q = searchTerm.toLowerCase().trim();
       result = result.filter((item) => {
-        const vehNo = (item.vehicle_number || "").toLowerCase();
-        const model = (item.vehicle_model || "").toLowerCase();
-        const driver = (item.driver_name || "").toLowerCase();
-        const type = (item.vehicle_type || "").toLowerCase();
-        const cap = (item.capacity || "").toLowerCase();
-        const note = (item.notes || "").toLowerCase();
+        const name = (item.driver_name || item.name || "").toLowerCase();
+        const contact = (item.contact_number || item.contactNo || "").toLowerCase();
+        const altContact = (item.alt_contact_number || "").toLowerCase();
+        const license = (item.license_number || "").toLowerCase();
+        const licenseType = (item.license_type || "").toLowerCase();
+        const veh = (item.assigned_vehicle || item.vehicleNo || "").toLowerCase();
+        const exp = (item.experience_years || "").toLowerCase();
+        const note = (item.notes || item.note || "").toLowerCase();
         return (
-          vehNo.includes(q) ||
-          model.includes(q) ||
-          driver.includes(q) ||
-          type.includes(q) ||
-          cap.includes(q) ||
+          name.includes(q) ||
+          contact.includes(q) ||
+          altContact.includes(q) ||
+          license.includes(q) ||
+          licenseType.includes(q) ||
+          veh.includes(q) ||
+          exp.includes(q) ||
           note.includes(q)
         );
       });
     }
 
     return result;
-  }, [fleetList, statusFilter, searchTerm]);
+  }, [driverList, statusFilter, searchTerm]);
 
-  // Handle Add Fleet CTA
-  const onClickAddFleet = () => {
+  // Handle Add Driver CTA
+  const onClickAddDriver = () => {
     setIsEdit(false);
     setModalData(null);
-    setFleetModal(true);
+    setDriverModal(true);
   };
 
-  // Handle Edit Fleet
+  // Handle View Supporting Documents
+  const handleViewDocuments = (driverRow) => {
+    setSelectedDriverForDocs(driverRow);
+    setDocsModalOpen(true);
+  };
+
+  // Handle Edit Trigger from Document Viewer
+  const handleEditFromDocs = (driverRow) => {
+    setDocsModalOpen(false);
+    onClickEdit(driverRow.id);
+  };
+
+  // Handle Edit Driver
   const onClickEdit = (id) => {
-    const selectedItem = fleetList.find((item) => item.id == id);
+    const selectedItem = driverList.find((item) => item.id == id);
     if (selectedItem) {
       setModalData(selectedItem);
       setIsEdit(true);
-      setFleetModal(true);
+      setDriverModal(true);
     }
   };
 
-  // Handle Delete Fleet
+  // Handle Delete Driver
   const onClickDelete = async (ids) => {
     const targetIds = Array.isArray(ids) ? ids : [ids];
     setDeleteLoad(true);
     try {
-      const response = await postApiData("DELETE_FLEETS", { ids: targetIds });
+      const response = await postApiData("DELETE_DRIVERS", { ids: targetIds });
       if (response && response.status) {
-        setFleetList((prev) =>
+        setDriverList((prev) =>
           prev.filter((item) => !targetIds.includes(item.id))
         );
         showToast(
           response.message ||
-            `${targetIds.length} vehicle(s) deleted successfully`,
+            `${targetIds.length} driver record${targetIds.length > 1 ? "s" : ""} deleted successfully`,
           "success"
         );
         setDeletePopup(false);
         setSelected([]);
       } else {
-        showToast(response?.message || "Failed to delete fleet vehicles", "error");
+        showToast(response?.message || "Failed to delete driver record(s)", "error");
       }
     } catch (error) {
-      console.error("Error deleting fleet:", error);
-      showToast("Error occurred while deleting fleet record.", "error");
+      console.error("Error deleting driver:", error);
+      showToast("Error occurred while deleting driver record.", "error");
     }
     setDeleteLoad(false);
   };
@@ -161,14 +180,14 @@ export default function FleetsWrapper({ pageData }) {
     <div className="w-full space-y-6 pb-12">
       {/* Page Header */}
       <PageHeader
-        eyebrow="Fleet Operations"
-        title="Fleet Management"
-        subtitle="Manage and monitor all your transport vehicles, drivers, payload capacities, and operational status in real time."
+        eyebrow="Personnel & Logistics"
+        title="Driver Management"
+        subtitle="Manage, track, and assign transport drivers, monitor license validities, and oversee duty status in real time."
       />
 
       {/* 4 Metric Summary Cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Total Fleets Card */}
+        {/* Total Drivers Card */}
         <div
           onClick={() => setStatusFilter("all")}
           className={`bg-white rounded-2xl p-4 md:p-5 border transition-all cursor-pointer shadow-2xs hover:shadow-md ${
@@ -179,21 +198,21 @@ export default function FleetsWrapper({ pageData }) {
         >
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">
-              Total Fleet
+              Total Drivers
             </span>
             <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
-              <FiTruck className="w-4 h-4" />
+              <HiOutlineUserGroup className="w-5 h-5" />
             </div>
           </div>
           <div className="text-2xl md:text-3xl font-extrabold text-slate-900 mt-2">
             {stats.total}
           </div>
           <span className="text-[11px] font-semibold text-slate-400 mt-1 block">
-            All registered vehicles
+            All registered drivers
           </span>
         </div>
 
-        {/* Active Fleets Card */}
+        {/* Active / Available Card */}
         <div
           onClick={() => setStatusFilter("active")}
           className={`bg-white rounded-2xl p-4 md:p-5 border transition-all cursor-pointer shadow-2xs hover:shadow-md ${
@@ -214,69 +233,69 @@ export default function FleetsWrapper({ pageData }) {
             {stats.active}
           </div>
           <span className="text-[11px] font-semibold text-emerald-600 mt-1 block">
-            Available for dispatch
+            Available for trip dispatch
           </span>
         </div>
 
-        {/* In Transit Card */}
+        {/* On Duty Card */}
         <div
-          onClick={() => setStatusFilter("in_transit")}
+          onClick={() => setStatusFilter("on_duty")}
           className={`bg-white rounded-2xl p-4 md:p-5 border transition-all cursor-pointer shadow-2xs hover:shadow-md ${
-            statusFilter === "in_transit"
+            statusFilter === "on_duty"
               ? "border-blue-500 ring-2 ring-blue-500/10"
               : "border-slate-200/80 hover:border-slate-300"
           }`}
         >
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-blue-600 uppercase tracking-wider">
-              In Transit
+              On Duty / En Route
             </span>
             <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
               <FiActivity className="w-4 h-4" />
             </div>
           </div>
           <div className="text-2xl md:text-3xl font-extrabold text-slate-900 mt-2">
-            {stats.inTransit}
+            {stats.onDuty}
           </div>
           <span className="text-[11px] font-semibold text-blue-600 mt-1 block">
-            On delivery route
+            Currently on assigned trip
           </span>
         </div>
 
-        {/* In Maintenance Card */}
+        {/* On Leave Card */}
         <div
-          onClick={() => setStatusFilter("maintenance")}
+          onClick={() => setStatusFilter("on_leave")}
           className={`bg-white rounded-2xl p-4 md:p-5 border transition-all cursor-pointer shadow-2xs hover:shadow-md ${
-            statusFilter === "maintenance"
+            statusFilter === "on_leave"
               ? "border-amber-500 ring-2 ring-amber-500/10"
               : "border-slate-200/80 hover:border-slate-300"
           }`}
         >
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-amber-600 uppercase tracking-wider">
-              In Maintenance
+              On Leave / Rest
             </span>
             <div className="w-9 h-9 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center">
-              <FiTool className="w-4 h-4" />
+              <FiClock className="w-4 h-4" />
             </div>
           </div>
           <div className="text-2xl md:text-3xl font-extrabold text-slate-900 mt-2">
-            {stats.maintenance}
+            {stats.onLeave}
           </div>
           <span className="text-[11px] font-semibold text-amber-600 mt-1 block">
-            Servicing or repairs
+            Scheduled off / leave
           </span>
         </div>
       </div>
 
       {/* Main White Container: Toolbar + DocumentTable */}
       <div className="bg-white rounded-2xl shadow-xs border border-slate-200/80 p-5 md:p-6 space-y-5">
-        {/* Toolbar: Search, Filter, + Add Fleet CTA */}
+        {/* Toolbar: Search, Filter, + Add Driver CTA */}
         <div className="flex flex-col lg:flex-row lg:items-center justify-between gap-4">
           {/* Left: Title + Count */}
           <div className="flex items-center gap-3">
             <h2 className="text-lg md:text-xl font-bold text-slate-900 tracking-tight">
-              All Fleet Vehicles
+              All Transport Drivers
             </h2>
             {isLoading ? (
               <span className="inline-flex items-center justify-center bg-blue-100/70 w-8 h-5 rounded-full animate-pulse" />
@@ -296,7 +315,7 @@ export default function FleetsWrapper({ pageData }) {
                 type="text"
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                placeholder="Search by vehicle no, model, driver, or type..."
+                placeholder="Search by name, contact, license, or vehicle..."
                 className="w-full pl-10 pr-8 py-2 text-xs md:text-sm bg-white border border-slate-200 hover:border-slate-300 text-slate-800 placeholder-slate-400 rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 transition-all outline-none"
               />
               {searchTerm && (
@@ -327,10 +346,10 @@ export default function FleetsWrapper({ pageData }) {
                     ? "Filter Status"
                     : statusFilter === "active"
                     ? "Active"
-                    : statusFilter === "in_transit"
-                    ? "In Transit"
-                    : statusFilter === "maintenance"
-                    ? "Maintenance"
+                    : statusFilter === "on_duty"
+                    ? "On Duty"
+                    : statusFilter === "on_leave"
+                    ? "On Leave"
                     : "Inactive"}
                 </span>
                 {statusFilter !== "all" && (
@@ -344,10 +363,10 @@ export default function FleetsWrapper({ pageData }) {
                     Filter by Status
                   </div>
                   {[
-                    { id: "all", label: "All Vehicles" },
+                    { id: "all", label: "All Drivers" },
                     { id: "active", label: "Active / Ready" },
-                    { id: "in_transit", label: "In Transit" },
-                    { id: "maintenance", label: "In Maintenance" },
+                    { id: "on_duty", label: "On Duty / En Route" },
+                    { id: "on_leave", label: "On Leave" },
                     { id: "inactive", label: "Inactive" },
                   ].map((opt) => (
                     <button
@@ -371,14 +390,14 @@ export default function FleetsWrapper({ pageData }) {
               )}
             </div>
 
-            {/* + Add New Fleet CTA Button */}
+            {/* + Add New Driver CTA Button */}
             <button
               type="button"
-              onClick={onClickAddFleet}
+              onClick={onClickAddDriver}
               className="flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white text-xs md:text-sm font-semibold rounded-xl shadow-sm shadow-blue-600/20 hover:shadow-md transition-all cursor-pointer"
             >
               <FiPlus className="w-4 h-4" />
-              <span>Add New Fleet</span>
+              <span>Add New Driver</span>
             </button>
           </div>
         </div>
@@ -394,7 +413,7 @@ export default function FleetsWrapper({ pageData }) {
                   onClick={() => setStatusFilter("all")}
                   className="text-blue-500 hover:text-blue-800"
                 >
-                  <FiX className="w-3 h-3" />
+                  <FiX className="w-3.5 h-3.5" />
                 </button>
               </span>
             )}
@@ -421,11 +440,12 @@ export default function FleetsWrapper({ pageData }) {
           </div>
         )}
 
-        {/* Common DocumentTable for Fleet records */}
+        {/* Common DocumentTable for Driver records */}
         <DocumentTable
           rows={finalDisplayData}
-          headCells={fleetTableHeadCells}
+          headCells={driverTableHeadCells}
           onClickEdit={onClickEdit}
+          onClickDocuments={handleViewDocuments}
           selected={selected}
           setSelected={setSelected}
           onClickDelete={(ids) => {
@@ -438,25 +458,39 @@ export default function FleetsWrapper({ pageData }) {
         />
       </div>
 
-      {/* Add / Edit Fleet Modal */}
+      {/* Supporting Documents Viewer Modal */}
       <CommonModal
-        modalTitle={isEdit ? "Edit Fleet Vehicle" : "Add New Fleet Vehicle"}
-        modalOpen={fleetModal}
-        setModalOpen={setFleetModal}
+        modalTitle="Driver Supporting Documents"
+        modalOpen={docsModalOpen}
+        setModalOpen={setDocsModalOpen}
+        modalSize="w-11/12 md:w-[750px] lg:w-[840px]"
+      >
+        <DriverDocumentsViewer
+          driver={selectedDriverForDocs}
+          onClose={() => setDocsModalOpen(false)}
+          onEdit={handleEditFromDocs}
+        />
+      </CommonModal>
+
+      {/* Add / Edit Driver Modal */}
+      <CommonModal
+        modalTitle={isEdit ? "Edit Driver Details" : "Add New Driver"}
+        modalOpen={driverModal}
+        setModalOpen={setDriverModal}
         modalSize="w-11/12 md:w-[680px]"
       >
-        <FleetForm
-          setFleetList={setFleetList}
+        <DriverForm
+          setDriverList={setDriverList}
           modalData={modalData}
           isEdit={isEdit}
-          toggleModal={() => setFleetModal(false)}
-          onClose={() => setFleetModal(false)}
+          toggleModal={() => setDriverModal(false)}
+          onClose={() => setDriverModal(false)}
         />
       </CommonModal>
 
       {/* Delete Confirmation Modal */}
       <CommonModal
-        modalTitle="Delete Fleet Vehicle"
+        modalTitle="Delete Driver Record"
         modalOpen={deletePopup}
         setModalOpen={setDeletePopup}
         modalSize="w-11/12 sm:w-96"
@@ -467,10 +501,10 @@ export default function FleetsWrapper({ pageData }) {
           </div>
           <div>
             <h4 className="text-sm font-bold text-slate-900">
-              Delete Fleet Vehicle{selected.length > 1 ? "s" : ""}?
+              Delete Driver Record{selected.length > 1 ? "s" : ""}?
             </h4>
             <p className="text-xs text-slate-500 mt-1">
-              Are you sure you want to delete {selected.length > 1 ? `${selected.length} selected vehicles` : "this fleet vehicle"}? This action cannot be undone.
+              Are you sure you want to delete {selected.length > 1 ? `${selected.length} selected drivers` : "this driver"}? This action cannot be undone.
             </p>
           </div>
           <div className="flex items-center justify-center gap-3 pt-2">

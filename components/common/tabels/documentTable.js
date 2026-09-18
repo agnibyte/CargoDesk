@@ -9,6 +9,9 @@ import {
   FiChevronRight,
   FiArrowUp,
   FiArrowDown,
+  FiFileText,
+  FiEye,
+  FiPaperclip,
 } from "react-icons/fi";
 import StatusBadge from "../statusBadge";
 import {
@@ -27,6 +30,7 @@ export default function DocumentTable({
   title = "",
   onClickDelete,
   onClickEdit,
+  onClickDocuments,
   selected = [],
   setSelected = () => {},
   searchTerm = "",
@@ -285,6 +289,17 @@ export default function DocumentTable({
                       );
                     }
 
+                    if (
+                      headCell.id === "supporting_documents" ||
+                      headCell.id === "documents"
+                    ) {
+                      return (
+                        <td key={headCell.id} className="py-4 px-4">
+                          <div className="w-16 h-6 bg-slate-200/80 rounded-lg" />
+                        </td>
+                      );
+                    }
+
                     if (headCell.id === "status") {
                       return (
                         <td key={headCell.id} className="py-4 px-4">
@@ -404,18 +419,49 @@ export default function DocumentTable({
                         );
                       }
 
-                      // Driver Name with Contact
+                      // Driver Name with Avatar Photo
                       if (headCell.id === "driver_name") {
+                        const driverInitials = (cellValue || "D")
+                          .split(" ")
+                          .map((n) => n[0])
+                          .join("")
+                          .substring(0, 2)
+                          .toUpperCase();
+
                         return (
                           <td key={headCell.id} className="py-3.5 px-4 whitespace-nowrap">
-                            <div className="font-semibold text-slate-800 text-sm">
-                              {cellValue || "Unassigned"}
-                            </div>
-                            {row.driver_contact && (
-                              <div className="text-[11px] font-medium text-slate-500">
-                                📞 {row.driver_contact}
+                            <div className="flex items-center gap-3">
+                              {/* Driver Avatar / Photo */}
+                              <div className="relative shrink-0">
+                                {row.profile_photo ? (
+                                  <img
+                                    src={row.profile_photo}
+                                    alt={cellValue || "Driver"}
+                                    className="w-9 h-9 rounded-xl object-cover border border-slate-200 shadow-2xs"
+                                  />
+                                ) : (
+                                  <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-bold text-xs flex items-center justify-center shadow-2xs">
+                                    {driverInitials}
+                                  </div>
+                                )}
                               </div>
-                            )}
+
+                              {/* Name & Contact */}
+                              <div>
+                                <div className="font-semibold text-slate-900 text-sm">
+                                  {cellValue || "Unassigned"}
+                                </div>
+                                {row.driver_contact ? (
+                                  <div className="text-[11px] font-medium text-slate-500">
+                                    📞 {row.driver_contact}
+                                  </div>
+                                ) : row.contact_number ? (
+                                  <div className="text-[11px] font-medium text-slate-500">
+                                    📞 {row.contact_number}
+                                  </div>
+                                ) : null}
+                              </div>
+                            </div>
                           </td>
                         );
                       }
@@ -495,10 +541,166 @@ export default function DocumentTable({
                         );
                       }
 
+                      // Contact Number (Drivers)
+                      if (headCell.id === "contact_number") {
+                        return (
+                          <td key={headCell.id} className="py-3.5 px-4 whitespace-nowrap">
+                            <div className="font-semibold text-slate-800 text-xs sm:text-sm">
+                              {cellValue || "-"}
+                            </div>
+                            {row.alt_contact_number && (
+                              <div className="text-[11px] font-medium text-slate-400">
+                                Alt: {row.alt_contact_number}
+                              </div>
+                            )}
+                          </td>
+                        );
+                      }
+
+                      // License Number
+                      if (headCell.id === "license_number") {
+                        return (
+                          <td key={headCell.id} className="py-3.5 px-4 whitespace-nowrap">
+                            <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-mono font-bold bg-slate-100 text-slate-800 border border-slate-200 uppercase tracking-wide">
+                              {cellValue || "-"}
+                            </span>
+                          </td>
+                        );
+                      }
+
+                      // License Type / Category
+                      if (headCell.id === "license_type") {
+                        return (
+                          <td key={headCell.id} className="py-3.5 px-4 whitespace-nowrap">
+                            <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-50 text-purple-700 border border-purple-200/80">
+                              {cellValue || "-"}
+                            </span>
+                          </td>
+                        );
+                      }
+
+                      // Assigned Vehicle
+                      if (headCell.id === "assigned_vehicle") {
+                        return (
+                          <td key={headCell.id} className="py-3.5 px-4 whitespace-nowrap">
+                            {cellValue ? (
+                              <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200 uppercase tracking-wider">
+                                {formatVehicleNumber(cellValue) || cellValue}
+                              </span>
+                            ) : (
+                              <span className="text-xs text-slate-400 italic">Unassigned</span>
+                            )}
+                          </td>
+                        );
+                      }
+
+                      // Experience
+                      if (headCell.id === "experience_years") {
+                        return (
+                          <td key={headCell.id} className="py-3.5 px-4 whitespace-nowrap font-medium text-slate-700 text-xs sm:text-sm">
+                            {cellValue ? (
+                              <span className="inline-flex items-center gap-1 font-semibold text-slate-800">
+                                <span>⭐</span>
+                                <span>{cellValue}</span>
+                              </span>
+                            ) : (
+                              "-"
+                            )}
+                          </td>
+                        );
+                      }
+
+                      // License Expiry
+                      if (headCell.id === "license_expiry") {
+                        return (
+                          <td
+                            key={headCell.id}
+                            className="py-3.5 px-4 text-slate-700 whitespace-nowrap"
+                          >
+                            <div className="flex items-center gap-2">
+                              <FiCalendar className="w-3.5 h-3.5 text-slate-400" />
+                              <span>{formatDate(cellValue)}</span>
+                            </div>
+                          </td>
+                        );
+                      }
+
+                      // Supporting Documents Column
+                      if (
+                        headCell.id === "supporting_documents" ||
+                        headCell.id === "documents"
+                      ) {
+                        let docs = [];
+                        if (cellValue) {
+                          if (Array.isArray(cellValue)) {
+                            docs = cellValue;
+                          } else if (typeof cellValue === "string") {
+                            try {
+                              const parsed = JSON.parse(cellValue);
+                              docs = Array.isArray(parsed) ? parsed : [cellValue];
+                            } catch (_) {
+                              docs = [{ name: "Document", dataUrl: cellValue }];
+                            }
+                          }
+                        }
+
+                        const count = docs.length;
+
+                        return (
+                          <td
+                            key={headCell.id}
+                            className="py-3.5 px-4 whitespace-nowrap"
+                            onClick={(e) => {
+                              if (onClickDocuments) {
+                                e.stopPropagation();
+                                onClickDocuments(row, docs);
+                              }
+                            }}
+                          >
+                            {count > 0 ? (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (onClickDocuments) {
+                                    onClickDocuments(row, docs);
+                                  }
+                                }}
+                                className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-semibold bg-amber-50 text-amber-800 border border-amber-200/90 hover:bg-amber-100 hover:border-amber-300 hover:shadow-2xs active:scale-95 transition-all cursor-pointer group"
+                                title={`Click to view ${count} attached document${count > 1 ? "s" : ""}`}
+                              >
+                                <FiFileText className="w-3.5 h-3.5 text-amber-600" />
+                                <span>
+                                  {count} {count === 1 ? "Doc" : "Docs"}
+                                </span>
+                                <FiEye className="w-3 h-3 text-amber-600/80 group-hover:text-amber-800 ml-0.5" />
+                              </button>
+                            ) : (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  if (onClickDocuments) {
+                                    onClickDocuments(row, []);
+                                  }
+                                }}
+                                className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-[11px] font-medium text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
+                                title="No documents attached - Click to view or manage"
+                              >
+                                <span className="text-slate-300">—</span>
+                                <span>0 docs</span>
+                              </button>
+                            )}
+                          </td>
+                        );
+                      }
+
                       // Status Badge
                       if (headCell.id === "status") {
                         const normalized = (cellValue || "").toString().toLowerCase();
                         const isActive = cellValue === 1 || cellValue === "1" || normalized === "active";
+                        const isOnDuty = normalized === "on duty" || normalized === "on_duty";
+                        const isOnLeave = normalized === "on leave" || normalized === "on_leave";
                         const isInTransit = normalized === "in transit" || normalized === "in_transit";
                         const isMaintenance = normalized === "maintenance" || normalized === "in maintenance";
 
@@ -510,10 +712,18 @@ export default function DocumentTable({
                           badgeClasses = "bg-emerald-50 text-emerald-700 border-emerald-200";
                           dotClass = "bg-emerald-500";
                           displayLabel = "Active";
+                        } else if (isOnDuty) {
+                          badgeClasses = "bg-blue-50 text-blue-700 border-blue-200";
+                          dotClass = "bg-blue-500 animate-pulse";
+                          displayLabel = "On Duty";
                         } else if (isInTransit) {
                           badgeClasses = "bg-blue-50 text-blue-700 border-blue-200";
                           dotClass = "bg-blue-500 animate-pulse";
                           displayLabel = "In Transit";
+                        } else if (isOnLeave) {
+                          badgeClasses = "bg-amber-50 text-amber-700 border-amber-200";
+                          dotClass = "bg-amber-500";
+                          displayLabel = "On Leave";
                         } else if (isMaintenance) {
                           badgeClasses = "bg-amber-50 text-amber-700 border-amber-200";
                           dotClass = "bg-amber-500";

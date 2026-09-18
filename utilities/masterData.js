@@ -206,6 +206,97 @@ export const FLEET_STATUS_OPTIONS = [
   "Inactive",
 ];
 
+export const driverTableHeadCells = [
+  {
+    id: "id",
+    numeric: false,
+    disablePadding: false,
+    label: "Sr. No.",
+  },
+  {
+    id: "driver_name",
+    numeric: false,
+    disablePadding: false,
+    label: "Driver Name",
+  },
+  {
+    id: "contact_number",
+    numeric: false,
+    disablePadding: false,
+    label: "Contact No.",
+  },
+  {
+    id: "license_number",
+    numeric: false,
+    disablePadding: false,
+    label: "License No.",
+  },
+  {
+    id: "license_type",
+    numeric: false,
+    disablePadding: false,
+    label: "License Category",
+  },
+  {
+    id: "assigned_vehicle",
+    numeric: false,
+    disablePadding: false,
+    label: "Assigned Vehicle",
+  },
+  {
+    id: "experience_years",
+    numeric: false,
+    disablePadding: false,
+    label: "Experience",
+  },
+  {
+    id: "license_expiry",
+    numeric: false,
+    disablePadding: false,
+    label: "License Expiry",
+  },
+  {
+    id: "supporting_documents",
+    numeric: false,
+    disablePadding: false,
+    label: "Documents",
+  },
+  {
+    id: "status",
+    numeric: false,
+    disablePadding: false,
+    label: "Status",
+  },
+  { id: "action", numeric: false, disablePadding: false, label: "Action" },
+];
+
+export const DRIVER_LICENSE_TYPES = [
+  "Heavy Transport Vehicle (HTV)",
+  "Hazardous & Container Certified",
+  "Chemical & Tanker Certified",
+  "Heavy Commercial (HMV/LMV)",
+  "Light Commercial Vehicle (LCV)",
+  "Multi-Axle Specialized Trailer",
+];
+
+export const DRIVER_STATUS_OPTIONS = [
+  "Active",
+  "On Duty",
+  "On Leave",
+  "Inactive",
+];
+
+export const DRIVER_BLOOD_GROUPS = [
+  "A+",
+  "A-",
+  "B+",
+  "B-",
+  "AB+",
+  "AB-",
+  "O+",
+  "O-",
+];
+
 export const menuItems = [
   {
     title: "Dashboard",
