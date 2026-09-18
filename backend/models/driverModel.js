@@ -121,87 +121,24 @@ const defaultSeedDrivers = [
   },
 ];
 
-export async function ensureDriverTable() {
-  if (isTableInitialized) return;
-  try {
-    const createTableQuery = `
-      CREATE TABLE IF NOT EXISTS drivers (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        driver_name VARCHAR(100) NOT NULL,
-        contact_number VARCHAR(30) NOT NULL,
-        alt_contact_number VARCHAR(30) NULL,
-        license_number VARCHAR(50) NOT NULL UNIQUE,
-        license_type VARCHAR(100) NULL,
-        license_expiry VARCHAR(30) NULL,
-        assigned_vehicle VARCHAR(50) NULL,
-        experience_years VARCHAR(30) NULL,
-        blood_group VARCHAR(10) NULL,
-        emergency_contact VARCHAR(150) NULL,
-        status VARCHAR(50) DEFAULT 'Active',
-        profile_photo LONGTEXT NULL,
-        supporting_documents LONGTEXT NULL,
-        address TEXT NULL,
-        notes TEXT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-    `;
-    await executeQuery(createTableQuery);
-
-    // Ensure columns exist if table was previously created with older schema
-    try {
-      const existingCols = await executeQuery(`SHOW COLUMNS FROM drivers`);
-      const colNames = Array.isArray(existingCols)
-        ? existingCols.map((c) => c.Field || c.field)
-        : [];
-
-      if (!colNames.includes("profile_photo")) {
-        await executeQuery(`ALTER TABLE drivers ADD COLUMN profile_photo LONGTEXT NULL`);
-      }
-      if (!colNames.includes("supporting_documents")) {
-        await executeQuery(`ALTER TABLE drivers ADD COLUMN supporting_documents LONGTEXT NULL`);
-      }
-    } catch (colErr) {
-      console.warn("Could not check/alter driver table columns:", colErr?.message);
-    }
-
-    // Check count, seed default records if table is brand new/empty
-    const countRes = await executeQuery(`SELECT COUNT(*) as total FROM drivers`);
-    const count = countRes?.[0]?.total || 0;
-    if (count === 0) {
-      for (const item of defaultSeedDrivers) {
-        try {
-          await executeQuery(`INSERT INTO drivers SET ?`, item);
-        } catch (seedErr) {
-          console.warn("Driver seed item error:", seedErr?.message);
-        }
-      }
-    }
-    isTableInitialized = true;
-  } catch (error) {
-    console.error("Error inspecting/initializing drivers table:", error);
-  }
-}
 
 export function getAllDriversModel() {
   return new Promise(async (resolve) => {
     try {
-      await ensureDriverTable();
       const selectQuery = `SELECT * FROM drivers ORDER BY id DESC`;
       const rows = await executeQuery(selectQuery);
       resolve({
         status: true,
-        data:
-          Array.isArray(rows) && rows.length > 0
+        data:Array.isArray(rows) && rows.length > 0
             ? rows
-            : defaultSeedDrivers.map((d, idx) => ({ id: idx + 1, ...d })),
+            : [],
         message: "Drivers fetched successfully",
       });
     } catch (error) {
       console.error("Error fetching drivers:", error);
       resolve({
         status: true,
-        data: defaultSeedDrivers.map((d, idx) => ({ id: idx + 1, ...d })),
+        data: [],
         message: "Drivers retrieved from fallback dataset",
       });
     }
@@ -211,7 +148,6 @@ export function getAllDriversModel() {
 export function addNewDriverModel(data) {
   return new Promise(async (resolve) => {
     try {
-      await ensureDriverTable();
 
       const {
         driver_name,
@@ -288,7 +224,6 @@ export function addNewDriverModel(data) {
 export function updateDriverModel(id, data) {
   return new Promise(async (resolve) => {
     try {
-      await ensureDriverTable();
 
       const updateData = {
         driver_name: data.driver_name ? data.driver_name.trim() : undefined,
@@ -350,7 +285,6 @@ export function deleteDriverModel(ids) {
         return resolve({ status: false, message: "No driver IDs provided for deletion" });
       }
 
-      await ensureDriverTable();
       const deleteQuery = `DELETE FROM drivers WHERE id IN (?)`;
       const result = await executeQuery(deleteQuery, [ids]);
 
