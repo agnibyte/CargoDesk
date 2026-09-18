@@ -89,7 +89,7 @@ export default function DocumentTable({
     } else if (selectedIndex > 0) {
       newSelected = newSelected.concat(
         selected.slice(0, selectedIndex),
-        selected.slice(selectedIndex + 1)
+        selected.slice(selectedIndex + 1),
       );
     }
     setSelected(newSelected);
@@ -119,7 +119,8 @@ export default function DocumentTable({
 
   const totalPages = Math.max(1, Math.ceil(rows.length / rowsPerPage));
   const isAllSelected = rows.length > 0 && selected.length === rows.length;
-  const isPartiallySelected = selected.length > 0 && selected.length < rows.length;
+  const isPartiallySelected =
+    selected.length > 0 && selected.length < rows.length;
 
   const startRecord = rows.length === 0 ? 0 : page * rowsPerPage + 1;
   const endRecord = Math.min((page + 1) * rowsPerPage, rows.length);
@@ -130,7 +131,8 @@ export default function DocumentTable({
       {!isTableLoading && selected.length > 0 && (
         <div className="flex items-center justify-between px-4 py-2.5 mb-3 bg-blue-50/90 border border-blue-200 rounded-xl text-blue-900 transition-all">
           <div className="text-xs md:text-sm font-semibold">
-            {selected.length} {selected.length === 1 ? "record" : "records"} selected
+            {selected.length} {selected.length === 1 ? "record" : "records"}{" "}
+            selected
           </div>
           <div className="flex items-center gap-2">
             {selected.length === 1 && (
@@ -209,7 +211,10 @@ export default function DocumentTable({
           <tbody className="divide-y divide-slate-100 text-xs md:text-sm bg-white">
             {isTableLoading ? (
               Array.from({ length: 5 }).map((_, rowIndex) => (
-                <tr key={`table-skeleton-${rowIndex}`} className="animate-pulse">
+                <tr
+                  key={`table-skeleton-${rowIndex}`}
+                  className="animate-pulse"
+                >
                   {/* Checkbox Skeleton */}
                   <td className="py-4 px-4 text-center">
                     <div className="w-4 h-4 bg-slate-200/80 rounded mx-auto" />
@@ -225,7 +230,21 @@ export default function DocumentTable({
                       );
                     }
 
-                    if (headCell.id === "vehicleNo" || headCell.id === "vehicle_number") {
+                    if (
+                      headCell.id === "profile_photo" ||
+                      headCell.id === "photo"
+                    ) {
+                      return (
+                        <td key={headCell.id} className="py-4 px-4">
+                          <div className="w-9 h-9 bg-slate-200/80 rounded-xl" />
+                        </td>
+                      );
+                    }
+
+                    if (
+                      headCell.id === "vehicleNo" ||
+                      headCell.id === "vehicle_number"
+                    ) {
                       return (
                         <td key={headCell.id} className="py-4 px-4">
                           <div className="w-28 h-4 bg-slate-200/80 rounded-md" />
@@ -257,7 +276,10 @@ export default function DocumentTable({
                       );
                     }
 
-                    if (headCell.id === "note" || headCell.id === "description") {
+                    if (
+                      headCell.id === "note" ||
+                      headCell.id === "description"
+                    ) {
                       return (
                         <td key={headCell.id} className="py-4 px-4">
                           <div className="w-40 h-4 bg-slate-200/80 rounded-md" />
@@ -366,14 +388,19 @@ export default function DocumentTable({
                       let cellValue = row[headCell.id];
 
                       // Vehicle No.
-                      if (headCell.id === "vehicleNo" || headCell.id === "vehicle_number") {
+                      if (
+                        headCell.id === "vehicleNo" ||
+                        headCell.id === "vehicle_number"
+                      ) {
                         return (
                           <td
                             key={headCell.id}
                             className="py-3.5 px-4 font-semibold text-slate-800 tracking-tight whitespace-nowrap"
                           >
                             <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200 uppercase tracking-wider">
-                              {formatVehicleNumber(cellValue) || cellValue || "-"}
+                              {formatVehicleNumber(cellValue) ||
+                                cellValue ||
+                                "-"}
                             </span>
                           </td>
                         );
@@ -382,7 +409,10 @@ export default function DocumentTable({
                       // Loan & Financier
                       if (headCell.id === "loan_name") {
                         return (
-                          <td key={headCell.id} className="py-3.5 px-4 whitespace-nowrap">
+                          <td
+                            key={headCell.id}
+                            className="py-3.5 px-4 whitespace-nowrap"
+                          >
                             <div className="font-semibold text-slate-800 text-sm">
                               {cellValue || "-"}
                             </div>
@@ -398,14 +428,26 @@ export default function DocumentTable({
 
                       // Tenure / EMIs Paid
                       if (headCell.id === "tenure_months") {
-                        const paid = row.emis_paid !== undefined && row.emis_paid !== null ? parseInt(row.emis_paid, 10) : 0;
+                        const paid =
+                          row.emis_paid !== undefined && row.emis_paid !== null
+                            ? parseInt(row.emis_paid, 10)
+                            : 0;
                         const total = cellValue ? parseInt(cellValue, 10) : 0;
-                        const pct = total > 0 ? Math.min(100, Math.round((paid / total) * 100)) : 0;
+                        const pct =
+                          total > 0
+                            ? Math.min(100, Math.round((paid / total) * 100))
+                            : 0;
 
                         return (
-                          <td key={headCell.id} className="py-3.5 px-4 whitespace-nowrap">
+                          <td
+                            key={headCell.id}
+                            className="py-3.5 px-4 whitespace-nowrap"
+                          >
                             <div className="text-xs font-semibold text-slate-700">
-                              {paid} / {total} <span className="text-[11px] font-normal text-slate-400">Mo</span>
+                              {paid} / {total}{" "}
+                              <span className="text-[11px] font-normal text-slate-400">
+                                Mo
+                              </span>
                             </div>
                             {total > 0 && (
                               <div className="w-20 bg-slate-100 rounded-full h-1.5 mt-1 overflow-hidden">
@@ -419,9 +461,12 @@ export default function DocumentTable({
                         );
                       }
 
-                      // Driver Name with Avatar Photo
-                      if (headCell.id === "driver_name") {
-                        const driverInitials = (cellValue || "D")
+                      // Driver Profile Photo Column (for Drivers Table)
+                      if (
+                        headCell.id === "profile_photo" ||
+                        headCell.id === "photo"
+                      ) {
+                        const driverInitials = (row.driver_name || row.name || "D")
                           .split(" ")
                           .map((n) => n[0])
                           .join("")
@@ -429,38 +474,53 @@ export default function DocumentTable({
                           .toUpperCase();
 
                         return (
-                          <td key={headCell.id} className="py-3.5 px-4 whitespace-nowrap">
-                            <div className="flex items-center gap-3">
-                              {/* Driver Avatar / Photo */}
-                              <div className="relative shrink-0">
-                                {row.profile_photo ? (
-                                  <img
-                                    src={row.profile_photo}
-                                    alt={cellValue || "Driver"}
-                                    className="w-9 h-9 rounded-xl object-cover border border-slate-200 shadow-2xs"
-                                  />
-                                ) : (
-                                  <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-bold text-xs flex items-center justify-center shadow-2xs">
-                                    {driverInitials}
-                                  </div>
-                                )}
-                              </div>
-
-                              {/* Name & Contact */}
-                              <div>
-                                <div className="font-semibold text-slate-900 text-sm">
-                                  {cellValue || "Unassigned"}
+                          <td
+                            key={headCell.id}
+                            className="py-3.5 px-4 whitespace-nowrap"
+                          >
+                            <div className="relative shrink-0 w-9 h-9">
+                              {cellValue || row.profile_photo ? (
+                                <img
+                                  src={cellValue || row.profile_photo}
+                                  alt={row.driver_name || row.name || "Driver"}
+                                  className="w-9 h-9 rounded-xl object-cover border border-slate-200 shadow-2xs"
+                                />
+                              ) : (
+                                <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-bold text-xs flex items-center justify-center shadow-2xs">
+                                  {driverInitials}
                                 </div>
-                                {row.driver_contact ? (
-                                  <div className="text-[11px] font-medium text-slate-500">
-                                    📞 {row.driver_contact}
-                                  </div>
-                                ) : row.contact_number ? (
-                                  <div className="text-[11px] font-medium text-slate-500">
-                                    📞 {row.contact_number}
-                                  </div>
-                                ) : null}
+                              )}
+                            </div>
+                          </td>
+                        );
+                      }
+
+                      // Driver Name (No driver avatar/photo in fleet table or driver_name column)
+                      if (headCell.id === "driver_name") {
+                        return (
+                          <td
+                            key={headCell.id}
+                            className="py-3.5 px-4 whitespace-nowrap"
+                          >
+                            <div>
+                              <div
+                                className={
+                                  cellValue
+                                    ? "font-semibold text-slate-900 text-sm"
+                                    : "text-xs text-slate-400 italic"
+                                }
+                              >
+                                {cellValue || "Unassigned"}
                               </div>
+                              {row.driver_contact ? (
+                                <div className="text-[11px] font-medium text-slate-500">
+                                  📞 {row.driver_contact}
+                                </div>
+                              ) : row.contact_number ? (
+                                <div className="text-[11px] font-medium text-slate-500">
+                                  📞 {row.contact_number}
+                                </div>
+                              ) : null}
                             </div>
                           </td>
                         );
@@ -469,7 +529,10 @@ export default function DocumentTable({
                       // Vehicle Model
                       if (headCell.id === "vehicle_model") {
                         return (
-                          <td key={headCell.id} className="py-3.5 px-4 whitespace-nowrap">
+                          <td
+                            key={headCell.id}
+                            className="py-3.5 px-4 whitespace-nowrap"
+                          >
                             <div className="font-semibold text-slate-800 text-sm">
                               {cellValue || "-"}
                             </div>
@@ -485,7 +548,10 @@ export default function DocumentTable({
                       // Vehicle Type Badge
                       if (headCell.id === "vehicle_type") {
                         return (
-                          <td key={headCell.id} className="py-3.5 px-4 whitespace-nowrap">
+                          <td
+                            key={headCell.id}
+                            className="py-3.5 px-4 whitespace-nowrap"
+                          >
                             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200/80">
                               {cellValue || "-"}
                             </span>
@@ -495,17 +561,21 @@ export default function DocumentTable({
 
                       // Fuel Type Badge
                       if (headCell.id === "fuel_type") {
-                        const isEv = cellValue === "Electric (EV)" || cellValue === "EV";
+                        const isEv =
+                          cellValue === "Electric (EV)" || cellValue === "EV";
                         const isCng = cellValue === "CNG";
                         return (
-                          <td key={headCell.id} className="py-3.5 px-4 whitespace-nowrap">
+                          <td
+                            key={headCell.id}
+                            className="py-3.5 px-4 whitespace-nowrap"
+                          >
                             <span
                               className={`inline-flex items-center px-2 py-0.5 rounded-md text-xs font-medium border ${
                                 isEv
                                   ? "bg-emerald-50 text-emerald-700 border-emerald-200"
                                   : isCng
-                                  ? "bg-teal-50 text-teal-700 border-teal-200"
-                                  : "bg-slate-100 text-slate-700 border-slate-200"
+                                    ? "bg-teal-50 text-teal-700 border-teal-200"
+                                    : "bg-slate-100 text-slate-700 border-slate-200"
                               }`}
                             >
                               {cellValue || "-"}
@@ -517,7 +587,10 @@ export default function DocumentTable({
                       // Capacity
                       if (headCell.id === "capacity") {
                         return (
-                          <td key={headCell.id} className="py-3.5 px-4 whitespace-nowrap font-medium text-slate-700">
+                          <td
+                            key={headCell.id}
+                            className="py-3.5 px-4 whitespace-nowrap font-medium text-slate-700"
+                          >
                             {cellValue ? (
                               <span className="inline-flex items-center gap-1 font-semibold text-slate-800">
                                 <span>⚖️</span>
@@ -533,7 +606,10 @@ export default function DocumentTable({
                       // Ownership Type
                       if (headCell.id === "ownership_type") {
                         return (
-                          <td key={headCell.id} className="py-3.5 px-4 whitespace-nowrap">
+                          <td
+                            key={headCell.id}
+                            className="py-3.5 px-4 whitespace-nowrap"
+                          >
                             <span className="text-xs font-medium text-slate-600 bg-slate-50 px-2 py-1 rounded-md border border-slate-200/80">
                               {cellValue || "-"}
                             </span>
@@ -544,7 +620,10 @@ export default function DocumentTable({
                       // Contact Number (Drivers)
                       if (headCell.id === "contact_number") {
                         return (
-                          <td key={headCell.id} className="py-3.5 px-4 whitespace-nowrap">
+                          <td
+                            key={headCell.id}
+                            className="py-3.5 px-4 whitespace-nowrap"
+                          >
                             <div className="font-semibold text-slate-800 text-xs sm:text-sm">
                               {cellValue || "-"}
                             </div>
@@ -560,7 +639,10 @@ export default function DocumentTable({
                       // License Number
                       if (headCell.id === "license_number") {
                         return (
-                          <td key={headCell.id} className="py-3.5 px-4 whitespace-nowrap">
+                          <td
+                            key={headCell.id}
+                            className="py-3.5 px-4 whitespace-nowrap"
+                          >
                             <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-mono font-bold bg-slate-100 text-slate-800 border border-slate-200 uppercase tracking-wide">
                               {cellValue || "-"}
                             </span>
@@ -571,7 +653,10 @@ export default function DocumentTable({
                       // License Type / Category
                       if (headCell.id === "license_type") {
                         return (
-                          <td key={headCell.id} className="py-3.5 px-4 whitespace-nowrap">
+                          <td
+                            key={headCell.id}
+                            className="py-3.5 px-4 whitespace-nowrap"
+                          >
                             <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold bg-purple-50 text-purple-700 border border-purple-200/80">
                               {cellValue || "-"}
                             </span>
@@ -582,13 +667,18 @@ export default function DocumentTable({
                       // Assigned Vehicle
                       if (headCell.id === "assigned_vehicle") {
                         return (
-                          <td key={headCell.id} className="py-3.5 px-4 whitespace-nowrap">
+                          <td
+                            key={headCell.id}
+                            className="py-3.5 px-4 whitespace-nowrap"
+                          >
                             {cellValue ? (
                               <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200 uppercase tracking-wider">
                                 {formatVehicleNumber(cellValue) || cellValue}
                               </span>
                             ) : (
-                              <span className="text-xs text-slate-400 italic">Unassigned</span>
+                              <span className="text-xs text-slate-400 italic">
+                                Unassigned
+                              </span>
                             )}
                           </td>
                         );
@@ -597,7 +687,10 @@ export default function DocumentTable({
                       // Experience
                       if (headCell.id === "experience_years") {
                         return (
-                          <td key={headCell.id} className="py-3.5 px-4 whitespace-nowrap font-medium text-slate-700 text-xs sm:text-sm">
+                          <td
+                            key={headCell.id}
+                            className="py-3.5 px-4 whitespace-nowrap font-medium text-slate-700 text-xs sm:text-sm"
+                          >
                             {cellValue ? (
                               <span className="inline-flex items-center gap-1 font-semibold text-slate-800">
                                 <span>⭐</span>
@@ -637,7 +730,9 @@ export default function DocumentTable({
                           } else if (typeof cellValue === "string") {
                             try {
                               const parsed = JSON.parse(cellValue);
-                              docs = Array.isArray(parsed) ? parsed : [cellValue];
+                              docs = Array.isArray(parsed)
+                                ? parsed
+                                : [cellValue];
                             } catch (_) {
                               docs = [{ name: "Document", dataUrl: cellValue }];
                             }
@@ -697,45 +792,73 @@ export default function DocumentTable({
 
                       // Status Badge
                       if (headCell.id === "status") {
-                        const normalized = (cellValue || "").toString().toLowerCase();
-                        const isActive = cellValue === 1 || cellValue === "1" || normalized === "active";
-                        const isOnDuty = normalized === "on duty" || normalized === "on_duty";
-                        const isOnLeave = normalized === "on leave" || normalized === "on_leave";
-                        const isInTransit = normalized === "in transit" || normalized === "in_transit";
-                        const isMaintenance = normalized === "maintenance" || normalized === "in maintenance";
+                        const normalized = (cellValue || "")
+                          .toString()
+                          .toLowerCase();
+                        const isActive =
+                          cellValue === 1 ||
+                          cellValue === "1" ||
+                          normalized === "active";
+                        const isOnDuty =
+                          normalized === "on duty" || normalized === "on_duty";
+                        const isOnLeave =
+                          normalized === "on leave" ||
+                          normalized === "on_leave";
+                        const isInTransit =
+                          normalized === "in transit" ||
+                          normalized === "in_transit";
+                        const isMaintenance =
+                          normalized === "maintenance" ||
+                          normalized === "in maintenance";
 
-                        let badgeClasses = "bg-slate-100 text-slate-600 border-slate-200";
+                        let badgeClasses =
+                          "bg-slate-100 text-slate-600 border-slate-200";
                         let dotClass = "bg-slate-400";
                         let displayLabel = cellValue || "Inactive";
 
                         if (isActive) {
-                          badgeClasses = "bg-emerald-50 text-emerald-700 border-emerald-200";
+                          badgeClasses =
+                            "bg-emerald-50 text-emerald-700 border-emerald-200";
                           dotClass = "bg-emerald-500";
                           displayLabel = "Active";
                         } else if (isOnDuty) {
-                          badgeClasses = "bg-blue-50 text-blue-700 border-blue-200";
+                          badgeClasses =
+                            "bg-blue-50 text-blue-700 border-blue-200";
                           dotClass = "bg-blue-500 animate-pulse";
                           displayLabel = "On Duty";
                         } else if (isInTransit) {
-                          badgeClasses = "bg-blue-50 text-blue-700 border-blue-200";
+                          badgeClasses =
+                            "bg-blue-50 text-blue-700 border-blue-200";
                           dotClass = "bg-blue-500 animate-pulse";
                           displayLabel = "In Transit";
                         } else if (isOnLeave) {
-                          badgeClasses = "bg-amber-50 text-amber-700 border-amber-200";
+                          badgeClasses =
+                            "bg-amber-50 text-amber-700 border-amber-200";
                           dotClass = "bg-amber-500";
                           displayLabel = "On Leave";
                         } else if (isMaintenance) {
-                          badgeClasses = "bg-amber-50 text-amber-700 border-amber-200";
+                          badgeClasses =
+                            "bg-amber-50 text-amber-700 border-amber-200";
                           dotClass = "bg-amber-500";
                           displayLabel = "Maintenance";
-                        } else if (cellValue === 0 || cellValue === "0" || normalized === "closed" || normalized === "inactive") {
-                          badgeClasses = "bg-slate-100 text-slate-600 border-slate-200";
+                        } else if (
+                          cellValue === 0 ||
+                          cellValue === "0" ||
+                          normalized === "closed" ||
+                          normalized === "inactive"
+                        ) {
+                          badgeClasses =
+                            "bg-slate-100 text-slate-600 border-slate-200";
                           dotClass = "bg-slate-400";
-                          displayLabel = cellValue === "Closed" ? "Closed" : "Inactive";
+                          displayLabel =
+                            cellValue === "Closed" ? "Closed" : "Inactive";
                         }
 
                         return (
-                          <td key={headCell.id} className="py-3.5 px-4 whitespace-nowrap">
+                          <td
+                            key={headCell.id}
+                            className="py-3.5 px-4 whitespace-nowrap"
+                          >
                             <span
                               className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-semibold border ${badgeClasses}`}
                             >
@@ -764,14 +887,21 @@ export default function DocumentTable({
                       // Document Type Badge
                       if (headCell.id === "documentType") {
                         return (
-                          <td key={headCell.id} className="py-3.5 px-4 whitespace-nowrap">
+                          <td
+                            key={headCell.id}
+                            className="py-3.5 px-4 whitespace-nowrap"
+                          >
                             <StatusBadge type={cellValue} />
                           </td>
                         );
                       }
 
                       // Expiry Date (Calendar Icon)
-                      if (headCell.id === "expiryDate" || headCell.id === "due_date" || headCell.id === "start_date") {
+                      if (
+                        headCell.id === "expiryDate" ||
+                        headCell.id === "due_date" ||
+                        headCell.id === "start_date"
+                      ) {
                         return (
                           <td
                             key={headCell.id}
@@ -789,7 +919,7 @@ export default function DocumentTable({
                       if (headCell.id === "alertDate") {
                         const alertDateVal = getDateBeforeDays(
                           row.expiryDate,
-                          getConstant("DAYS_BEFORE_ALERT")
+                          getConstant("DAYS_BEFORE_ALERT"),
                         );
                         return (
                           <td

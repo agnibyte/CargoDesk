@@ -52,5 +52,9 @@ export const internalList = {
   ADD_NEW_DRIVER: "/api/driver/add-new",
   UPDATE_DRIVER: "/api/driver/update",
   DELETE_DRIVERS: "/api/driver/delete",
+
+  // fleet-driver assignment
+  ASSIGN_FLEET_DRIVER: "/api/fleet-driver/assign",
+  REMOVE_FLEET_DRIVER: "/api/fleet-driver/remove",
 };
 

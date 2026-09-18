@@ -1,7 +1,9 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useForm } from "react-hook-form";
+import CustomSearch from "../common/customSearch";
+import { useFleetDriver } from "@/context/fleetDriverContext";
 import { postApiData } from "@/utilities/services/apiService";
 import { showToast } from "@/utilities/toastService";
 import { vehicleNoListArr } from "@/utilities/dummyData";
@@ -15,9 +17,9 @@ import {
   FiTruck,
   FiUser,
   FiFileText,
-  FiSettings,
   FiCheck,
   FiShield,
+  FiAlertCircle,
 } from "react-icons/fi";
 import { ImSpinner9 } from "react-icons/im";
 
@@ -28,6 +30,8 @@ export default function FleetForm({
   onClose,
   toggleModal,
 }) {
+  const { drivers, refreshAll } = useFleetDriver();
+
   const defaultFormData = {
     vehicle_number: "",
     vehicle_model: "",
@@ -36,8 +40,6 @@ export default function FleetForm({
     fuel_type: "Diesel",
     ownership_type: "Owned",
     manufacturing_year: new Date().getFullYear().toString(),
-    driver_name: "",
-    driver_contact: "",
     gps_tracking_id: "",
     chassis_number: "",
     engine_number: "",
@@ -45,6 +47,7 @@ export default function FleetForm({
     notes: "",
   };
 
+  const [selectedDriverId, setSelectedDriverId] = useState("");
   const [apiLoading, setApiLoading] = useState(false);
 
   const {
@@ -68,18 +71,72 @@ export default function FleetForm({
         fuel_type: modalData.fuel_type || "Diesel",
         ownership_type: modalData.ownership_type || "Owned",
         manufacturing_year: modalData.manufacturing_year || "",
-        driver_name: modalData.driver_name || "",
-        driver_contact: modalData.driver_contact || "",
         gps_tracking_id: modalData.gps_tracking_id || "",
         chassis_number: modalData.chassis_number || "",
         engine_number: modalData.engine_number || "",
         status: modalData.status || "Active",
         notes: modalData.notes || modalData.note || "",
       });
+
+      // Find driver assigned to this fleet
+      let initialDriverId = "";
+      if (modalData.driver_id) {
+        initialDriverId = modalData.driver_id;
+      } else {
+        const assigned = drivers.find((d) => Number(d.fleet_id) === Number(modalData.id));
+        if (assigned) {
+          initialDriverId = assigned.id;
+        }
+      }
+      setSelectedDriverId(initialDriverId ? String(initialDriverId) : "");
     } else {
       reset(defaultFormData);
+      setSelectedDriverId("");
     }
-  }, [isEdit, modalData, reset]);
+  }, [isEdit, modalData, reset, drivers]);
+
+  // Construct options for CustomSearch
+  const driverOptions = useMemo(() => {
+    const opts = [
+      {
+        value: "",
+        label: "-- Unassigned (No Driver) --",
+      },
+    ];
+
+    drivers.forEach((d) => {
+      const isCurrentFleet = modalData?.id && Number(d.fleet_id) === Number(modalData.id);
+      const isAssignedElsewhere = d.fleet_id && !isCurrentFleet;
+
+      opts.push({
+        value: String(d.id),
+        id: d.id,
+        label: `${d.driver_name} (${d.contact_number || "No Contact"})${
+          isCurrentFleet
+            ? " [Currently Assigned]"
+            : isAssignedElsewhere
+            ? ` [Assigned: ${d.assigned_vehicle || "Vehicle"}]`
+            : " [Available]"
+        }`,
+        driver: d,
+      });
+    });
+
+    return opts;
+  }, [drivers, modalData]);
+
+  // Find currently selected driver object for preview
+  const selectedDriver = useMemo(() => {
+    if (!selectedDriverId) return null;
+    return drivers.find((d) => String(d.id) === String(selectedDriverId)) || null;
+  }, [selectedDriverId, drivers]);
+
+  // Check if selected driver is currently assigned elsewhere
+  const isDriverReassigned = useMemo(() => {
+    if (!selectedDriver || !selectedDriver.fleet_id) return false;
+    if (!modalData?.id) return true; // Adding new fleet and driver already has a fleet
+    return Number(selectedDriver.fleet_id) !== Number(modalData.id);
+  }, [selectedDriver, modalData]);
 
   const handleClose = () => {
     if (onClose) onClose();
@@ -88,6 +145,11 @@ export default function FleetForm({
 
   const onSubmit = async (data) => {
     setApiLoading(true);
+
+    const parsedDriverId =
+      selectedDriverId !== "" && Number(selectedDriverId) > 0
+        ? Number(selectedDriverId)
+        : null;
 
     const payload = {
       vehicle_number: data.vehicle_number
@@ -101,8 +163,6 @@ export default function FleetForm({
       manufacturing_year: data.manufacturing_year
         ? data.manufacturing_year.trim()
         : "",
-      driver_name: data.driver_name ? data.driver_name.trim() : "",
-      driver_contact: data.driver_contact ? data.driver_contact.trim() : "",
       gps_tracking_id: data.gps_tracking_id
         ? data.gps_tracking_id.trim()
         : "",
@@ -110,6 +170,7 @@ export default function FleetForm({
       engine_number: data.engine_number ? data.engine_number.trim() : "",
       status: data.status || "Active",
       notes: data.notes ? data.notes.trim() : "",
+      driver_id: parsedDriverId,
     };
 
     let response;
@@ -121,24 +182,47 @@ export default function FleetForm({
     }
 
     if (response && response.status) {
-      if (isEdit) {
-        setFleetList((prev) =>
-          prev.map((item) =>
-            item.id == modalData.id
-              ? { ...item, ...payload, id: modalData.id }
-              : item
-          )
-        );
-        showToast(response.message || "Fleet updated successfully", "success");
-      } else {
-        showToast(response.message || "Fleet added successfully", "success");
-        setFleetList((prev) => [
-          { ...payload, id: response.id || Date.now() },
-          ...prev,
-        ]);
+      showToast(
+        response.message || (isEdit ? "Fleet updated successfully" : "Fleet added successfully"),
+        "success"
+      );
+
+      // Refresh synchronized context datasets
+      await refreshAll();
+
+      if (setFleetList) {
+        // Also update local list if provided
+        if (isEdit) {
+          setFleetList((prev) =>
+            prev.map((item) =>
+              item.id == modalData.id
+                ? {
+                    ...item,
+                    ...payload,
+                    id: modalData.id,
+                    driver_id: parsedDriverId,
+                    driver_name: selectedDriver?.driver_name || null,
+                    driver_contact: selectedDriver?.contact_number || null,
+                  }
+                : item
+            )
+          );
+        } else {
+          setFleetList((prev) => [
+            {
+              ...payload,
+              id: response.id || Date.now(),
+              driver_id: parsedDriverId,
+              driver_name: selectedDriver?.driver_name || null,
+              driver_contact: selectedDriver?.contact_number || null,
+            },
+            ...prev,
+          ]);
+        }
       }
 
       reset(defaultFormData);
+      setSelectedDriverId("");
       handleClose();
     } else {
       showToast(response?.message || "Failed to save fleet record", "error");
@@ -352,48 +436,110 @@ export default function FleetForm({
         </div>
       </div>
 
-      {/* 3. Driver Assignment */}
+      {/* 3. Driver Assignment (Single Source of Truth via customSearch) */}
       <div className="bg-slate-50/70 border border-slate-200/80 rounded-2xl p-4 sm:p-5 space-y-4 shadow-2xs">
-        <div className="flex items-center gap-2.5 pb-2 border-b border-slate-200/60">
-          <div className="w-8 h-8 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center font-bold text-sm shadow-2xs">
-            <FiUser className="w-4 h-4" />
+        <div className="flex items-center justify-between pb-2 border-b border-slate-200/60">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-xl bg-purple-50 text-purple-600 flex items-center justify-center font-bold text-sm shadow-2xs">
+              <FiUser className="w-4 h-4" />
+            </div>
+            <div>
+              <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
+                Assigned Driver Details
+              </h4>
+              <p className="text-[11px] text-slate-500 font-medium">
+                Search and assign a registered driver to this vehicle
+              </p>
+            </div>
           </div>
-          <div>
-            <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider">
-              Assigned Driver Details
-            </h4>
-            <p className="text-[11px] text-slate-500 font-medium">
-              Primary driver name and direct contact mobile number
-            </p>
-          </div>
+          {selectedDriver && (
+            <span className="text-[11px] font-bold px-2 py-0.5 rounded-full bg-purple-100 text-purple-700">
+              Driver Assigned
+            </span>
+          )}
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Driver Name */}
+        <div className="space-y-3">
+          {/* Driver Selection Dropdown using CustomSearch */}
           <div>
             <label className="block text-xs font-bold text-slate-700 mb-1.5">
-              Assigned Driver Name
+              Select Transport Driver
             </label>
-            <input
-              type="text"
-              placeholder="e.g. Ramesh Sharma"
-              {...register("driver_name")}
-              className="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-white text-slate-900 rounded-xl border border-slate-200 hover:border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 outline-none transition-all shadow-2xs font-medium placeholder-slate-400"
+            <CustomSearch
+              name="driver_id"
+              id="fleet_driver_select"
+              value={selectedDriverId}
+              options={driverOptions}
+              placeholder="Search by driver name or contact number..."
+              onChange={(opt) => {
+                const val = opt?.value !== undefined ? opt.value : opt || "";
+                setSelectedDriverId(val ? String(val) : "");
+              }}
             />
           </div>
 
-          {/* Driver Contact */}
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1.5">
-              Driver Mobile Contact
-            </label>
-            <input
-              type="text"
-              placeholder="e.g. +91 98201 44552"
-              {...register("driver_contact")}
-              className="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-white text-slate-900 rounded-xl border border-slate-200 hover:border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 outline-none transition-all shadow-2xs font-medium placeholder-slate-400"
-            />
-          </div>
+          {/* Reassignment Warning Banner */}
+          {isDriverReassigned && selectedDriver && (
+            <div className="flex items-start gap-2.5 p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs">
+              <FiAlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+              <div>
+                <span className="font-bold">Reassignment Notice: </span>
+                <span>
+                  <strong>{selectedDriver.driver_name}</strong> is currently assigned to vehicle{" "}
+                  <strong>{selectedDriver.assigned_vehicle || "another vehicle"}</strong>. Saving this fleet
+                  will reassign them to this vehicle.
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* Driver Info Card */}
+          {selectedDriver && (
+            <div className="p-3.5 bg-white border border-slate-200/90 rounded-xl shadow-2xs flex items-center justify-between gap-4">
+              <div className="flex items-center gap-3 min-w-0">
+                <div className="relative shrink-0">
+                  {selectedDriver.profile_photo ? (
+                    <img
+                      src={selectedDriver.profile_photo}
+                      alt={selectedDriver.driver_name}
+                      className="w-10 h-10 rounded-xl object-cover border border-slate-200"
+                    />
+                  ) : (
+                    <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-purple-600 to-indigo-600 text-white font-bold text-xs flex items-center justify-center">
+                      {(selectedDriver.driver_name || "D")
+                        .split(" ")
+                        .map((n) => n[0])
+                        .join("")
+                        .substring(0, 2)
+                        .toUpperCase()}
+                    </div>
+                  )}
+                </div>
+                <div className="min-w-0">
+                  <div className="text-xs font-bold text-slate-900 truncate">
+                    {selectedDriver.driver_name}
+                  </div>
+                  <div className="text-[11px] text-slate-500 font-medium">
+                    📞 {selectedDriver.contact_number || "No Contact"} •{" "}
+                    <span className="font-mono">{selectedDriver.license_number || "DL"}</span>
+                  </div>
+                </div>
+              </div>
+
+              <div className="shrink-0 flex items-center gap-2">
+                <span className="px-2 py-0.5 rounded-md text-[10px] font-semibold bg-slate-100 text-slate-700">
+                  {selectedDriver.license_type || "HTV"}
+                </span>
+                <button
+                  type="button"
+                  onClick={() => setSelectedDriverId("")}
+                  className="text-xs text-rose-500 hover:text-rose-700 font-semibold px-2 py-1 rounded-lg hover:bg-rose-50 transition-colors"
+                >
+                  Unassign
+                </button>
+              </div>
+            </div>
+          )}
         </div>
       </div>
 

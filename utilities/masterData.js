@@ -214,6 +214,12 @@ export const driverTableHeadCells = [
     label: "Sr. No.",
   },
   {
+    id: "profile_photo",
+    numeric: false,
+    disablePadding: false,
+    label: "Photo",
+  },
+  {
     id: "driver_name",
     numeric: false,
     disablePadding: false,

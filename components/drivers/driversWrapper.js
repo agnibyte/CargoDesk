@@ -7,6 +7,7 @@ import DriverDocumentsViewer from "./driverDocumentsViewer";
 import { driverTableHeadCells } from "@/utilities/masterData";
 import { postApiData } from "@/utilities/services/apiService";
 import { showToast } from "@/utilities/toastService";
+import { useFleetDriver } from "@/context/fleetDriverContext";
 import {
   FiUsers,
   FiPlus,
@@ -23,6 +24,7 @@ import { HiOutlineUserGroup } from "react-icons/hi";
 import { ImSpinner9 } from "react-icons/im";
 
 export default function DriversWrapper({ pageData }) {
+  const { drivers: contextDrivers, loading: contextLoading, refreshAll } = useFleetDriver();
   const [driverList, setDriverList] = useState(pageData?.drivers || []);
   const [driverModal, setDriverModal] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
@@ -33,13 +35,21 @@ export default function DriversWrapper({ pageData }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [filterMenuOpen, setFilterMenuOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(!pageData?.drivers);
+  const [isLoading, setIsLoading] = useState(!pageData?.drivers && !contextDrivers.length);
   const [docsModalOpen, setDocsModalOpen] = useState(false);
   const [selectedDriverForDocs, setSelectedDriverForDocs] = useState(null);
 
-  // Fetch drivers if not provided via SSR
+  // Sync with context drivers whenever updated
   useEffect(() => {
-    if (!pageData?.drivers) {
+    if (contextDrivers && contextDrivers.length > 0) {
+      setDriverList(contextDrivers);
+      setIsLoading(false);
+    }
+  }, [contextDrivers]);
+
+  // Fetch drivers if not provided via SSR or context
+  useEffect(() => {
+    if (!pageData?.drivers && (!contextDrivers || contextDrivers.length === 0)) {
       setIsLoading(true);
       postApiData("GET_ALL_DRIVERS")
         .then((res) => {
@@ -50,44 +60,50 @@ export default function DriversWrapper({ pageData }) {
         .catch((err) => console.error("Error fetching driver list:", err))
         .finally(() => setIsLoading(false));
     }
-  }, [pageData]);
+  }, [pageData, contextDrivers]);
 
   // Compute summary stats
   const stats = useMemo(() => {
     const total = driverList.length;
-    let active = 0;
-    let onDuty = 0;
+    let assigned = 0;
+    let unassigned = 0;
     let onLeave = 0;
-    let inactive = 0;
 
     driverList.forEach((item) => {
-      const s = (item.status || "").toLowerCase();
-      if (s === "active" || item.status === 1 || item.status === "1") {
-        active += 1;
-      } else if (s === "on duty" || s === "on_duty" || s === "in transit" || s === "in_transit") {
-        onDuty += 1;
-      } else if (s === "on leave" || s === "on_leave" || s === "leave") {
-        onLeave += 1;
+      const isAssigned = Boolean(item.fleet_id || item.assigned_vehicle);
+      if (isAssigned) {
+        assigned += 1;
       } else {
-        inactive += 1;
+        unassigned += 1;
+      }
+
+      const s = (item.status || "").toLowerCase();
+      if (s === "on leave" || s === "on_leave" || s === "leave") {
+        onLeave += 1;
       }
     });
 
-    return { total, active, onDuty, onLeave, inactive };
+    return { total, assigned, unassigned, onLeave };
   }, [driverList]);
 
   // Filtered display data
   const finalDisplayData = useMemo(() => {
     let result = driverList;
 
-    // Filter by status
+    // Filter by status / assignment
     if (statusFilter !== "all") {
       result = result.filter((item) => {
-        const s = (item.status || "").toLowerCase();
-        if (statusFilter === "active") return s === "active" || item.status === 1;
-        if (statusFilter === "on_duty") return s === "on duty" || s === "on_duty" || s === "in transit";
-        if (statusFilter === "on_leave") return s === "on leave" || s === "on_leave";
-        if (statusFilter === "inactive") return s === "inactive" || s === "closed" || item.status === 0;
+        const isAssigned = Boolean(item.fleet_id || item.assigned_vehicle);
+        if (statusFilter === "assigned") return isAssigned;
+        if (statusFilter === "unassigned") return !isAssigned;
+        if (statusFilter === "on_leave") {
+          const s = (item.status || "").toLowerCase();
+          return s === "on leave" || s === "on_leave" || s === "leave";
+        }
+        if (statusFilter === "active") {
+          const s = (item.status || "").toLowerCase();
+          return s === "active" || item.status === 1;
+        }
         return true;
       });
     }
@@ -212,53 +228,53 @@ export default function DriversWrapper({ pageData }) {
           </span>
         </div>
 
-        {/* Active / Available Card */}
+        {/* Fleet Assigned Drivers Card */}
         <div
-          onClick={() => setStatusFilter("active")}
+          onClick={() => setStatusFilter("assigned")}
           className={`bg-white rounded-2xl p-4 md:p-5 border transition-all cursor-pointer shadow-2xs hover:shadow-md ${
-            statusFilter === "active"
+            statusFilter === "assigned"
               ? "border-emerald-500 ring-2 ring-emerald-500/10"
               : "border-slate-200/80 hover:border-slate-300"
           }`}
         >
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-emerald-600 uppercase tracking-wider">
-              Active / Ready
+              Fleet Assigned
             </span>
             <div className="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
               <FiCheckCircle className="w-4 h-4" />
             </div>
           </div>
           <div className="text-2xl md:text-3xl font-extrabold text-slate-900 mt-2">
-            {stats.active}
+            {stats.assigned}
           </div>
           <span className="text-[11px] font-semibold text-emerald-600 mt-1 block">
-            Available for trip dispatch
+            Assigned to a fleet vehicle
           </span>
         </div>
 
-        {/* On Duty Card */}
+        {/* Unassigned Drivers Card */}
         <div
-          onClick={() => setStatusFilter("on_duty")}
+          onClick={() => setStatusFilter("unassigned")}
           className={`bg-white rounded-2xl p-4 md:p-5 border transition-all cursor-pointer shadow-2xs hover:shadow-md ${
-            statusFilter === "on_duty"
-              ? "border-blue-500 ring-2 ring-blue-500/10"
+            statusFilter === "unassigned"
+              ? "border-indigo-500 ring-2 ring-indigo-500/10"
               : "border-slate-200/80 hover:border-slate-300"
           }`}
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-bold text-blue-600 uppercase tracking-wider">
-              On Duty / En Route
+            <span className="text-xs font-bold text-indigo-600 uppercase tracking-wider">
+              Unassigned Drivers
             </span>
-            <div className="w-9 h-9 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center">
-              <FiActivity className="w-4 h-4" />
+            <div className="w-9 h-9 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+              <FiUsers className="w-4 h-4" />
             </div>
           </div>
           <div className="text-2xl md:text-3xl font-extrabold text-slate-900 mt-2">
-            {stats.onDuty}
+            {stats.unassigned}
           </div>
-          <span className="text-[11px] font-semibold text-blue-600 mt-1 block">
-            Currently on assigned trip
+          <span className="text-[11px] font-semibold text-indigo-600 mt-1 block">
+            Available for vehicle assignment
           </span>
         </div>
 
@@ -329,7 +345,7 @@ export default function DriversWrapper({ pageData }) {
               )}
             </div>
 
-            {/* Status Filter Dropdown */}
+            {/* Status / Assignment Filter Dropdown */}
             <div className="relative">
               <button
                 type="button"
@@ -343,14 +359,14 @@ export default function DriversWrapper({ pageData }) {
                 <FiFilter className="w-4 h-4" />
                 <span>
                   {statusFilter === "all"
-                    ? "Filter Status"
-                    : statusFilter === "active"
-                    ? "Active"
-                    : statusFilter === "on_duty"
-                    ? "On Duty"
+                    ? "Filter Drivers"
+                    : statusFilter === "assigned"
+                    ? "Fleet Assigned"
+                    : statusFilter === "unassigned"
+                    ? "Unassigned Drivers"
                     : statusFilter === "on_leave"
                     ? "On Leave"
-                    : "Inactive"}
+                    : "Filtered"}
                 </span>
                 {statusFilter !== "all" && (
                   <span className="w-2 h-2 rounded-full bg-blue-600" />
@@ -358,16 +374,15 @@ export default function DriversWrapper({ pageData }) {
               </button>
 
               {filterMenuOpen && (
-                <div className="absolute right-0 mt-2 w-48 bg-white rounded-2xl shadow-xl border border-slate-100 p-2 z-30 animate-dropdown">
+                <div className="absolute right-0 mt-2 w-52 bg-white rounded-2xl shadow-xl border border-slate-100 p-2 z-30 animate-dropdown">
                   <div className="text-[11px] font-bold text-slate-400 uppercase tracking-wider px-3 py-1.5">
-                    Filter by Status
+                    Filter by Assignment / Status
                   </div>
                   {[
                     { id: "all", label: "All Drivers" },
-                    { id: "active", label: "Active / Ready" },
-                    { id: "on_duty", label: "On Duty / En Route" },
-                    { id: "on_leave", label: "On Leave" },
-                    { id: "inactive", label: "Inactive" },
+                    { id: "assigned", label: "Fleet Assigned Drivers" },
+                    { id: "unassigned", label: "Unassigned Drivers" },
+                    { id: "on_leave", label: "On Leave / Rest" },
                   ].map((opt) => (
                     <button
                       key={opt.id}
@@ -408,7 +423,16 @@ export default function DriversWrapper({ pageData }) {
             <span className="text-xs font-medium text-slate-400">Active filters:</span>
             {statusFilter !== "all" && (
               <span className="inline-flex items-center gap-1.5 px-3 py-1 rounded-full text-xs font-semibold bg-blue-50 text-blue-700 border border-blue-200">
-                <span>Status: {statusFilter}</span>
+                <span>
+                  Filter:{" "}
+                  {statusFilter === "assigned"
+                    ? "Fleet Assigned"
+                    : statusFilter === "unassigned"
+                    ? "Unassigned Drivers"
+                    : statusFilter === "on_leave"
+                    ? "On Leave"
+                    : statusFilter}
+                </span>
                 <button
                   onClick={() => setStatusFilter("all")}
                   className="text-blue-500 hover:text-blue-800"

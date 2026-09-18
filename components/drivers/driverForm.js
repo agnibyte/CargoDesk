@@ -1,10 +1,11 @@
 "use client";
 
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState, useRef, useMemo } from "react";
 import { useForm } from "react-hook-form";
+import CustomSearch from "../common/customSearch";
+import { useFleetDriver } from "@/context/fleetDriverContext";
 import { postApiData } from "@/utilities/services/apiService";
 import { showToast } from "@/utilities/toastService";
-import { vehicleNoListArr } from "@/utilities/dummyData";
 import {
   DRIVER_LICENSE_TYPES,
   DRIVER_STATUS_OPTIONS,
@@ -22,6 +23,7 @@ import {
   FiEye,
   FiFile,
   FiX,
+  FiAlertCircle,
 } from "react-icons/fi";
 import { ImSpinner9 } from "react-icons/im";
 
@@ -32,9 +34,12 @@ export default function DriverForm({
   onClose,
   toggleModal,
 }) {
+  const { fleets, refreshAll } = useFleetDriver();
+
   const [profilePhoto, setProfilePhoto] = useState("");
   const [supportingDocs, setSupportingDocs] = useState([]);
   const [previewDoc, setPreviewDoc] = useState(null);
+  const [selectedFleetId, setSelectedFleetId] = useState("");
   const [apiLoading, setApiLoading] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
 
@@ -55,7 +60,6 @@ export default function DriverForm({
       license_number: "",
       license_type: DRIVER_LICENSE_TYPES[0] || "Heavy Transport Vehicle (HTV)",
       license_expiry: "",
-      assigned_vehicle: "",
       experience_years: "5 Years",
       blood_group: "B+",
       emergency_contact: "",
@@ -75,7 +79,6 @@ export default function DriverForm({
         license_number: modalData.license_number || "",
         license_type: modalData.license_type || DRIVER_LICENSE_TYPES[0],
         license_expiry: modalData.license_expiry || "",
-        assigned_vehicle: modalData.assigned_vehicle || modalData.vehicleNo || "",
         experience_years: modalData.experience_years || "5 Years",
         blood_group: modalData.blood_group || "B+",
         emergency_contact: modalData.emergency_contact || "",
@@ -83,6 +86,25 @@ export default function DriverForm({
         address: modalData.address || "",
         notes: modalData.notes || modalData.note || "",
       });
+
+      // Find initial fleet id
+      let initialFleetId = "";
+      if (modalData.fleet_id) {
+        initialFleetId = modalData.fleet_id;
+      } else if (modalData.assigned_vehicle) {
+        const found = fleets.find(
+          (f) =>
+            f.vehicle_number?.toUpperCase() ===
+            modalData.assigned_vehicle?.toUpperCase()
+        );
+        if (found) initialFleetId = found.id;
+      } else {
+        const found = fleets.find(
+          (f) => Number(f.driver_id) === Number(modalData.id)
+        );
+        if (found) initialFleetId = found.id;
+      }
+      setSelectedFleetId(initialFleetId ? String(initialFleetId) : "");
 
       setProfilePhoto(modalData.profile_photo || "");
 
@@ -109,7 +131,6 @@ export default function DriverForm({
         license_number: "",
         license_type: DRIVER_LICENSE_TYPES[0] || "Heavy Transport Vehicle (HTV)",
         license_expiry: "",
-        assigned_vehicle: "",
         experience_years: "5 Years",
         blood_group: "B+",
         emergency_contact: "",
@@ -117,10 +138,55 @@ export default function DriverForm({
         address: "",
         notes: "",
       });
+      setSelectedFleetId("");
       setProfilePhoto("");
       setSupportingDocs([]);
     }
-  }, [isEdit, modalData, reset]);
+  }, [isEdit, modalData, reset, fleets]);
+
+  // Construct options for CustomSearch dropdown
+  const fleetOptions = useMemo(() => {
+    const opts = [
+      {
+        value: "",
+        label: "-- Unassigned (No Fleet Vehicle) --",
+      },
+    ];
+
+    fleets.forEach((f) => {
+      const isCurrentDriver =
+        modalData?.id && Number(f.driver_id) === Number(modalData.id);
+      const isAssignedElsewhere = f.driver_id && !isCurrentDriver;
+
+      opts.push({
+        value: String(f.id),
+        id: f.id,
+        label: `${f.vehicle_number} (${f.vehicle_type || f.vehicle_model || "Fleet"})${
+          isCurrentDriver
+            ? " [Currently Assigned]"
+            : isAssignedElsewhere
+            ? ` [Assigned: ${f.driver_name || "Driver"}]`
+            : " [Available]"
+        }`,
+        fleet: f,
+      });
+    });
+
+    return opts;
+  }, [fleets, modalData]);
+
+  // Find currently selected fleet object for preview
+  const selectedFleet = useMemo(() => {
+    if (!selectedFleetId) return null;
+    return fleets.find((f) => String(f.id) === String(selectedFleetId)) || null;
+  }, [selectedFleetId, fleets]);
+
+  // Check if selected fleet is currently assigned to another driver
+  const isFleetReassigned = useMemo(() => {
+    if (!selectedFleet || !selectedFleet.driver_id) return false;
+    if (!modalData?.id) return true; // Adding new driver and fleet is already assigned
+    return Number(selectedFleet.driver_id) !== Number(modalData.id);
+  }, [selectedFleet, modalData]);
 
   const handleClose = () => {
     if (onClose) onClose();
@@ -226,6 +292,11 @@ export default function DriverForm({
   const onSubmit = async (data) => {
     setApiLoading(true);
 
+    const parsedFleetId =
+      selectedFleetId !== "" && Number(selectedFleetId) > 0
+        ? Number(selectedFleetId)
+        : null;
+
     const payload = {
       driver_name: data.driver_name ? data.driver_name.trim() : "",
       contact_number: data.contact_number ? data.contact_number.trim() : "",
@@ -235,9 +306,8 @@ export default function DriverForm({
         : "",
       license_type: data.license_type || "",
       license_expiry: data.license_expiry || "",
-      assigned_vehicle: data.assigned_vehicle
-        ? data.assigned_vehicle.toUpperCase().trim()
-        : "",
+      assigned_vehicle: selectedFleet?.vehicle_number || "",
+      fleet_id: parsedFleetId,
       experience_years: data.experience_years ? data.experience_years.trim() : "",
       blood_group: data.blood_group || "",
       emergency_contact: data.emergency_contact ? data.emergency_contact.trim() : "",
@@ -257,21 +327,44 @@ export default function DriverForm({
     }
 
     if (response && response.status) {
-      if (isEdit) {
-        setDriverList((prev) =>
-          prev.map((item) =>
-            item.id == modalData.id
-              ? { ...item, ...payload, id: modalData.id }
-              : item
-          )
-        );
-        showToast(response.message || "Driver updated successfully", "success");
-      } else {
-        showToast(response.message || "Driver added successfully", "success");
-        setDriverList((prev) => [
-          { ...payload, id: response.id || Date.now() },
-          ...prev,
-        ]);
+      showToast(
+        response.message || (isEdit ? "Driver updated successfully" : "Driver added successfully"),
+        "success"
+      );
+
+      // Refresh synchronized context datasets
+      await refreshAll();
+
+      if (setDriverList) {
+        if (isEdit) {
+          setDriverList((prev) =>
+            prev.map((item) =>
+              item.id == modalData.id
+                ? {
+                    ...item,
+                    ...payload,
+                    id: modalData.id,
+                    fleet_id: parsedFleetId,
+                    assigned_vehicle: selectedFleet?.vehicle_number || null,
+                    vehicle_number: selectedFleet?.vehicle_number || null,
+                    vehicle_model: selectedFleet?.vehicle_model || null,
+                  }
+                : item
+            )
+          );
+        } else {
+          setDriverList((prev) => [
+            {
+              ...payload,
+              id: response.id || Date.now(),
+              fleet_id: parsedFleetId,
+              assigned_vehicle: selectedFleet?.vehicle_number || null,
+              vehicle_number: selectedFleet?.vehicle_number || null,
+              vehicle_model: selectedFleet?.vehicle_model || null,
+            },
+            ...prev,
+          ]);
+        }
       }
 
       handleClose();
@@ -694,27 +787,82 @@ export default function DriverForm({
           </div>
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-            {/* Assigned Vehicle */}
-            <div>
-              <label className="block text-xs font-bold text-slate-700 mb-1.5">
+            {/* Assigned Vehicle Custom Search */}
+            <div className="md:col-span-2 space-y-2">
+              <label className="block text-xs font-bold text-slate-700">
                 Assigned Fleet Vehicle{" "}
-                <span className="text-slate-400 font-normal">(Optional)</span>
+                <span className="text-slate-400 font-normal">
+                  (Single source of truth via MySQL ID)
+                </span>
               </label>
-              <input
-                type="text"
-                list="driverVehicleSuggestions"
-                placeholder="e.g. MH 04 EF 9101"
-                {...register("assigned_vehicle", {
-                  onChange: (e) =>
-                    setValue("assigned_vehicle", e.target.value.toUpperCase()),
-                })}
-                className="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-white text-slate-900 rounded-xl border border-slate-200 hover:border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 outline-none transition-all shadow-2xs uppercase placeholder:normal-case font-semibold"
+
+              <CustomSearch
+                name="fleet_id"
+                label="Select Assigned Fleet Vehicle"
+                options={fleetOptions}
+                value={selectedFleetId}
+                selectedValue={selectedFleetId}
+                onChange={(result) => {
+                  const val = result ? String(result.value || "") : "";
+                  setSelectedFleetId(val);
+                }}
+                className="w-full"
               />
-              <datalist id="driverVehicleSuggestions">
-                {vehicleNoListArr.map((item) => (
-                  <option key={item.id} value={item.label} />
-                ))}
-              </datalist>
+
+              {/* Reassignment Warning */}
+              {isFleetReassigned && selectedFleet && (
+                <div className="flex items-start gap-2.5 p-3 rounded-xl bg-amber-50 border border-amber-200/80 text-amber-800 text-xs">
+                  <FiAlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
+                  <div>
+                    <span className="font-bold">Vehicle Reassignment Notice:</span>{" "}
+                    This vehicle (
+                    <span className="font-semibold">{selectedFleet.vehicle_number}</span>
+                    ) is currently assigned to{" "}
+                    <span className="font-bold text-amber-900">
+                      {selectedFleet.driver_name || "another driver"}
+                    </span>
+                    . Saving this form will automatically transfer the vehicle assignment to this driver.
+                  </div>
+                </div>
+              )}
+
+              {/* Selected Fleet Vehicle Details Card */}
+              {selectedFleet && (
+                <div className="flex items-center justify-between p-3 rounded-xl bg-blue-50/60 border border-blue-100 text-xs">
+                  <div className="flex items-center gap-3">
+                    <div className="w-9 h-9 rounded-xl bg-blue-600 text-white flex items-center justify-center font-bold text-sm shadow-xs">
+                      <FiTruck className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <div className="font-bold text-slate-900">
+                        {selectedFleet.vehicle_number}
+                      </div>
+                      <div className="text-[11px] text-slate-500 flex items-center gap-2">
+                        <span>{selectedFleet.vehicle_type || "Vehicle"}</span>
+                        {selectedFleet.vehicle_model && (
+                          <>
+                            <span>•</span>
+                            <span>{selectedFleet.vehicle_model}</span>
+                          </>
+                        )}
+                        {selectedFleet.capacity && (
+                          <>
+                            <span>•</span>
+                            <span>Cap: {selectedFleet.capacity}</span>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setSelectedFleetId("")}
+                    className="text-xs font-semibold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100/80 px-2.5 py-1 rounded-lg transition-colors cursor-pointer"
+                  >
+                    Unassign Vehicle
+                  </button>
+                </div>
+              )}
             </div>
 
             {/* Operational Status */}

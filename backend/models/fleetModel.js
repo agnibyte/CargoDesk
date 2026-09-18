@@ -1,4 +1,4 @@
-import executeQuery from "@/helpers/dbConnection";
+import executeQuery, { executeTransaction } from "@/helpers/dbConnection";
 
 let isTableInitialized = false;
 
@@ -12,8 +12,6 @@ const defaultSeedFleets = [
     fuel_type: "Diesel",
     ownership_type: "Owned",
     manufacturing_year: "2023",
-    driver_name: "Ramesh Sharma",
-    driver_contact: "+91 98201 44552",
     gps_tracking_id: "GPS-TRK-9101",
     chassis_number: "MAT5530SXYZ12345",
     status: "Active",
@@ -27,8 +25,6 @@ const defaultSeedFleets = [
     fuel_type: "Diesel",
     ownership_type: "Owned",
     manufacturing_year: "2022",
-    driver_name: "Suresh Patil",
-    driver_contact: "+91 97654 32189",
     gps_tracking_id: "GPS-TRK-0123",
     chassis_number: "AL2820AB567890",
     status: "In Transit",
@@ -42,8 +38,6 @@ const defaultSeedFleets = [
     fuel_type: "Diesel",
     ownership_type: "Leased / Financed",
     manufacturing_year: "2023",
-    driver_name: "Abdul Khan",
-    driver_contact: "+91 99887 76655",
     gps_tracking_id: "GPS-TRK-1122",
     chassis_number: "BB3528RC998877",
     status: "Active",
@@ -57,8 +51,6 @@ const defaultSeedFleets = [
     fuel_type: "CNG",
     ownership_type: "Attached / Vendor",
     manufacturing_year: "2021",
-    driver_name: "Vikas Deshmukh",
-    driver_contact: "+91 91234 56780",
     gps_tracking_id: "GPS-TRK-5678",
     chassis_number: "EP6028D112233",
     status: "Maintenance",
@@ -72,8 +64,6 @@ const defaultSeedFleets = [
     fuel_type: "Diesel",
     ownership_type: "Owned",
     manufacturing_year: "2022",
-    driver_name: "Dinesh Yadav",
-    driver_contact: "+91 94567 89012",
     gps_tracking_id: "GPS-TRK-2345",
     chassis_number: "MBX28E445566",
     status: "Active",
@@ -94,8 +84,6 @@ export async function ensureFleetTable() {
         fuel_type VARCHAR(50) NULL,
         ownership_type VARCHAR(50) NULL,
         manufacturing_year VARCHAR(10) NULL,
-        driver_name VARCHAR(100) NULL,
-        driver_contact VARCHAR(30) NULL,
         gps_tracking_id VARCHAR(100) NULL,
         chassis_number VARCHAR(100) NULL,
         engine_number VARCHAR(100) NULL,
@@ -129,7 +117,20 @@ export function getAllFleetsModel() {
   return new Promise(async (resolve, reject) => {
     try {
       await ensureFleetTable();
-      const selectQuery = `SELECT * FROM fleets ORDER BY id DESC`;
+      const selectQuery = `
+        SELECT 
+          f.*,
+          d.id AS driver_id,
+          d.driver_name AS driver_name,
+          d.contact_number AS driver_contact,
+          d.license_number AS driver_license_number,
+          d.license_type AS driver_license_type,
+          d.status AS driver_status,
+          d.profile_photo AS driver_profile_photo
+        FROM fleets f
+        LEFT JOIN drivers d ON d.fleet_id = f.id
+        ORDER BY f.id DESC
+      `;
       const rows = await executeQuery(selectQuery);
       resolve({
         status: true,
@@ -161,14 +162,18 @@ export function addNewFleetModel(data) {
         fuel_type,
         ownership_type,
         manufacturing_year,
-        driver_name,
-        driver_contact,
         gps_tracking_id,
         chassis_number,
         engine_number,
         status,
         notes,
+        driver_id,
       } = data;
+
+      const parsedDriverId =
+        driver_id !== undefined && driver_id !== null && driver_id !== "" && Number(driver_id) > 0
+          ? Number(driver_id)
+          : null;
 
       const payload = {
         vehicle_number: vehicle_number ? vehicle_number.toUpperCase().trim() : null,
@@ -178,8 +183,6 @@ export function addNewFleetModel(data) {
         fuel_type: fuel_type || null,
         ownership_type: ownership_type || null,
         manufacturing_year: manufacturing_year || null,
-        driver_name: driver_name || null,
-        driver_contact: driver_contact || null,
         gps_tracking_id: gps_tracking_id || null,
         chassis_number: chassis_number || null,
         engine_number: engine_number || null,
@@ -187,8 +190,20 @@ export function addNewFleetModel(data) {
         notes: notes || null,
       };
 
-      const insertQuery = `INSERT INTO fleets SET ?`;
-      const result = await executeQuery(insertQuery, payload);
+      const result = await executeTransaction(async (queryFn) => {
+        const insertRes = await queryFn(`INSERT INTO fleets SET ?`, payload);
+        const newFleetId = insertRes.insertId;
+
+        // If driver was selected, update driver.fleet_id
+        if (parsedDriverId && newFleetId) {
+          // Unassign any driver previously on this new fleet (just in case)
+          await queryFn(`UPDATE drivers SET fleet_id = NULL WHERE fleet_id = ?`, [newFleetId]);
+          // Assign selected driver to this fleet
+          await queryFn(`UPDATE drivers SET fleet_id = ? WHERE id = ?`, [newFleetId, parsedDriverId]);
+        }
+
+        return insertRes;
+      });
 
       if (result && result.affectedRows > 0) {
         resolve({
@@ -224,6 +239,13 @@ export function updateFleetModel(id, data) {
     try {
       await ensureFleetTable();
 
+      const parsedDriverId =
+        data.driver_id !== undefined
+          ? data.driver_id !== null && data.driver_id !== "" && Number(data.driver_id) > 0
+            ? Number(data.driver_id)
+            : null
+          : undefined;
+
       const updateData = {
         vehicle_number: data.vehicle_number ? data.vehicle_number.toUpperCase().trim() : undefined,
         vehicle_model: data.vehicle_model,
@@ -232,8 +254,6 @@ export function updateFleetModel(id, data) {
         fuel_type: data.fuel_type,
         ownership_type: data.ownership_type,
         manufacturing_year: data.manufacturing_year,
-        driver_name: data.driver_name,
-        driver_contact: data.driver_contact,
         gps_tracking_id: data.gps_tracking_id,
         chassis_number: data.chassis_number,
         engine_number: data.engine_number,
@@ -246,14 +266,29 @@ export function updateFleetModel(id, data) {
         (key) => updateData[key] === undefined && delete updateData[key]
       );
 
-      const updateQuery = `UPDATE fleets SET ? WHERE id = ?`;
-      const result = await executeQuery(updateQuery, [updateData, id]);
+      await executeTransaction(async (queryFn) => {
+        if (Object.keys(updateData).length > 0) {
+          await queryFn(`UPDATE fleets SET ? WHERE id = ?`, [updateData, id]);
+        }
 
-      if (result.affectedRows > 0) {
-        resolve({ status: true, message: "Fleet vehicle updated successfully" });
-      } else {
-        resolve({ status: false, message: "Fleet record not found or unchanged" });
-      }
+        // Manage driver assignment if provided in update payload
+        if (parsedDriverId !== undefined) {
+          if (parsedDriverId) {
+            // Remove previous driver on this fleet (if different)
+            await queryFn(`UPDATE drivers SET fleet_id = NULL WHERE fleet_id = ? AND id != ?`, [
+              id,
+              parsedDriverId,
+            ]);
+            // Assign selected driver to this fleet
+            await queryFn(`UPDATE drivers SET fleet_id = ? WHERE id = ?`, [id, parsedDriverId]);
+          } else {
+            // Unassign whoever was on this fleet
+            await queryFn(`UPDATE drivers SET fleet_id = NULL WHERE fleet_id = ?`, [id]);
+          }
+        }
+      });
+
+      resolve({ status: true, message: "Fleet vehicle updated successfully" });
     } catch (error) {
       console.error("Error updating fleet:", error);
       if (error.code === "ER_DUP_ENTRY") {
@@ -279,8 +314,14 @@ export function deleteFleetModel(ids) {
       }
 
       await ensureFleetTable();
-      const deleteQuery = `DELETE FROM fleets WHERE id IN (?)`;
-      const result = await executeQuery(deleteQuery, [ids]);
+
+      const result = await executeTransaction(async (queryFn) => {
+        // Unassign any drivers assigned to the fleets being deleted
+        await queryFn(`UPDATE drivers SET fleet_id = NULL WHERE fleet_id IN (?)`, [ids]);
+        // Delete fleets
+        const deleteRes = await queryFn(`DELETE FROM fleets WHERE id IN (?)`, [ids]);
+        return deleteRes;
+      });
 
       if (result.affectedRows > 0) {
         resolve({

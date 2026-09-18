@@ -1,4 +1,4 @@
-import executeQuery from "@/helpers/dbConnection";
+import executeQuery, { executeTransaction } from "@/helpers/dbConnection";
 
 let isTableInitialized = false;
 
@@ -11,7 +11,6 @@ const defaultSeedDrivers = [
     license_number: "MH04 20150012345",
     license_type: "Heavy Transport Vehicle (HTV)",
     license_expiry: "2028-06-15",
-    assigned_vehicle: "MH 04 EF 9101",
     experience_years: "10 Years",
     blood_group: "B+",
     emergency_contact: "Sunita Sharma (Wife) - +91 98201 11223",
@@ -44,7 +43,6 @@ const defaultSeedDrivers = [
     license_number: "MH12 20170098765",
     license_type: "Heavy Transport Vehicle (HTV)",
     license_expiry: "2027-11-20",
-    assigned_vehicle: "MH 12 UV 0123",
     experience_years: "8 Years",
     blood_group: "O+",
     emergency_contact: "Anand Patil (Brother) - +91 97654 00112",
@@ -69,7 +67,6 @@ const defaultSeedDrivers = [
     license_number: "MH01 20160045678",
     license_type: "Hazardous & Container Certified",
     license_expiry: "2029-03-10",
-    assigned_vehicle: "MH 01 JB 1122",
     experience_years: "12 Years",
     blood_group: "AB+",
     emergency_contact: "Farida Khan (Wife) - +91 99887 22334",
@@ -94,7 +91,6 @@ const defaultSeedDrivers = [
     license_number: "MH03 20190034567",
     license_type: "Chemical & Tanker Certified",
     license_expiry: "2026-12-05",
-    assigned_vehicle: "MH 03 CD 5678",
     experience_years: "6 Years",
     blood_group: "A+",
     emergency_contact: "Pooja Deshmukh (Wife) - +91 91234 99887",
@@ -110,7 +106,6 @@ const defaultSeedDrivers = [
     license_number: "MH05 20180067890",
     license_type: "Heavy Commercial (HMV/LMV)",
     license_expiry: "2028-09-25",
-    assigned_vehicle: "MH 05 GH 2345",
     experience_years: "7 Years",
     blood_group: "O-",
     emergency_contact: "Rajesh Yadav (Brother) - +91 94567 33445",
@@ -121,17 +116,94 @@ const defaultSeedDrivers = [
   },
 ];
 
+export async function ensureDriverTable() {
+  if (isTableInitialized) return;
+  try {
+    const createTableQuery = `
+      CREATE TABLE IF NOT EXISTS drivers (
+        id INT AUTO_INCREMENT PRIMARY KEY,
+        driver_name VARCHAR(100) NOT NULL,
+        contact_number VARCHAR(30) NOT NULL,
+        alt_contact_number VARCHAR(30) NULL,
+        license_number VARCHAR(50) NOT NULL UNIQUE,
+        license_type VARCHAR(100) NULL,
+        license_expiry VARCHAR(30) NULL,
+        assigned_vehicle VARCHAR(50) NULL,
+        experience_years VARCHAR(30) NULL,
+        blood_group VARCHAR(10) NULL,
+        emergency_contact VARCHAR(150) NULL,
+        status VARCHAR(50) DEFAULT 'Active',
+        profile_photo LONGTEXT NULL,
+        supporting_documents LONGTEXT NULL,
+        fleet_id INT NULL,
+        address TEXT NULL,
+        notes TEXT NULL,
+        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+    `;
+    await executeQuery(createTableQuery);
+
+    // Ensure columns exist if table was previously created with older schema
+    try {
+      const existingCols = await executeQuery(`SHOW COLUMNS FROM drivers`);
+      const colNames = Array.isArray(existingCols)
+        ? existingCols.map((c) => c.Field || c.field)
+        : [];
+
+      if (!colNames.includes("profile_photo")) {
+        await executeQuery(`ALTER TABLE drivers ADD COLUMN profile_photo LONGTEXT NULL`);
+      }
+      if (!colNames.includes("supporting_documents")) {
+        await executeQuery(`ALTER TABLE drivers ADD COLUMN supporting_documents LONGTEXT NULL`);
+      }
+      if (!colNames.includes("fleet_id")) {
+        await executeQuery(`ALTER TABLE drivers ADD COLUMN fleet_id INT NULL`);
+      }
+    } catch (colErr) {
+      console.warn("Could not check/alter driver table columns:", colErr?.message);
+    }
+
+    // Check count, seed default records if table is brand new/empty
+    const countRes = await executeQuery(`SELECT COUNT(*) as total FROM drivers`);
+    const count = countRes?.[0]?.total || 0;
+    if (count === 0) {
+      for (const item of defaultSeedDrivers) {
+        try {
+          await executeQuery(`INSERT INTO drivers SET ?`, item);
+        } catch (seedErr) {
+          console.warn("Driver seed item error:", seedErr?.message);
+        }
+      }
+    }
+    isTableInitialized = true;
+  } catch (error) {
+    console.error("Error inspecting/initializing drivers table:", error);
+  }
+}
 
 export function getAllDriversModel() {
   return new Promise(async (resolve) => {
     try {
-      const selectQuery = `SELECT * FROM drivers ORDER BY id DESC`;
+      await ensureDriverTable();
+      const selectQuery = `
+        SELECT 
+          d.*,
+          d.fleet_id AS fleet_id,
+          f.id AS assigned_fleet_id,
+          f.vehicle_number AS assigned_vehicle,
+          f.vehicle_model AS assigned_vehicle_model,
+          f.vehicle_type AS assigned_vehicle_type,
+          f.capacity AS assigned_vehicle_capacity,
+          f.status AS assigned_vehicle_status
+        FROM drivers d
+        LEFT JOIN fleets f ON d.fleet_id = f.id
+        ORDER BY d.id DESC
+      `;
       const rows = await executeQuery(selectQuery);
       resolve({
         status: true,
-        data:Array.isArray(rows) && rows.length > 0
-            ? rows
-            : [],
+        data: Array.isArray(rows) ? rows : [],
         message: "Drivers fetched successfully",
       });
     } catch (error) {
@@ -148,6 +220,7 @@ export function getAllDriversModel() {
 export function addNewDriverModel(data) {
   return new Promise(async (resolve) => {
     try {
+      await ensureDriverTable();
 
       const {
         driver_name,
@@ -156,16 +229,21 @@ export function addNewDriverModel(data) {
         license_number,
         license_type,
         license_expiry,
-        assigned_vehicle,
         experience_years,
         blood_group,
         emergency_contact,
         status,
         profile_photo,
         supporting_documents,
+        fleet_id,
         address,
         notes,
       } = data;
+
+      const parsedFleetId =
+        fleet_id !== undefined && fleet_id !== null && fleet_id !== "" && Number(fleet_id) > 0
+          ? Number(fleet_id)
+          : null;
 
       const payload = {
         driver_name: driver_name ? driver_name.trim() : null,
@@ -174,7 +252,6 @@ export function addNewDriverModel(data) {
         license_number: license_number ? license_number.toUpperCase().trim() : null,
         license_type: license_type || null,
         license_expiry: license_expiry || null,
-        assigned_vehicle: assigned_vehicle ? assigned_vehicle.toUpperCase().trim() : null,
         experience_years: experience_years || null,
         blood_group: blood_group || null,
         emergency_contact: emergency_contact ? emergency_contact.trim() : null,
@@ -185,14 +262,23 @@ export function addNewDriverModel(data) {
             ? supporting_documents
             : JSON.stringify(supporting_documents)
           : null,
+        fleet_id: parsedFleetId,
         address: address ? address.trim() : null,
         notes: notes ? notes.trim() : null,
       };
 
-      const insertQuery = `INSERT INTO drivers SET ?`;
-      const result = await executeQuery(insertQuery, payload);
+      // Perform transaction to ensure 1-to-1 relationship integrity
+      const result = await executeTransaction(async (queryFn) => {
+        // If a fleet is being assigned, unassign any existing driver on that fleet
+        if (parsedFleetId) {
+          await queryFn(`UPDATE drivers SET fleet_id = NULL WHERE fleet_id = ?`, [parsedFleetId]);
+        }
 
-      if (result && result.affectedRows > 0) {
+        const insertRes = await queryFn(`INSERT INTO drivers SET ?`, payload);
+        return insertRes;
+      });
+
+      if (result && result.insertId) {
         resolve({
           status: true,
           id: result.insertId,
@@ -224,6 +310,14 @@ export function addNewDriverModel(data) {
 export function updateDriverModel(id, data) {
   return new Promise(async (resolve) => {
     try {
+      await ensureDriverTable();
+
+      const parsedFleetId =
+        data.fleet_id !== undefined
+          ? data.fleet_id !== null && data.fleet_id !== "" && Number(data.fleet_id) > 0
+            ? Number(data.fleet_id)
+            : null
+          : undefined;
 
       const updateData = {
         driver_name: data.driver_name ? data.driver_name.trim() : undefined,
@@ -232,7 +326,6 @@ export function updateDriverModel(id, data) {
         license_number: data.license_number ? data.license_number.toUpperCase().trim() : undefined,
         license_type: data.license_type,
         license_expiry: data.license_expiry,
-        assigned_vehicle: data.assigned_vehicle ? data.assigned_vehicle.toUpperCase().trim() : undefined,
         experience_years: data.experience_years,
         blood_group: data.blood_group,
         emergency_contact: data.emergency_contact ? data.emergency_contact.trim() : undefined,
@@ -244,6 +337,7 @@ export function updateDriverModel(id, data) {
               ? data.supporting_documents
               : JSON.stringify(data.supporting_documents)
             : undefined,
+        fleet_id: parsedFleetId,
         address: data.address,
         notes: data.notes,
       };
@@ -253,14 +347,22 @@ export function updateDriverModel(id, data) {
         (key) => updateData[key] === undefined && delete updateData[key]
       );
 
-      const updateQuery = `UPDATE drivers SET ? WHERE id = ?`;
-      const result = await executeQuery(updateQuery, [updateData, id]);
+      // Perform transaction to maintain 1-to-1 relationship
+      await executeTransaction(async (queryFn) => {
+        if (parsedFleetId !== undefined) {
+          if (parsedFleetId) {
+            // Unassign other drivers currently on this fleet
+            await queryFn(`UPDATE drivers SET fleet_id = NULL WHERE fleet_id = ? AND id != ?`, [
+              parsedFleetId,
+              id,
+            ]);
+          }
+        }
 
-      if (result.affectedRows > 0) {
-        resolve({ status: true, message: "Driver updated successfully" });
-      } else {
-        resolve({ status: false, message: "Driver record not found or unchanged" });
-      }
+        await queryFn(`UPDATE drivers SET ? WHERE id = ?`, [updateData, id]);
+      });
+
+      resolve({ status: true, message: "Driver updated successfully" });
     } catch (error) {
       console.error("Error updating driver:", error);
       if (error.code === "ER_DUP_ENTRY") {
@@ -285,6 +387,7 @@ export function deleteDriverModel(ids) {
         return resolve({ status: false, message: "No driver IDs provided for deletion" });
       }
 
+      await ensureDriverTable();
       const deleteQuery = `DELETE FROM drivers WHERE id IN (?)`;
       const result = await executeQuery(deleteQuery, [ids]);
 

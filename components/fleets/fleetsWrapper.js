@@ -6,6 +6,7 @@ import FleetForm from "./fleetForm";
 import { fleetTableHeadCells } from "@/utilities/masterData";
 import { postApiData } from "@/utilities/services/apiService";
 import { showToast } from "@/utilities/toastService";
+import { useFleetDriver } from "@/context/fleetDriverContext";
 import { getConstant } from "@/utilities/utils";
 import {
   FiTruck,
@@ -22,6 +23,7 @@ import {
 import { ImSpinner9 } from "react-icons/im";
 
 export default function FleetsWrapper({ pageData }) {
+  const { fleets: contextFleets, loading: contextLoading, refreshAll } = useFleetDriver();
   const [fleetList, setFleetList] = useState(pageData?.fleets || []);
   const [fleetModal, setFleetModal] = useState(false);
   const [isEdit, setIsEdit] = useState(false);
@@ -32,11 +34,19 @@ export default function FleetsWrapper({ pageData }) {
   const [searchTerm, setSearchTerm] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [filterMenuOpen, setFilterMenuOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(!pageData?.fleets);
+  const [isLoading, setIsLoading] = useState(!pageData?.fleets && !contextFleets.length);
 
-  // Fetch fleets if not provided via SSR
+  // Sync with context fleets whenever updated
   useEffect(() => {
-    if (!pageData?.fleets) {
+    if (contextFleets && contextFleets.length > 0) {
+      setFleetList(contextFleets);
+      setIsLoading(false);
+    }
+  }, [contextFleets]);
+
+  // Fetch fleets if not provided via SSR or context
+  useEffect(() => {
+    if (!pageData?.fleets && (!contextFleets || contextFleets.length === 0)) {
       setIsLoading(true);
       postApiData("GET_ALL_FLEETS")
         .then((res) => {
@@ -47,7 +57,7 @@ export default function FleetsWrapper({ pageData }) {
         .catch((err) => console.error("Error fetching fleet list:", err))
         .finally(() => setIsLoading(false));
     }
-  }, [pageData]);
+  }, [pageData, contextFleets]);
 
   // Compute summary stats
   const stats = useMemo(() => {
