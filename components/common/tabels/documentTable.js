@@ -375,31 +375,24 @@ const resolveCellValue = (headCell, row, index, onClickDocuments) => {
   }
 
   // 3. Explicit or Inferred Column Type
-  const type =
-    headCell.type ||
-    (headCell.id === "vehicleNo" || headCell.id === "vehicle_number"
-      ? "vehicle"
-      : headCell.id === "profile_photo" || headCell.id === "photo"
-        ? "avatar"
-        : headCell.id === "documentType"
-          ? "documentType"
-          : headCell.id === "status"
-            ? "status"
-            : headCell.id === "supporting_documents" ||
-                headCell.id === "documents"
-              ? "documents"
-              : headCell.id === "expiryDate" ||
-                  headCell.id === "due_date" ||
-                  headCell.id === "start_date" ||
-                  headCell.id === "license_expiry"
-                ? "date"
-                : headCell.id === "alertDate"
-                  ? "alertDate"
-                  : headCell.formatPrice
-                    ? "price"
-                    : headCell.upperCase
-                      ? "uppercase"
-                      : "text");
+  const typeMap = {
+  vehicle: ["vehicleNo", "vehicle_number"],
+  avatar: ["profile_photo", "photo"],
+  documentType: ["documentType"],
+  status: ["status"],
+  documents: ["supporting_documents", "documents"],
+  date: ["expiryDate", "due_date", "start_date", "license_expiry"],
+  alertDate: ["alertDate"],
+};
+
+const type =
+  headCell.type ||
+  Object.entries(typeMap).find(([, ids]) => ids.includes(headCell.id))?.[0] ||
+  (headCell.formatPrice
+    ? "price"
+    : headCell.upperCase
+      ? "uppercase"
+      : "text");
 
   // Handle explicitly / inferred types
   switch (type) {
