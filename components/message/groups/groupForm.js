@@ -164,7 +164,7 @@ export default function GroupForm({
       onSubmit={handleSubmit(onSubmit)}
       className={`w-full bg-white space-y-4 ${
         !isEdit
-          ? "rounded-2xl p-6 border border-slate-200/80 shadow-2xs"
+          ? "rounded-2xl px-6 border border-slate-200/80 shadow-2xs"
           : "p-4 md:p-6"
       }`}
     >

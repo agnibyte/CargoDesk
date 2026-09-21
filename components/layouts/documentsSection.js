@@ -158,7 +158,7 @@ export default function DocumentsSection({
         setModalOpen={setDeletePopup}
         modalSize="w-11/12 md:w-96"
       >
-        <div className="p-5 text-center space-y-4">
+        <div className="px-5 text-center space-y-4">
           <p className="text-sm font-medium text-slate-700">
             Are you sure you want to delete {selected.length > 1 ? `these ${selected.length} records` : "this document"}?
           </p>

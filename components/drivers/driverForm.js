@@ -379,7 +379,7 @@ export default function DriverForm({
     <>
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="p-5 md:p-6 space-y-5 max-h-[82vh] overflow-y-auto"
+        className="px-5 md:px-6 space-y-5 max-h-[82vh] overflow-y-auto"
       >
         {/* 1. Profile Photo Header Banner */}
         <div className="bg-gradient-to-r from-blue-50/80 via-indigo-50/50 to-slate-50 border border-blue-100 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-center gap-5 shadow-2xs">

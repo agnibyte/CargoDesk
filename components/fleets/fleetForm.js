@@ -234,7 +234,7 @@ export default function FleetForm({
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="p-5 md:p-6 space-y-5 max-h-[82vh] overflow-y-auto"
+      className="px-5 md:px-6 space-y-5 max-h-[82vh] overflow-y-auto"
     >
       {/* 1. Vehicle Identity & Model */}
       <div className="bg-slate-50/70 border border-slate-200/80 rounded-2xl p-4 sm:p-5 space-y-4 shadow-2xs">
