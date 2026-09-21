@@ -1,16 +1,21 @@
+"use client";
+
 import React, { useEffect, useState } from "react";
-import { DocValidation } from "@/utilities/formValidation";
-import { Controller, useForm } from "react-hook-form";
-import commonStyle from "@/styles/common/common.module.scss";
-import { DOCUMENTS_TYPE_LIST, vehicleNoListArr } from "@/utilities/dummyData";
+import { useForm, Controller } from "react-hook-form";
 import moment from "moment";
+import { DOCUMENTS_TYPE_LIST, vehicleNoListArr } from "@/utilities/dummyData";
 import { getConstant } from "@/utilities/utils";
-import styles from "@/styles/formStyles.module.scss";
-import CustomDatePicker from "../customDatePicker";
-import CustomSearch from "../customSearch";
-import { InputWithVoice } from "../inputWithVoice";
+import {
+  FloatingInput,
+  FloatingSelect,
+  FloatingTextarea,
+} from "../floatingInput";
+import { FiMic, FiCheck, FiFileText } from "react-icons/fi";
+import { ImSpinner9 } from "react-icons/im";
+import { showToast } from "@/utilities/toastService";
 
 export default function AddDocumentForm({
+  setReminderModal,
   addReminderData,
   reminderData,
   isEdit,
@@ -18,218 +23,240 @@ export default function AddDocumentForm({
   updateReminderData,
   isLoading,
 }) {
-  const defaultData = {
-    // masterNo: "",
+  const [isListening, setIsListening] = useState(false);
+
+  const defaultValues = {
     vehicleNo: "",
     documentType: "",
-    expiryDate: moment(),
-    alertDate: "",
+    expiryDate: moment().format("YYYY-MM-DD"),
     note: "",
   };
-
-  const DOCUMENTS_TYPE_LIST_ARR = DOCUMENTS_TYPE_LIST;
-  const VEHICLE_NO_LIST_ARR = vehicleNoListArr;
-
-  const initialFormData = isEdit
-    ? {
-        ...reminderData,
-        vehicleNo:
-          VEHICLE_NO_LIST_ARR.find(
-            (el) => el.value === reminderData.vehicleNo
-          ) || null,
-        documentType:
-          DOCUMENTS_TYPE_LIST_ARR.find(
-            (el) => el.value === reminderData.documentType
-          ) || null,
-      }
-    : defaultData;
-
-  const [formData, setFormData] = useState(initialFormData);
-  const [expiryDateError, setExpiryDateError] = useState("");
-  const [expiryDate, setExpiryDate] = useState(
-    isEdit ? reminderData.expiryDate : defaultData.expiryDate
-  );
 
   const {
     register,
     handleSubmit,
-    reset,
-    control,
-    formState: { errors },
-    clearErrors,
     setValue,
-  } = useForm();
+    watch,
+    reset,
+    formState: { errors },
+  } = useForm({
+    defaultValues,
+  });
+
+  const watchedNote = watch("note");
 
   useEffect(() => {
     if (isEdit && reminderData) {
-      setValue("vehicleNo", initialFormData.vehicleNo);
-      setValue("documentType", initialFormData.documentType);
-      setValue("expiryDate", initialFormData.expiryDate);
-    }
-  }, [isEdit, reminderData, setValue]);
+      // Resolve vehicleNo (could be object or string)
+      let vNo = "";
+      if (typeof reminderData.vehicleNo === "object" && reminderData.vehicleNo !== null) {
+        vNo = reminderData.vehicleNo.value || "";
+      } else if (reminderData.vehicleNo) {
+        vNo = reminderData.vehicleNo;
+      }
 
-  const updateSelectedForm = (type, value) => {
-    setFormData((prev) => ({ ...prev, [type]: value }));
-  };
+      // Resolve documentType (could be object or string)
+      let docType = "";
+      if (typeof reminderData.documentType === "object" && reminderData.documentType !== null) {
+        docType = reminderData.documentType.value || "";
+      } else if (reminderData.documentType) {
+        docType = reminderData.documentType;
+      }
 
-  const onChangeExpiryDate = (date) => {
-    if (!date) {
-      setExpiryDateError("Please enter the expiry date");
+      const expDate = reminderData.expiryDate
+        ? moment(reminderData.expiryDate).format("YYYY-MM-DD")
+        : moment().format("YYYY-MM-DD");
+
+      reset({
+        vehicleNo: vNo,
+        documentType: docType,
+        expiryDate: expDate,
+        note: reminderData.note || "",
+      });
     } else {
-      setExpiryDateError("");
-      const formattedDate = moment(date).toISOString();
-      setExpiryDate(formattedDate);
-      updateSelectedForm("expiryDate", formattedDate);
+      reset(defaultValues);
     }
-  };
+  }, [isEdit, reminderData, reset]);
 
-  const onClickSubmit = () => {
-    if (!formData.expiryDate) {
-      setExpiryDateError("Please enter the expiry date");
+  // Speech recognition handler
+  const handleSpeechRecognition = () => {
+    if (typeof window === "undefined" || !("webkitSpeechRecognition" in window)) {
+      showToast({
+        message: "Speech recognition is not supported in this browser.",
+        type: "error",
+      });
       return;
     }
 
-    const newData = {
-      ...formData,
-      vehicleNo: formData.vehicleNo?.value,
-      documentType: formData.documentType?.value,
-    };
+    try {
+      const recognition = new window.webkitSpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.lang = "en-US";
 
-    if (isEdit) {
-      updateReminderData(newData);
-    } else {
-      addReminderData(newData);
+      recognition.onstart = () => {
+        setIsListening(true);
+      };
+
+      recognition.onresult = (event) => {
+        const transcript = event.results[0][0].transcript;
+        const current = watchedNote ? `${watchedNote} ` : "";
+        setValue("note", `${current}${transcript}`.trim());
+      };
+
+      recognition.onerror = () => {
+        setIsListening(false);
+      };
+
+      recognition.onend = () => {
+        setIsListening(false);
+      };
+
+      recognition.start();
+    } catch (e) {
+      setIsListening(false);
     }
-
-    reset(defaultData);
   };
 
+  const onSubmit = (data) => {
+    const formattedExpiryDate = moment(data.expiryDate).toISOString();
+
+    const selectedVehicleObj = vehicleNoListArr.find(
+      (v) => v.value === data.vehicleNo || v.label === data.vehicleNo
+    );
+    const selectedDocObj = DOCUMENTS_TYPE_LIST.find(
+      (d) => d.value === data.documentType || d.label === data.documentType
+    );
+
+    const payload = {
+      ...reminderData,
+      vehicleNo: data.vehicleNo,
+      documentType: data.documentType,
+      expiryDate: formattedExpiryDate,
+      note: data.note ? data.note.trim() : "",
+      vehicleObj: selectedVehicleObj,
+      docObj: selectedDocObj,
+    };
+
+    if (isEdit && updateReminderData) {
+      updateReminderData(payload);
+    } else if (addReminderData) {
+      addReminderData(payload);
+    }
+
+    if (setReminderModal) {
+      setReminderModal(false);
+    }
+    reset(defaultValues);
+  };
+
+  // Convert dummyData arrays into label/value option items for FloatingSelect
+  const vehicleOptions = [
+    { value: "", label: "Select Vehicle Number" },
+    ...vehicleNoListArr.map((v) => ({
+      value: v.value || v.label,
+      label: v.label,
+    })),
+  ];
+
+  const documentTypeOptions = [
+    { value: "", label: "Select Document Type" },
+    ...DOCUMENTS_TYPE_LIST.map((d) => ({
+      value: d.value || d.label,
+      label: d.label,
+    })),
+  ];
+
   return (
-    <form
-      onSubmit={handleSubmit(onClickSubmit)}
-      className={styles.formContainer}
-    >
-      {/* <div className="form-group">
-        <label
-          htmlFor="masterNo"
-          className="form-label"
-        >
-          Master Number
-        </label>
-        <input
-          {...validation.masterNo}
-          type="text"
-          placeholder="Enter master number"
-          className={`form-control ${errors?.masterNo ? "is-invalid" : ""}`}
-          id="masterNo"
-          name="masterNo"
-          value={formData.masterNo}
-          onChange={(e) => updateSelectedForm("masterNo", e.target.value)}
-        />
-        {errors?.masterNo && (
-          <div className="invalid-feedback">{errors.masterNo.message}</div>
-        )}
-      </div> */}
-      <InputWithVoice
-        note={formData.note}
-        setNote={(value) => updateSelectedForm("note", value)}
-        label="Add Note"
+    <form onSubmit={handleSubmit(onSubmit)} className="px-4 sm:px-6 py-3 space-y-4 bg-slate-50 rounded-xl">
+      {/* Vehicle Number Field */}
+      <FloatingSelect
+        id="doc_vehicle_no"
+        label="Vehicle Number"
+        required
+        options={vehicleOptions}
+        error={errors.vehicleNo}
+        {...register("vehicleNo", {
+          required: "Please select vehicle number",
+        })}
       />
 
-      <div className="form-group mt-3">
-        <label
-          htmlFor="vehicleNo"
-          className="form-label"
-        >
-          Vehicle Number
-        </label>
-        <Controller
-          control={control}
-          name="vehicleNo"
-          render={({ field }) => (
-            <CustomSearch
-              {...field}
-              {...register("vehicleNo", DocValidation.vehicleNo)}
-              selectedValue={formData.vehicleNo}
-              options={VEHICLE_NO_LIST_ARR}
-              onChange={(e) => {
-                field.onChange(e);
-                clearErrors("vehicleNo");
-                updateSelectedForm("vehicleNo", e);
-              }}
-              className="form-control cutomClass"
-              placeholder="Please Select Vehicle Number"
-              isSearchable
-            />
-          )}
-        />
-        {errors.vehicleNo && (
-          <div className={styles.errorMsg}>{errors.vehicleNo.message}</div>
-        )}
-      </div>
+      {/* Document Type Field */}
+      <FloatingSelect
+        id="doc_type"
+        label="Document Type"
+        required
+        options={documentTypeOptions}
+        error={errors.documentType}
+        {...register("documentType", {
+          required: "Please select document type",
+        })}
+      />
 
-      <div className="form-group mt-3">
-        <label
-          htmlFor="documentType"
-          className="form-label"
-        >
-          Document Type
-        </label>
-        <Controller
-          control={control}
-          name="documentType"
-          render={({ field }) => (
-            <CustomSearch
-              {...field}
-              {...register("documentType", DocValidation.documentType)}
-              selectedValue={formData.documentType}
-              options={DOCUMENTS_TYPE_LIST_ARR}
-              onChange={(e) => {
-                field.onChange(e);
-                clearErrors("documentType");
-                updateSelectedForm("documentType", e);
-              }}
-              placeholder="Please Select Document Type"
-              isSearchable
-            />
-          )}
-        />
-        {errors.documentType && (
-          <div className={styles.errorMsg}>{errors.documentType.message}</div>
-        )}
-      </div>
+      {/* Expiry Date Field */}
+      <FloatingInput
+        id="doc_expiry_date"
+        label="Select Expiry Date"
+        required
+        type="date"
+        error={errors.expiryDate}
+        {...register("expiryDate", {
+          required: "Please enter the expiry date",
+        })}
+      />
 
-      <div className="form-group mt-3">
-        <label
-          htmlFor="expiryDate"
-          className="form-label"
-        >
-          Select Expiry Date
-        </label>{" "}
-        <br />
-        <div className="mt-2">
-          <CustomDatePicker
-            value={expiryDate ? moment(expiryDate) : null}
-            onChange={onChangeExpiryDate}
-          />
-        </div>
-        {expiryDateError && (
-          <div className={styles.errorMsg}>{expiryDateError}</div>
-        )}
-      </div>
+      {/* Add Note with Voice Recording */}
+      <FloatingInput
+        id="doc_note"
+        label="Add Note (Optional)"
+        placeholder="Type or click mic to speak..."
+        error={errors.note}
+        rightElement={
+          <button
+            type="button"
+            onClick={handleSpeechRecognition}
+            title={isListening ? "Listening..." : "Voice input"}
+            className={`p-1.5 rounded-lg transition-all cursor-pointer ${
+              isListening
+                ? "bg-rose-500 text-white animate-pulse"
+                : "text-slate-400 hover:text-blue-600 hover:bg-blue-50"
+            }`}
+          >
+            <FiMic className="w-4 h-4" />
+          </button>
+        }
+        {...register("note")}
+      />
 
-      <div className={`${styles.formActions}`}>
+      {/* Form Action Buttons */}
+      <div className="pt-2 flex items-center justify-end gap-2">
+        {setReminderModal && (
+          <button
+            type="button"
+            onClick={() => setReminderModal(false)}
+            disabled={isLoading}
+            className="px-4 py-2.5 text-xs sm:text-sm font-semibold rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer disabled:opacity-50"
+          >
+            Cancel
+          </button>
+        )}
+
         <button
           type="submit"
-          className={` ${styles.btn} ${
-            isEdit ? styles.btnWarning : styles.btnPrimary
-          }`}
+          disabled={isLoading}
+          className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white text-xs sm:text-sm font-semibold rounded-xl shadow-sm shadow-blue-600/25 hover:shadow-md transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
         >
-          {isLoading
-            ? getConstant("LOADING_TEXT")
-            : isEdit
-            ? "Update"
-            : "Submit"}
+          {isLoading ? (
+            <>
+              <ImSpinner9 className="w-4 h-4 animate-spin" />
+              <span>{getConstant("LOADING_TEXT") || "Saving..."}</span>
+            </>
+          ) : (
+            <>
+              <FiCheck className="w-4 h-4" />
+              <span>{isEdit ? "Update Document" : "Save Document"}</span>
+            </>
+          )}
         </button>
       </div>
     </form>

@@ -2,8 +2,13 @@ import { reminderValidation } from "@/utilities/formValidation";
 import commonStyle from "@/styles/common/common.module.scss";
 import React, { useState } from "react";
 import { Controller, useForm } from "react-hook-form";
-import CustomSearch from "../common/customSearch";
-import CustomDatePicker from "../common/customDatePicker";
+import CustomSearch from "../customSearch";
+import CustomDatePicker from "../customDatePicker";
+import {
+  FloatingInput,
+  FloatingTextarea,
+  FloatingSelect,
+} from "../floatingInput";
 import moment from "moment";
 
 const AddReminderForm = ({
@@ -76,112 +81,58 @@ const AddReminderForm = ({
     <div className="container">
       <div className="">
         <div className="card-body">
-          <form onSubmit={handleSubmit(submitform)}>
-            <div className="mb-3">
-              <label
-                htmlFor="title"
-                className="form-label"
-              >
-                Title
-              </label>
-              <input
-                {...validation.title}
-                type="text"
-                placeholder="Enter title"
-                className="form-control"
-                id="title"
-                name="title"
-                value={formData.title}
-                onChange={(e) => updateSelectedForm("title", e.target.value)}
-                // required
-              />
+          <form onSubmit={handleSubmit(submitform)} className="space-y-4">
+            <FloatingInput
+              id="reminder_title"
+              label="Title"
+              placeholder="Enter title"
+              value={formData.title}
+              error={errors?.title}
+              {...validation.title}
+              onChange={(e) => updateSelectedForm("title", e.target.value)}
+            />
 
-              <span
-                className={commonStyle["errorMsg"]}
-                aria-hidden="true"
-              >
-                {errors?.title && errors.title.message}
-              </span>
-            </div>
-            <div className="mb-3">
-              <label
-                htmlFor="description"
-                className="form-label"
-              >
-                Description
-              </label>
-              <textarea
-                {...validation.description}
-                className="form-control"
-                id="description"
-                name="description"
-                placeholder="Enter description"
-                rows="2"
-                value={formData.description}
-                onChange={(e) =>
-                  updateSelectedForm("description", e.target.value)
-                }
-                // required
-              ></textarea>
-              <span
-                className={commonStyle["errorMsg"]}
-                aria-hidden="true"
-              >
-                {errors?.description && errors.description.message}
-              </span>
-            </div>
-            <div className="mb-3">
-              <label
-                htmlFor="date"
-                className="form-label"
-              >
+            <FloatingTextarea
+              id="reminder_description"
+              label="Description"
+              placeholder="Enter description"
+              rows={3}
+              value={formData.description}
+              error={errors?.description}
+              {...validation.description}
+              onChange={(e) =>
+                updateSelectedForm("description", e.target.value)
+              }
+            />
+
+            <div className="relative">
+              <label className="block text-xs font-bold text-slate-700 mb-1.5">
                 Select Date
               </label>
               <CustomDatePicker onChange={handleDateChange} />
-              <span
-                className={commonStyle["errorMsg"]}
-                aria-hidden="true"
-              >
-                {errors?.date && errors.date.message}
-              </span>
+              {errors?.date && (
+                <p className="text-red-500 text-xs font-normal mt-1.5 pl-1">
+                  {errors.date.message}
+                </p>
+              )}
             </div>
-            <div className="mb-3">
-              <label
-                htmlFor="priority"
-                className="form-label"
-              >
-                Priority
-              </label>
-              <Controller
-                control={control}
-                name="priority"
-                render={({ field }) => (
-                  <CustomSearch
-                    {...validation.priority}
-                    name="priority"
-                    selectedValue={formData["priority"]}
-                    options={priorityListArr}
-                    onChange={(e) => {
-                      field.onChange(e);
-                      clearErrors("priority");
-                      updateSelectedForm("priority", e);
-                    }}
-                    className="pdp_contact_lens_power"
-                    placeholder="Please Select"
-                    isSearchable={true}
-                  />
-                )}
-              />
-              <span
-                className={commonStyle["errorMsg"]}
-                aria-hidden="true"
-              >
-                {errors?.priority && errors.priority.message}
-              </span>
-            </div>
+
+            <FloatingSelect
+              id="reminder_priority"
+              label="Priority"
+              options={priorityListArr}
+              value={formData.priority}
+              error={errors?.priority}
+              {...validation.priority}
+              onChange={(e) => {
+                clearErrors("priority");
+                updateSelectedForm("priority", e.target.value);
+              }}
+            />
+
             <button
               type="submit"
-              className="btn btn-primary"
+              className="w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs sm:text-sm font-bold shadow-md shadow-blue-500/20 hover:shadow-lg transition-all cursor-pointer flex items-center justify-center gap-2 mt-4"
             >
               Add Reminder
             </button>

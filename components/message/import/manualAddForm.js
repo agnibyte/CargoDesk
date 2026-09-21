@@ -5,6 +5,10 @@ import { ImSpinner9 } from "react-icons/im";
 import { getConstant } from "@/utilities/utils";
 import { postApiData } from "@/utilities/services/apiService";
 import { showToast } from "@/utilities/toastService";
+import {
+  FloatingInput,
+  FloatingTextarea,
+} from "@/components/common/floatingInput";
 
 export default function ManualAddForm({
   pageData,
@@ -184,78 +188,45 @@ export default function ManualAddForm({
       {/* Inputs Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
         {/* Name Field */}
-        <div>
-          <label className="block text-xs font-bold text-slate-700 mb-1.5">
-            Name <span className="text-rose-500">*</span>
-          </label>
-          <div className="relative">
-            <input
-              type="text"
-              value={formData.name}
-              {...register("name", validations.name)}
-              onChange={(e) => handleChange("name", e.target.value)}
-              className={`w-full px-3.5 py-2.5 text-xs sm:text-sm bg-white text-slate-900 rounded-xl border ${
-                errors.name
-                  ? "border-rose-400 focus:border-rose-500 focus:ring-rose-500/15"
-                  : "border-slate-200 hover:border-slate-300 focus:border-blue-500 focus:ring-blue-500/15"
-              } outline-none focus:ring-2 transition-all shadow-2xs placeholder-slate-400`}
-              placeholder="Enter Name"
-            />
-          </div>
-          {errors.name && (
-            <p className="text-rose-500 text-xs font-medium mt-1">
-              {errors.name.message}
-            </p>
-          )}
-        </div>
+        <FloatingInput
+          id="contact_name"
+          label="Name"
+          required
+          placeholder="Enter Name"
+          value={formData.name}
+          error={errors.name}
+          {...register("name", validations.name)}
+          onChange={(e) => handleChange("name", e.target.value)}
+        />
 
         {/* Phone Number Field */}
-        <div>
-          <label className="block text-xs font-bold text-slate-700 mb-1.5">
-            Phone Number <span className="text-rose-500">*</span>
-          </label>
-          <div className="relative">
-            <input
-              type="tel"
-              value={formData.phone}
-              minLength={getConstant("LEN_MIN_PHONE_NO") || 10}
-              maxLength={getConstant("LEN_MAX_PHONE_NO") || 15}
-              {...register("phone", validations.phone)}
-              onChange={(e) => handleChange("phone", e.target.value)}
-              className={`w-full px-3.5 py-2.5 text-xs sm:text-sm bg-white text-slate-900 rounded-xl border ${
-                errors.phone
-                  ? "border-rose-400 focus:border-rose-500 focus:ring-rose-500/15"
-                  : "border-slate-200 hover:border-slate-300 focus:border-blue-500 focus:ring-blue-500/15"
-              } outline-none focus:ring-2 transition-all shadow-2xs placeholder-slate-400`}
-              placeholder="Enter Phone No"
-            />
-          </div>
-          {errors.phone && (
-            <p className="text-rose-500 text-xs font-medium mt-1">
-              {errors.phone.message}
-            </p>
-          )}
-        </div>
+        <FloatingInput
+          id="contact_phone"
+          label="Phone Number"
+          required
+          type="tel"
+          placeholder="Enter Phone No"
+          value={formData.phone}
+          minLength={getConstant("LEN_MIN_PHONE_NO") || 10}
+          maxLength={getConstant("LEN_MAX_PHONE_NO") || 15}
+          error={errors.phone}
+          {...register("phone", validations.phone)}
+          onChange={(e) => handleChange("phone", e.target.value)}
+        />
       </div>
 
       {/* Note Field */}
       <div>
-        <label className="block text-xs font-bold text-slate-700 mb-1.5">
-          Note <span className="text-slate-400 font-normal">(Optional)</span>
-        </label>
-        <textarea
+        <FloatingTextarea
+          id="contact_note"
+          label="Note (Optional)"
           rows={3}
+          placeholder="Enter Note"
           value={formData.note}
+          error={errors.note}
           {...register("note", validations.note)}
           onChange={(e) => handleChange("note", e.target.value)}
-          className="w-full p-3 text-xs sm:text-sm bg-white text-slate-900 rounded-xl border border-slate-200 hover:border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 outline-none transition-all shadow-2xs placeholder-slate-400 resize-none"
-          placeholder="Enter Note"
         />
-        {errors.note && (
-          <p className="text-rose-500 text-xs font-medium mt-1">
-            {errors.note.message}
-          </p>
-        )}
       </div>
 
       {/* Full-width Blue Submit Button */}

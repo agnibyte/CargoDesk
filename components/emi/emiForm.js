@@ -7,6 +7,11 @@ import { postApiData } from "@/utilities/services/apiService";
 import { showToast } from "@/utilities/toastService";
 import { vehicleNoListArr } from "@/utilities/dummyData";
 import {
+  FloatingInput,
+  FloatingSelect,
+  FloatingTextarea,
+} from "../common/floatingInput";
+import {
   FiTruck,
   FiDollarSign,
   FiCalendar,
@@ -210,81 +215,59 @@ export default function EmiForm({ setEmiList, modalData, isEdit, onClose, toggle
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Vehicle Number */}
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1.5">
-              Vehicle Number{" "}
-              <span className="text-slate-400 font-normal">(Optional)</span>
-            </label>
-            <input
-              type="text"
-              list="vehicleSuggestionsList"
-              placeholder="e.g. MH 04 EF 9101"
-              {...register("vehicle_number", {
-                onChange: (e) =>
-                  setValue("vehicle_number", e.target.value.toUpperCase()),
-              })}
-              className="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-white text-slate-900 rounded-xl border border-slate-200 hover:border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 outline-none transition-all shadow-2xs uppercase placeholder:normal-case font-medium"
-            />
+          <FloatingInput
+            id="emi_vehicle_number"
+            label="Vehicle Number (Optional)"
+            list="vehicleSuggestionsList"
+            placeholder="e.g. MH 04 EF 9101"
+            className="uppercase font-medium"
+            {...register("vehicle_number", {
+              onChange: (e) =>
+                setValue("vehicle_number", e.target.value.toUpperCase()),
+            })}
+          >
             <datalist id="vehicleSuggestionsList">
               {vehicleNoListArr.map((item) => (
                 <option key={item.id} value={item.label} />
               ))}
             </datalist>
-          </div>
+          </FloatingInput>
 
           {/* Loan / Item Name */}
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1.5">
-              Loan / Item Name <span className="text-rose-500">*</span>
-            </label>
-            <input
-              type="text"
-              placeholder="e.g. Truck Chassis Loan, Vehicle EMI"
-              {...register("loan_name", { required: "Loan Name is required" })}
-              className={`w-full px-3.5 py-2.5 text-xs sm:text-sm bg-white text-slate-900 rounded-xl border ${
-                errors.loan_name
-                  ? "border-rose-400 focus:border-rose-500 focus:ring-rose-500/15"
-                  : "border-slate-200 hover:border-slate-300 focus:border-blue-500 focus:ring-blue-500/15"
-              } outline-none focus:ring-2 transition-all shadow-2xs font-medium placeholder-slate-400`}
-            />
-            {errors.loan_name && (
-              <p className="text-rose-500 text-xs font-medium mt-1">
-                {errors.loan_name.message}
-              </p>
-            )}
-          </div>
+          <FloatingInput
+            id="emi_loan_name"
+            label="Loan / Item Name"
+            required
+            placeholder="e.g. Truck Chassis Loan, Vehicle EMI"
+            error={errors.loan_name}
+            {...register("loan_name", { required: "Loan Name is required" })}
+          />
 
           {/* Financier / Bank Name */}
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1.5">
-              Financier / Bank Name
-            </label>
-            <input
-              type="text"
-              list="bankOptionsList"
-              placeholder="e.g. HDFC Bank, Tata Capital, Cholamandalam"
-              {...register("bank_name")}
-              className="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-white text-slate-900 rounded-xl border border-slate-200 hover:border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 outline-none transition-all shadow-2xs font-medium placeholder-slate-400"
-            />
+          <FloatingInput
+            id="emi_bank_name"
+            label="Financier / Bank Name"
+            list="bankOptionsList"
+            placeholder="e.g. HDFC Bank, Tata Capital, Cholamandalam"
+            error={errors.bank_name}
+            {...register("bank_name")}
+          >
             <datalist id="bankOptionsList">
               {FINANCIER_OPTIONS.map((bank) => (
                 <option key={bank} value={bank} />
               ))}
             </datalist>
-          </div>
+          </FloatingInput>
 
           {/* Loan Agreement / Account Number */}
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1.5">
-              Loan Agreement / A/C No.
-            </label>
-            <input
-              type="text"
-              placeholder="e.g. LN-9842109"
-              {...register("loan_account_no")}
-              className="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-white text-slate-900 rounded-xl border border-slate-200 hover:border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 outline-none transition-all shadow-2xs font-mono font-medium placeholder-slate-400"
-            />
-          </div>
+          <FloatingInput
+            id="emi_loan_account_no"
+            label="Loan Agreement / A/C No."
+            placeholder="e.g. LN-9842109"
+            className="font-mono"
+            error={errors.loan_account_no}
+            {...register("loan_account_no")}
+          />
         </div>
       </div>
 
@@ -306,86 +289,58 @@ export default function EmiForm({ setEmiList, modalData, isEdit, onClose, toggle
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Loan Principal Amount */}
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1.5">
-              Loan Principal Amount (₹) <span className="text-rose-500">*</span>
-            </label>
-            <input
-              type="number"
-              step="any"
-              placeholder="e.g. 1500000"
-              {...register("loan_amount", {
-                required: "Loan Amount is required",
-                min: { value: 1, message: "Must be greater than 0" },
-              })}
-              className={`w-full px-3.5 py-2.5 text-xs sm:text-sm bg-white text-slate-900 rounded-xl border ${
-                errors.loan_amount
-                  ? "border-rose-400 focus:border-rose-500 focus:ring-rose-500/15"
-                  : "border-slate-200 hover:border-slate-300 focus:border-blue-500 focus:ring-blue-500/15"
-              } outline-none focus:ring-2 transition-all shadow-2xs font-semibold placeholder-slate-400`}
-            />
-            {errors.loan_amount && (
-              <p className="text-rose-500 text-xs font-medium mt-1">
-                {errors.loan_amount.message}
-              </p>
-            )}
-          </div>
+          <FloatingInput
+            id="emi_loan_amount"
+            label="Loan Principal Amount (₹)"
+            required
+            type="number"
+            step="any"
+            placeholder="e.g. 1500000"
+            className="font-semibold"
+            error={errors.loan_amount}
+            {...register("loan_amount", {
+              required: "Loan Amount is required",
+              min: { value: 1, message: "Must be greater than 0" },
+            })}
+          />
 
           {/* Monthly EMI Amount */}
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1.5">
-              Monthly EMI Amount (₹) <span className="text-rose-500">*</span>
-            </label>
-            <input
-              type="number"
-              step="any"
-              placeholder="e.g. 42500"
-              {...register("emi_amount", {
-                required: "EMI Amount is required",
-                min: { value: 1, message: "Must be greater than 0" },
-              })}
-              className={`w-full px-3.5 py-2.5 text-xs sm:text-sm bg-white text-blue-600 rounded-xl border ${
-                errors.emi_amount
-                  ? "border-rose-400 focus:border-rose-500 focus:ring-rose-500/15"
-                  : "border-slate-200 hover:border-slate-300 focus:border-blue-500 focus:ring-blue-500/15"
-              } outline-none focus:ring-2 transition-all shadow-2xs font-bold placeholder-slate-400`}
-            />
-            {errors.emi_amount && (
-              <p className="text-rose-500 text-xs font-medium mt-1">
-                {errors.emi_amount.message}
-              </p>
-            )}
-          </div>
+          <FloatingInput
+            id="emi_amount"
+            label="Monthly EMI Amount (₹)"
+            required
+            type="number"
+            step="any"
+            placeholder="e.g. 42500"
+            className="font-bold text-blue-600"
+            error={errors.emi_amount}
+            {...register("emi_amount", {
+              required: "EMI Amount is required",
+              min: { value: 1, message: "Must be greater than 0" },
+            })}
+          />
 
           {/* Down Payment */}
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1.5">
-              Down Payment Paid (₹){" "}
-              <span className="text-slate-400 font-normal">(Optional)</span>
-            </label>
-            <input
-              type="number"
-              step="any"
-              placeholder="e.g. 250000"
-              {...register("down_payment")}
-              className="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-white text-slate-900 rounded-xl border border-slate-200 hover:border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 outline-none transition-all shadow-2xs font-medium placeholder-slate-400"
-            />
-          </div>
+          <FloatingInput
+            id="emi_down_payment"
+            label="Down Payment Paid (₹) (Optional)"
+            type="number"
+            step="any"
+            placeholder="e.g. 250000"
+            error={errors.down_payment}
+            {...register("down_payment")}
+          />
 
           {/* Interest Rate */}
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1.5">
-              Interest Rate (% p.a.){" "}
-              <span className="text-slate-400 font-normal">(Optional)</span>
-            </label>
-            <input
-              type="number"
-              step="0.01"
-              placeholder="e.g. 9.5"
-              {...register("interest_rate")}
-              className="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-white text-slate-900 rounded-xl border border-slate-200 hover:border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 outline-none transition-all shadow-2xs font-medium placeholder-slate-400"
-            />
-          </div>
+          <FloatingInput
+            id="emi_interest_rate"
+            label="Interest Rate (% p.a.) (Optional)"
+            type="number"
+            step="0.01"
+            placeholder="e.g. 9.5"
+            error={errors.interest_rate}
+            {...register("interest_rate")}
+          />
         </div>
       </div>
 
@@ -407,118 +362,69 @@ export default function EmiForm({ setEmiList, modalData, isEdit, onClose, toggle
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Total Tenure (Months) */}
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1.5">
-              Total Tenure (Months) <span className="text-rose-500">*</span>
-            </label>
-            <input
-              type="number"
-              placeholder="e.g. 36"
-              {...register("tenure_months", {
-                required: "Tenure is required",
-                min: { value: 1, message: "Must be at least 1 month" },
-              })}
-              className={`w-full px-3.5 py-2.5 text-xs sm:text-sm bg-white text-slate-900 rounded-xl border ${
-                errors.tenure_months
-                  ? "border-rose-400 focus:border-rose-500 focus:ring-rose-500/15"
-                  : "border-slate-200 hover:border-slate-300 focus:border-blue-500 focus:ring-blue-500/15"
-              } outline-none focus:ring-2 transition-all shadow-2xs font-medium placeholder-slate-400`}
-            />
-            {errors.tenure_months && (
-              <p className="text-rose-500 text-xs font-medium mt-1">
-                {errors.tenure_months.message}
-              </p>
-            )}
-          </div>
+          <FloatingInput
+            id="emi_tenure_months"
+            label="Total Tenure (Months)"
+            required
+            type="number"
+            placeholder="e.g. 36"
+            error={errors.tenure_months}
+            {...register("tenure_months", {
+              required: "Tenure is required",
+              min: { value: 1, message: "Must be at least 1 month" },
+            })}
+          />
 
           {/* EMIs Paid */}
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1.5">
-              EMIs Paid So Far (Installments)
-            </label>
-            <input
-              type="number"
-              min="0"
-              placeholder="e.g. 12"
-              {...register("emis_paid")}
-              className="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-white text-slate-900 rounded-xl border border-slate-200 hover:border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 outline-none transition-all shadow-2xs font-medium placeholder-slate-400"
-            />
-          </div>
+          <FloatingInput
+            id="emi_emis_paid"
+            label="EMIs Paid So Far (Installments)"
+            type="number"
+            min="0"
+            placeholder="e.g. 12"
+            error={errors.emis_paid}
+            {...register("emis_paid")}
+          />
 
           {/* Start Date */}
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1.5">
-              Loan Start Date <span className="text-rose-500">*</span>
-            </label>
-            <input
-              type="date"
-              {...register("start_date", {
-                required: "Start Date is required",
-              })}
-              className={`w-full px-3.5 py-2.5 text-xs sm:text-sm bg-white text-slate-900 rounded-xl border ${
-                errors.start_date
-                  ? "border-rose-400 focus:border-rose-500 focus:ring-rose-500/15"
-                  : "border-slate-200 hover:border-slate-300 focus:border-blue-500 focus:ring-blue-500/15"
-              } outline-none focus:ring-2 transition-all shadow-2xs font-medium`}
-            />
-            {errors.start_date && (
-              <p className="text-rose-500 text-xs font-medium mt-1">
-                {errors.start_date.message}
-              </p>
-            )}
-          </div>
+          <FloatingInput
+            id="emi_start_date"
+            label="Loan Start Date"
+            required
+            type="date"
+            error={errors.start_date}
+            {...register("start_date", {
+              required: "Start Date is required",
+            })}
+          />
 
           {/* Monthly Due Date */}
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1.5">
-              Monthly Due Date <span className="text-rose-500">*</span>
-            </label>
-            <input
-              type="date"
-              {...register("due_date", { required: "Due Date is required" })}
-              className={`w-full px-3.5 py-2.5 text-xs sm:text-sm bg-white text-slate-900 rounded-xl border ${
-                errors.due_date
-                  ? "border-rose-400 focus:border-rose-500 focus:ring-rose-500/15"
-                  : "border-slate-200 hover:border-slate-300 focus:border-blue-500 focus:ring-blue-500/15"
-              } outline-none focus:ring-2 transition-all shadow-2xs font-medium`}
-            />
-            {errors.due_date && (
-              <p className="text-rose-500 text-xs font-medium mt-1">
-                {errors.due_date.message}
-              </p>
-            )}
-          </div>
+          <FloatingInput
+            id="emi_due_date"
+            label="Monthly Due Date"
+            required
+            type="date"
+            error={errors.due_date}
+            {...register("due_date", { required: "Due Date is required" })}
+          />
 
           {/* Payment Mode */}
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1.5">
-              Payment Mode
-            </label>
-            <select
-              {...register("payment_mode")}
-              className="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-white text-slate-900 rounded-xl border border-slate-200 hover:border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 outline-none transition-all shadow-2xs font-medium cursor-pointer"
-            >
-              {PAYMENT_MODES.map((mode) => (
-                <option key={mode} value={mode}>
-                  {mode}
-                </option>
-              ))}
-            </select>
-          </div>
+          <FloatingSelect
+            id="emi_payment_mode"
+            label="Payment Mode"
+            options={PAYMENT_MODES}
+            error={errors.payment_mode}
+            {...register("payment_mode")}
+          />
 
           {/* Status */}
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1.5">
-              Loan Status
-            </label>
-            <select
-              {...register("status")}
-              className="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-white text-slate-900 rounded-xl border border-slate-200 hover:border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 outline-none transition-all shadow-2xs font-medium cursor-pointer"
-            >
-              <option value="Active">Active</option>
-              <option value="Closed">Closed</option>
-            </select>
-          </div>
+          <FloatingSelect
+            id="emi_status"
+            label="Loan Status"
+            options={["Active", "Closed"]}
+            error={errors.status}
+            {...register("status")}
+          />
         </div>
       </div>
 
@@ -539,11 +445,13 @@ export default function EmiForm({ setEmiList, modalData, isEdit, onClose, toggle
         </div>
 
         <div>
-          <textarea
-            rows={2}
+          <FloatingTextarea
+            id="emi_notes"
+            label="Notes & Remarks"
+            rows={3}
             placeholder="e.g. Hypothecation NOC pending from bank, e-mandate registered with SBI account..."
+            error={errors.notes}
             {...register("notes")}
-            className="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-white text-slate-900 rounded-xl border border-slate-200 hover:border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 outline-none transition-all shadow-2xs font-medium placeholder-slate-400 resize-none"
           />
         </div>
       </div>

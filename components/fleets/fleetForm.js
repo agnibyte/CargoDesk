@@ -3,6 +3,11 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { useForm } from "react-hook-form";
 import CustomSearch from "../common/customSearch";
+import {
+  FloatingInput,
+  FloatingSelect,
+  FloatingTextarea,
+} from "../common/floatingInput";
 import { useFleetDriver } from "@/context/fleetDriverContext";
 import { postApiData } from "@/utilities/services/apiService";
 import { showToast } from "@/utilities/toastService";
@@ -254,96 +259,59 @@ export default function FleetForm({
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Vehicle Registration Number */}
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1.5">
-              Vehicle Registration No. <span className="text-rose-500">*</span>
-            </label>
-            <input
-              type="text"
-              list="fleetVehicleSuggestions"
-              placeholder="e.g. MH 04 EF 9101"
-              {...register("vehicle_number", {
-                required: "Vehicle Registration Number is required",
-                onChange: (e) =>
-                  setValue("vehicle_number", e.target.value.toUpperCase()),
-              })}
-              className={`w-full px-3.5 py-2.5 text-xs sm:text-sm bg-white text-slate-900 rounded-xl border ${
-                errors.vehicle_number
-                  ? "border-rose-400 focus:border-rose-500 focus:ring-rose-500/15"
-                  : "border-slate-200 hover:border-slate-300 focus:border-blue-500 focus:ring-blue-500/15"
-              } outline-none focus:ring-2 transition-all shadow-2xs uppercase placeholder:normal-case font-semibold`}
-            />
+          <FloatingInput
+            id="fleet_vehicle_number"
+            label="Vehicle Registration No."
+            required
+            list="fleetVehicleSuggestions"
+            placeholder="e.g. MH 04 EF 9101"
+            className="uppercase font-semibold"
+            error={errors.vehicle_number}
+            {...register("vehicle_number", {
+              required: "Vehicle Registration Number is required",
+              onChange: (e) =>
+                setValue("vehicle_number", e.target.value.toUpperCase()),
+            })}
+          >
             <datalist id="fleetVehicleSuggestions">
               {vehicleNoListArr.map((item) => (
                 <option key={item.id} value={item.label} />
               ))}
             </datalist>
-            {errors.vehicle_number && (
-              <p className="text-rose-500 text-xs font-medium mt-1">
-                {errors.vehicle_number.message}
-              </p>
-            )}
-          </div>
+          </FloatingInput>
 
           {/* Model & Make */}
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1.5">
-              Make & Model <span className="text-rose-500">*</span>
-            </label>
-            <input
-              type="text"
-              placeholder="e.g. Tata Prima 5530.S / Ashok Leyland 2820"
-              {...register("vehicle_model", {
-                required: "Make & Model is required",
-              })}
-              className={`w-full px-3.5 py-2.5 text-xs sm:text-sm bg-white text-slate-900 rounded-xl border ${
-                errors.vehicle_model
-                  ? "border-rose-400 focus:border-rose-500 focus:ring-rose-500/15"
-                  : "border-slate-200 hover:border-slate-300 focus:border-blue-500 focus:ring-blue-500/15"
-              } outline-none focus:ring-2 transition-all shadow-2xs font-medium placeholder-slate-400`}
-            />
-            {errors.vehicle_model && (
-              <p className="text-rose-500 text-xs font-medium mt-1">
-                {errors.vehicle_model.message}
-              </p>
-            )}
-          </div>
+          <FloatingInput
+            id="fleet_vehicle_model"
+            label="Make & Model"
+            required
+            placeholder="e.g. Tata Prima 5530.S / Ashok Leyland 2820"
+            error={errors.vehicle_model}
+            {...register("vehicle_model", {
+              required: "Make & Model is required",
+            })}
+          />
 
           {/* Vehicle Type */}
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1.5">
-              Vehicle Type / Body <span className="text-rose-500">*</span>
-            </label>
-            <select
-              {...register("vehicle_type", {
-                required: "Vehicle Type is required",
-              })}
-              className="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-white text-slate-900 rounded-xl border border-slate-200 hover:border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 outline-none transition-all shadow-2xs font-medium cursor-pointer"
-            >
-              {FLEET_VEHICLE_TYPES.map((type) => (
-                <option key={type} value={type}>
-                  {type}
-                </option>
-              ))}
-            </select>
-          </div>
+          <FloatingSelect
+            id="fleet_vehicle_type"
+            label="Vehicle Type / Body"
+            required
+            options={FLEET_VEHICLE_TYPES}
+            error={errors.vehicle_type}
+            {...register("vehicle_type", {
+              required: "Vehicle Type is required",
+            })}
+          />
 
           {/* Fuel Type */}
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1.5">
-              Fuel Type
-            </label>
-            <select
-              {...register("fuel_type")}
-              className="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-white text-slate-900 rounded-xl border border-slate-200 hover:border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 outline-none transition-all shadow-2xs font-medium cursor-pointer"
-            >
-              {FLEET_FUEL_TYPES.map((fuel) => (
-                <option key={fuel} value={fuel}>
-                  {fuel}
-                </option>
-              ))}
-            </select>
-          </div>
+          <FloatingSelect
+            id="fleet_fuel_type"
+            label="Fuel Type"
+            options={FLEET_FUEL_TYPES}
+            error={errors.fuel_type}
+            {...register("fuel_type")}
+          />
         </div>
       </div>
 
@@ -365,74 +333,48 @@ export default function FleetForm({
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Payload Capacity */}
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1.5">
-              Payload Capacity <span className="text-rose-500">*</span>
-            </label>
-            <input
-              type="text"
-              placeholder="e.g. 25 Tons / 35 Tons / 18 Cu.M"
-              {...register("capacity", {
-                required: "Payload Capacity is required",
-              })}
-              className={`w-full px-3.5 py-2.5 text-xs sm:text-sm bg-white text-slate-900 rounded-xl border ${
-                errors.capacity
-                  ? "border-rose-400 focus:border-rose-500 focus:ring-rose-500/15"
-                  : "border-slate-200 hover:border-slate-300 focus:border-blue-500 focus:ring-blue-500/15"
-              } outline-none focus:ring-2 transition-all shadow-2xs font-semibold placeholder-slate-400`}
-            />
-            {errors.capacity && (
-              <p className="text-rose-500 text-xs font-medium mt-1">
-                {errors.capacity.message}
-              </p>
-            )}
-          </div>
+          <FloatingInput
+            id="fleet_capacity"
+            label="Payload Capacity"
+            required
+            placeholder="e.g. 25 Tons / 35 Tons / 18 Cu.M"
+            className="font-semibold"
+            error={errors.capacity}
+            {...register("capacity", {
+              required: "Payload Capacity is required",
+            })}
+          />
 
           {/* Manufacturing Year */}
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1.5">
-              Manufacturing / Model Year
-            </label>
-            <input
-              type="number"
-              min="1990"
-              max="2035"
-              placeholder="e.g. 2023"
-              {...register("manufacturing_year")}
-              className="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-white text-slate-900 rounded-xl border border-slate-200 hover:border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 outline-none transition-all shadow-2xs font-medium placeholder-slate-400"
-            />
-          </div>
+          <FloatingInput
+            id="fleet_manufacturing_year"
+            label="Manufacturing / Model Year"
+            type="number"
+            min="1990"
+            max="2035"
+            placeholder="e.g. 2023"
+            error={errors.manufacturing_year}
+            {...register("manufacturing_year")}
+          />
 
           {/* Ownership Type */}
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1.5">
-              Ownership Type
-            </label>
-            <select
-              {...register("ownership_type")}
-              className="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-white text-slate-900 rounded-xl border border-slate-200 hover:border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 outline-none transition-all shadow-2xs font-medium cursor-pointer"
-            >
-              {FLEET_OWNERSHIP_TYPES.map((type) => (
-                <option key={type} value={type}>
-                  {type}
-                </option>
-              ))}
-            </select>
-          </div>
+          <FloatingSelect
+            id="fleet_ownership_type"
+            label="Ownership Type"
+            options={FLEET_OWNERSHIP_TYPES}
+            error={errors.ownership_type}
+            {...register("ownership_type")}
+          />
 
           {/* GPS Tracking Device ID */}
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1.5">
-              GPS Tracking ID / Fastag{" "}
-              <span className="text-slate-400 font-normal">(Optional)</span>
-            </label>
-            <input
-              type="text"
-              placeholder="e.g. GPS-TRK-9101"
-              {...register("gps_tracking_id")}
-              className="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-white text-slate-900 rounded-xl border border-slate-200 hover:border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 outline-none transition-all shadow-2xs font-mono font-medium placeholder-slate-400"
-            />
-          </div>
+          <FloatingInput
+            id="fleet_gps_tracking_id"
+            label="GPS Tracking ID / Fastag (Optional)"
+            placeholder="e.g. GPS-TRK-9101"
+            className="font-mono"
+            error={errors.gps_tracking_id}
+            {...register("gps_tracking_id")}
+          />
         </div>
       </div>
 
@@ -561,34 +503,23 @@ export default function FleetForm({
 
         <div className="space-y-4">
           {/* Status Selection */}
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1.5">
-              Operational Status
-            </label>
-            <select
-              {...register("status")}
-              className="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-white text-slate-900 rounded-xl border border-slate-200 hover:border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 outline-none transition-all shadow-2xs font-medium cursor-pointer"
-            >
-              {FLEET_STATUS_OPTIONS.map((status) => (
-                <option key={status} value={status}>
-                  {status}
-                </option>
-              ))}
-            </select>
-          </div>
+          <FloatingSelect
+            id="fleet_status"
+            label="Operational Status"
+            options={FLEET_STATUS_OPTIONS}
+            error={errors.status}
+            {...register("status")}
+          />
 
           {/* Notes */}
-          <div>
-            <label className="block text-xs font-bold text-slate-700 mb-1.5">
-              Notes & Remarks
-            </label>
-            <textarea
-              rows={2}
-              placeholder="e.g. Dedicated for North Corridor route. Tyre replacement scheduled next month..."
-              {...register("notes")}
-              className="w-full px-3.5 py-2.5 text-xs sm:text-sm bg-white text-slate-900 rounded-xl border border-slate-200 hover:border-slate-300 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 outline-none transition-all shadow-2xs font-medium placeholder-slate-400 resize-none"
-            />
-          </div>
+          <FloatingTextarea
+            id="fleet_notes"
+            label="Notes & Remarks"
+            rows={3}
+            placeholder="e.g. Dedicated for North Corridor route. Tyre replacement scheduled next month..."
+            error={errors.notes}
+            {...register("notes")}
+          />
         </div>
       </div>
 
