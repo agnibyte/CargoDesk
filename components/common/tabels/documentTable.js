@@ -376,23 +376,23 @@ const resolveCellValue = (headCell, row, index, onClickDocuments) => {
 
   // 3. Explicit or Inferred Column Type
   const typeMap = {
-  vehicle: ["vehicleNo", "vehicle_number"],
-  avatar: ["profile_photo", "photo"],
-  documentType: ["documentType"],
-  status: ["status"],
-  documents: ["supporting_documents", "documents"],
-  date: ["expiryDate", "due_date", "start_date", "license_expiry"],
-  alertDate: ["alertDate"],
-};
+    vehicle: ["vehicleNo", "vehicle_number"],
+    avatar: ["profile_photo", "photo"],
+    documentType: ["documentType"],
+    status: ["status"],
+    documents: ["supporting_documents", "documents"],
+    date: ["expiryDate", "due_date", "start_date", "license_expiry"],
+    alertDate: ["alertDate"],
+  };
 
-const type =
-  headCell.type ||
-  Object.entries(typeMap).find(([, ids]) => ids.includes(headCell.id))?.[0] ||
-  (headCell.formatPrice
-    ? "price"
-    : headCell.upperCase
-      ? "uppercase"
-      : "text");
+  const type =
+    headCell.type ||
+    Object.entries(typeMap).find(([, ids]) => ids.includes(headCell.id))?.[0] ||
+    (headCell.formatPrice
+      ? "price"
+      : headCell.upperCase
+        ? "uppercase"
+        : "text");
 
   // Handle explicitly / inferred types
   switch (type) {
