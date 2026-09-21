@@ -361,7 +361,7 @@ const renderActionCell = ({
  * Dynamic Cell Value Resolver
  * ============================================================================
  */
-const resolveCellValue = (headCell, row, index, onClickDocuments) => {
+const resolveCellValue = (headCell, row, index, onClickDocuments, tableName) => {
   const rawValue = row[headCell.id];
 
   // 1. HIGHEST PRIORITY: Custom render function
@@ -555,15 +555,12 @@ const resolveCellValue = (headCell, row, index, onClickDocuments) => {
         >
           {rawValue || "Unassigned"}
         </div>
-        {row.driver_contact ? (
-          <div className="text-[11px] font-medium text-slate-500">
-            📞 {row.driver_contact}
-          </div>
-        ) : row.contact_number ? (
-          <div className="text-[11px] font-medium text-slate-500">
-            📞 {row.contact_number}
-          </div>
-        ) : null}
+        {(row.driver_contact || row.contact_number) &&
+          tableName != "drivers" && (
+            <div className="text-[11px] font-medium text-slate-500">
+              📞 {row.driver_contact || row.contact_number}
+            </div>
+          )}
       </div>
     );
   }
@@ -848,6 +845,7 @@ export default function DocumentTable({
   rowClassName,
   defaultSortBy,
   defaultSortOrder = "asc",
+  tableName = "",
 }) {
   const isTableLoading = isLoading || loading;
   const [order, setOrder] = useState(defaultSortOrder);
@@ -1188,6 +1186,7 @@ export default function DocumentTable({
                             row,
                             index,
                             onClickDocuments,
+                            tableName,
                           )}
                         </td>
                       );

@@ -479,6 +479,11 @@ export default function DriversWrapper({ pageData }) {
           searchTerm={searchTerm}
           rowsPerPageOptions={[5, 10, 25, 50]}
           isLoading={isLoading}
+          tableName="drivers"
+          // pageSize={pageSize}
+          // setPageSize={setPageSize}
+          // currentPage={currentPage}
+          // setCurrentPage={setCurrentPage}
         />
       </div>
 
