@@ -14,7 +14,7 @@ import {
 } from "../floatingInput";
 import { FiMic, FiCheck, FiFileText } from "react-icons/fi";
 import { ImSpinner9 } from "react-icons/im";
-import { showToast } from "@/utilities/toastService";
+import useAutoFocusField from "@/hooks/useAutoFocusField";
 
 export default function AddDocumentForm({
   setReminderModal,
@@ -22,6 +22,7 @@ export default function AddDocumentForm({
   reminderData,
   isEdit,
   setIsEdit,
+  focusField,
   updateReminderData,
   isLoading,
 }) {
@@ -152,6 +153,9 @@ export default function AddDocumentForm({
     }
   }, [isEdit, reminderData, reset, vehicleOptions, documentTypeOptions]);
 
+  // Reusable platform-wide auto-scroll and highlight target field
+  useAutoFocusField(focusField, true, [reminderData, isEdit]);
+
   // Speech recognition handler
   const handleSpeechRecognition = () => {
     if (typeof window === "undefined" || !("webkitSpeechRecognition" in window)) {
@@ -193,7 +197,9 @@ export default function AddDocumentForm({
   };
 
   const onSubmit = (data) => {
-    const formattedExpiryDate = moment(data.expiryDate).toISOString();
+    const formattedExpiryDate = data.expiryDate
+      ? moment(data.expiryDate).toISOString()
+      : moment().toISOString();
 
     const selectedVehicleObj = vehicleOptions.find(
       (v) =>
@@ -229,111 +235,122 @@ export default function AddDocumentForm({
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="px-4 sm:px-6 py-3 space-y-4 bg-slate-50 rounded-xl">
+    <form onSubmit={handleSubmit(onSubmit)} className="px-4 sm:px-6 py-3 space-y-4 bg-slate-50">
       {/* Vehicle Number Field */}
-      <Controller
-        name="vehicleNo"
-        control={control}
-        rules={{ required: "Please select vehicle number" }}
-        render={({ field }) => (
-          <FloatingSelect
-            id="doc_vehicle_no"
-            label="Vehicle Number"
-            required
-            options={vehicleOptions}
-            error={errors.vehicleNo}
-            value={field.value}
-            selectedValue={field.value}
-            onChange={(val) => {
-              const actualVal =
-                val && typeof val === "object"
-                  ? val.value !== undefined
-                    ? val.value
-                    : val.target?.value
-                  : val;
-              field.onChange(actualVal || "");
-            }}
-            onBlur={field.onBlur}
-          />
-        )}
-      />
+      <div data-field-container data-field="vehicleNo">
+        <Controller
+          name="vehicleNo"
+          control={control}
+          rules={{ required: "Please select vehicle number" }}
+          render={({ field }) => (
+            <FloatingSelect
+              id="doc_vehicle_no"
+              name="vehicleNo"
+              label="Vehicle Number"
+              required
+              options={vehicleOptions}
+              error={errors.vehicleNo}
+              value={field.value}
+              selectedValue={field.value}
+              onChange={(val) => {
+                const actualVal =
+                  val && typeof val === "object"
+                    ? val.value !== undefined
+                      ? val.value
+                      : val.target?.value
+                    : val;
+                field.onChange(actualVal || "");
+              }}
+              onBlur={field.onBlur}
+            />
+          )}
+        />
+      </div>
 
       {/* Document Type Field */}
-      <Controller
-        name="documentType"
-        control={control}
-        rules={{ required: "Please select document type" }}
-        render={({ field }) => (
-          <FloatingSelect
-            id="doc_type"
-            label="Document Type"
-            required
-            options={documentTypeOptions}
-            error={errors.documentType}
-            value={field.value}
-            selectedValue={field.value}
-            onChange={(val) => {
-              const actualVal =
-                val && typeof val === "object"
-                  ? val.value !== undefined
-                    ? val.value
-                    : val.target?.value
-                  : val;
-              field.onChange(actualVal || "");
-            }}
-            onBlur={field.onBlur}
-          />
-        )}
-      />
+      <div data-field-container data-field="documentType">
+        <Controller
+          name="documentType"
+          control={control}
+          rules={{ required: "Please select document type" }}
+          render={({ field }) => (
+            <FloatingSelect
+              id="doc_type"
+              name="documentType"
+              label="Document Type"
+              required
+              options={documentTypeOptions}
+              error={errors.documentType}
+              value={field.value}
+              selectedValue={field.value}
+              onChange={(val) => {
+                const actualVal =
+                  val && typeof val === "object"
+                    ? val.value !== undefined
+                      ? val.value
+                      : val.target?.value
+                    : val;
+                field.onChange(actualVal || "");
+              }}
+              onBlur={field.onBlur}
+            />
+          )}
+        />
+      </div>
 
       {/* Expiry Date Field with Material UI X Date Picker */}
-      <Controller
-        name="expiryDate"
-        control={control}
-        rules={{ required: "Please enter the expiry date" }}
-        render={({ field }) => (
-          <FloatingDatePicker
-            id="doc_expiry_date"
-            name="expiryDate"
-            label="Select Expiry Date"
-            required
-            format="DD/MM/YYYY"
-            error={errors.expiryDate}
-            value={field.value}
-            onChange={(val) => {
-              const formatted =
-                val && moment(val).isValid()
-                  ? moment(val).format("YYYY-MM-DD")
-                  : val;
-              field.onChange(formatted);
-            }}
-            onBlur={field.onBlur}
-          />
-        )}
-      />
+      <div data-field-container data-field="expiryDate">
+        <Controller
+          name="expiryDate"
+          control={control}
+          rules={{ required: "Please enter the expiry date" }}
+          render={({ field }) => (
+            <FloatingDatePicker
+              id="doc_expiry_date"
+              name="expiryDate"
+              label="Select Expiry Date"
+              required
+              format="DD/MM/YYYY"
+              error={errors.expiryDate}
+              value={field.value}
+              onChange={(val) => {
+                const formatted =
+                  val && moment(val).isValid()
+                    ? moment(val).format("YYYY-MM-DD")
+                    : val;
+                field.onChange(formatted);
+              }}
+              onBlur={field.onBlur}
+            />
+          )}
+        />
+      </div>
 
       {/* Add Note with Voice Recording */}
-      <FloatingInput
-        id="doc_note"
-        label="Add Note (Optional)"
-        placeholder="Type or click mic to speak..."
-        error={errors.note}
-        rightElement={
-          <button
-            type="button"
-            onClick={handleSpeechRecognition}
-            title={isListening ? "Listening..." : "Voice input"}
-            className={`p-1.5 rounded-lg transition-all cursor-pointer ${
-              isListening
-                ? "bg-rose-500 text-white animate-pulse"
-                : "text-slate-400 hover:text-blue-600 hover:bg-blue-50"
-            }`}
-          >
-            <FiMic className="w-4 h-4" />
-          </button>
-        }
-        {...register("note")}
-      />
+      <div data-field-container data-field="note">
+        <FloatingInput
+          id="doc_note"
+          name="note"
+          label="Add Note (Optional)"
+          placeholder="Type or click mic to speak..."
+          error={errors.note}
+          rightElement={
+            <button
+              type="button"
+              onClick={handleSpeechRecognition}
+              title={isListening ? "Listening..." : "Voice input"}
+              className={`p-1.5 rounded-lg transition-all cursor-pointer ${
+                isListening
+                  ? "bg-rose-500 text-white animate-pulse"
+                  : "text-slate-400 hover:text-blue-600 hover:bg-blue-50"
+              }`}
+            >
+              <FiMic className="w-4 h-4" />
+            </button>
+          }
+          {...register("note")}
+        />
+      </div>
 
       {/* Form Action Buttons */}
       <div className="pt-2 flex items-center justify-end gap-2">

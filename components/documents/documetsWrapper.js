@@ -11,6 +11,7 @@ export default function DocumetsWrapper({ pageData }) {
   const [updateLoading, setUpdateLoading] = useState(false);
   const [addLoading, setAddLoading] = useState(false);
   const [reminderData, setReminderData] = useState("");
+  const [focusField, setFocusField] = useState(null);
   const [documentTableData, setDocumentTableData] = useState(
     pageData?.documents || []
   );
@@ -18,6 +19,7 @@ export default function DocumetsWrapper({ pageData }) {
   const onClickAddReminder = () => {
     setIsEdit(false);
     setReminderData("");
+    setFocusField(null);
     setReminderModal(true);
   };
 
@@ -80,6 +82,7 @@ export default function DocumetsWrapper({ pageData }) {
         setReminderData={setReminderData}
         setReminderModal={setReminderModal}
         setIsEdit={setIsEdit}
+        setFocusField={setFocusField}
         tableData={documentTableData}
         setTableData={setDocumentTableData}
         onClickAddDocument={onClickAddReminder}
@@ -98,6 +101,7 @@ export default function DocumetsWrapper({ pageData }) {
           reminderData={reminderData}
           isEdit={isEdit}
           setIsEdit={setIsEdit}
+          focusField={focusField}
           isLoading={isEdit ? updateLoading : addLoading}
           updateReminderData={updateReminderData}
         />

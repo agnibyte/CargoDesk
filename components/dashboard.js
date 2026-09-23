@@ -14,6 +14,7 @@ const Dashboard = ({ pageData }) => {
   const [addLoading, setAddLoading] = useState(false);
   const [tableLoading, setTableLoading] = useState(true);
   const [reminderData, setReminderData] = useState("");
+  const [focusField, setFocusField] = useState(null);
   const [documentTableData, setDocumentTableData] = useState([]);
   const [selectedTab, setSelectedTab] = useState("document");
 
@@ -67,6 +68,7 @@ const Dashboard = ({ pageData }) => {
   const onClickAddReminder = () => {
     setIsEdit(false);
     setReminderData("");
+    setFocusField(null);
     setReminderModal(true);
   };
 
@@ -112,6 +114,7 @@ const Dashboard = ({ pageData }) => {
             setReminderData={setReminderData}
             setReminderModal={setReminderModal}
             setIsEdit={setIsEdit}
+            setFocusField={setFocusField}
             tableData={documentTableData}
             setTableData={setDocumentTableData}
             onClickAddDocument={onClickAddReminder}
@@ -135,6 +138,7 @@ const Dashboard = ({ pageData }) => {
           reminderData={reminderData}
           isEdit={isEdit}
           setIsEdit={setIsEdit}
+          focusField={focusField}
           isLoading={isEdit ? updateLoading : addLoading}
           updateReminderData={updateReminderData}
         />

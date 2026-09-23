@@ -12,6 +12,7 @@ export default function DocumentsSection({
   setReminderData,
   setReminderModal,
   setIsEdit,
+  setFocusField,
   tableData = [],
   setTableData,
   onClickAddDocument = () => {},
@@ -26,10 +27,15 @@ export default function DocumentsSection({
   const [appliedFilter, setAppliedFilter] = useState([]);
   const [searchTerm, setSearchTerm] = useState("");
 
-  const onClickEdit = (id) => {
-    const selectedItem = tableData.find((item) => item.id == id);
+  const onClickEdit = (id, row, targetField) => {
+    const selectedItem =
+      (typeof row === "object" && row !== null && row.id ? row : null) ||
+      tableData.find((item) => item.id == id);
     if (selectedItem) {
       setReminderData(selectedItem);
+      if (setFocusField) {
+        setFocusField(targetField || null);
+      }
       setIsEdit(true);
       setReminderModal(true);
     }

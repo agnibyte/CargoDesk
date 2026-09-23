@@ -6,6 +6,7 @@ import CustomSearch from "../common/customSearch";
 import { useFleetDriver } from "@/context/fleetDriverContext";
 import { postApiData } from "@/utilities/services/apiService";
 import { showToast } from "@/utilities/toastService";
+import useAutoFocusField from "@/hooks/useAutoFocusField";
 import {
   DRIVER_LICENSE_TYPES,
   DRIVER_STATUS_OPTIONS,
@@ -145,73 +146,8 @@ export default function DriverForm({
     }
   }, [isEdit, modalData, reset, fleets]);
 
-  // Auto-scroll and highlight target field from table cell right-click
-  useEffect(() => {
-    if (!focusField || !isEdit) return;
-
-    const timer = setTimeout(() => {
-      const FIELD_MAP = {
-        profile_photo: "profile_photo",
-        photo: "profile_photo",
-        avatar: "profile_photo",
-        driver_name: "driver_name",
-        name: "driver_name",
-        contact_number: "contact_number",
-        contact: "contact_number",
-        contactNo: "contact_number",
-        alt_contact_number: "alt_contact_number",
-        blood_group: "blood_group",
-        license_number: "license_number",
-        license_type: "license_type",
-        license_expiry: "license_expiry",
-        expiryDate: "license_expiry",
-        experience_years: "experience_years",
-        experience: "experience_years",
-        supporting_documents: "supporting_documents",
-        documents: "supporting_documents",
-        assigned_vehicle: "assigned_vehicle",
-        vehicle_number: "assigned_vehicle",
-        vehicleNo: "assigned_vehicle",
-        fleet_id: "assigned_vehicle",
-        status: "status",
-        emergency_contact: "emergency_contact",
-        address: "address",
-        notes: "notes",
-      };
-
-      const targetKey = FIELD_MAP[focusField] || focusField;
-      const el =
-        document.querySelector(`[data-field="${targetKey}"]`) ||
-        document.querySelector(`[name="${targetKey}"]`) ||
-        document.getElementById(targetKey) ||
-        document.querySelector(`[data-field="${focusField}"]`) ||
-        document.querySelector(`[name="${focusField}"]`);
-
-      if (el) {
-        el.scrollIntoView({ behavior: "smooth", block: "center" });
-
-        // Add visual glowing focus ring
-        el.classList.add("ring-4", "ring-blue-500/40", "bg-blue-50/30", "transition-all", "duration-500", "rounded-xl");
-
-        const focusable =
-          el.tagName === "INPUT" || el.tagName === "SELECT" || el.tagName === "TEXTAREA"
-            ? el
-            : el.querySelector("input, select, textarea, button");
-
-        if (focusable && typeof focusable.focus === "function") {
-          try {
-            focusable.focus({ preventScroll: true });
-          } catch (_) {}
-        }
-
-        setTimeout(() => {
-          el.classList.remove("ring-4", "ring-blue-500/40", "bg-blue-50/30");
-        }, 2200);
-      }
-    }, 280);
-
-    return () => clearTimeout(timer);
-  }, [focusField, isEdit, modalData]);
+  // Reusable platform-wide auto-scroll and highlight target field
+  useAutoFocusField(focusField, isEdit, [modalData]);
 
   // Construct options for CustomSearch dropdown
   const fleetOptions = useMemo(() => {
