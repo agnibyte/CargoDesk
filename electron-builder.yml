@@ -1,0 +1,56 @@
+appId: com.cargodesk.app
+productName: CargoDesk
+copyright: "Copyright © 2026 CargoDesk"
+
+asar: false
+npmRebuild: false
+nodeGypRebuild: false
+
+directories:
+  output: dist-electron
+  buildResources: build
+
+files:
+  - "**/*"
+  - "!dist-electron/**"
+  - "!**/*.map"
+  - "!**/*.md"
+
+extraResources:
+  - from: .env
+    to: .env
+  - from: public
+    to: public
+
+win:
+  target:
+    - target: nsis
+      arch:
+        - x64
+    - target: portable
+      arch:
+        - x64
+  icon: build/icon.png
+  artifactName: "${productName}-Setup-${version}-${arch}.${ext}"
+
+nsis:
+  oneClick: false
+  allowToChangeInstallationDirectory: true
+  createDesktopShortcut: true
+  createStartMenuShortcut: true
+  shortcutName: CargoDesk
+  runAfterFinish: true
+
+portable:
+  artifactName: "${productName}-Portable-${version}-${arch}.${ext}"
+
+mac:
+  target:
+    - default
+  category: public.app-category.business
+
+linux:
+  target:
+    - AppImage
+    - deb
+  category: Office

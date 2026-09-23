@@ -1,12 +1,22 @@
 {
   "name": "cargodesk",
   "version": "0.1.0",
+  "description": "CargoDesk Desktop Application",
+  "author": "CargoDesk",
   "private": true,
+  "main": "electron/main.js",
   "scripts": {
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "next lint"
+    "lint": "next lint",
+    "electron:dev": "concurrently -k \"next dev -p 3000\" \"wait-on -t 60000 http://127.0.0.1:3000 && electron .\"",
+    "electron:build": "next build && electron-builder --dir",
+    "electron:dist": "next build && electron-builder --win"
+  },
+  "overrides": {
+    "@noble/hashes": "1.8.0",
+    "@electron/get": "3.1.0"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -37,8 +47,14 @@
   "devDependencies": {
     "@eslint/eslintrc": "^3",
     "@tailwindcss/postcss": "^4",
+    "concurrently": "^10.0.5",
+    "cross-env": "^10.1.0",
+    "dotenv": "^18.0.3",
+    "electron": "^34.2.0",
+    "electron-builder": "^26.15.3",
     "eslint": "^9",
     "eslint-config-next": "15.3.4",
-    "tailwindcss": "^4"
+    "tailwindcss": "^4",
+    "wait-on": "^9.1.0"
   }
 }
