@@ -8,6 +8,7 @@ import React, {
   useMemo,
   useCallback,
 } from "react";
+import { createPortal } from "react-dom";
 import { FiSearch, FiChevronDown, FiCheck, FiX } from "react-icons/fi";
 
 // Harmonious palette of gradients for initial avatar badges
@@ -100,10 +101,64 @@ const CustomSearch = forwardRef(
     const containerRef = useRef(null);
     const searchInputRef = useRef(null);
     const listRef = useRef(null);
+    const popoverRef = useRef(null);
 
     const [isOpen, setIsOpen] = useState(false);
     const [searchQuery, setSearchQuery] = useState("");
     const [highlightedIndex, setHighlightedIndex] = useState(0);
+    const [mounted, setMounted] = useState(false);
+    const [popoverCoords, setPopoverCoords] = useState(null);
+
+    useEffect(() => {
+      setMounted(true);
+    }, []);
+
+    // Update fixed coordinates for portal
+    const updatePopoverPosition = useCallback(() => {
+      if (!containerRef.current) return;
+      const rect = containerRef.current.getBoundingClientRect();
+      const viewportHeight = window.innerHeight;
+      const spaceBelow = viewportHeight - rect.bottom;
+      const spaceAbove = rect.top;
+
+      // Flip upward if space below is too small (< 220px) and space above is greater
+      const openUpward = spaceBelow < 220 && spaceAbove > spaceBelow;
+
+      setPopoverCoords({
+        top: openUpward ? rect.top - 6 : rect.bottom + 6,
+        left: rect.left,
+        width: rect.width,
+        placement: openUpward ? "top" : "bottom",
+        maxHeight: Math.min(
+          320,
+          Math.max(160, openUpward ? spaceAbove - 20 : spaceBelow - 20)
+        ),
+      });
+    }, []);
+
+    // Sync position on open, scroll, or resize
+    useEffect(() => {
+      if (!isOpen) return;
+
+      updatePopoverPosition();
+
+      const handleScrollOrResize = () => {
+        updatePopoverPosition();
+      };
+
+      window.addEventListener("resize", handleScrollOrResize, { passive: true });
+      window.addEventListener("scroll", handleScrollOrResize, {
+        capture: true,
+        passive: true,
+      });
+
+      return () => {
+        window.removeEventListener("resize", handleScrollOrResize);
+        window.removeEventListener("scroll", handleScrollOrResize, {
+          capture: true,
+        });
+      };
+    }, [isOpen, updatePopoverPosition]);
 
     // Initial value resolution
     const initialRawVal =
@@ -315,6 +370,7 @@ const CustomSearch = forwardRef(
       if (willOpen) {
         setSearchQuery("");
         setHighlightedIndex(0);
+        updatePopoverPosition();
         if (onFocus) {
           const focusEvent = createSyntheticEvent(
             "focus",
@@ -341,10 +397,13 @@ const CustomSearch = forwardRef(
       }
     };
 
-    // Close on click outside
+    // Close on click outside (handles container and portal popover)
     useEffect(() => {
       function handleClickOutside(e) {
-        if (containerRef.current && !containerRef.current.contains(e.target)) {
+        const inContainer = containerRef.current && containerRef.current.contains(e.target);
+        const inPopover = popoverRef.current && popoverRef.current.contains(e.target);
+
+        if (!inContainer && !inPopover) {
           if (isOpen) {
             setIsOpen(false);
             setSearchQuery("");
@@ -438,6 +497,8 @@ const CustomSearch = forwardRef(
       <div
         ref={containerRef}
         className={`relative w-full text-left select-none ${
+          isOpen ? "z-50" : "z-10"
+        } ${
           disabled ? "opacity-60 cursor-not-allowed pointer-events-none" : ""
         }`}
         onKeyDown={handleKeyDown}
@@ -499,97 +560,128 @@ const CustomSearch = forwardRef(
           </div>
         </div>
 
-        {/* Dropdown Popover Menu with Live Search */}
-        {isOpen && (
-          <div className="absolute z-50 left-0 right-0 top-full mt-1.5 bg-white rounded-2xl border border-slate-200/90 shadow-xl shadow-slate-900/10 overflow-hidden animate-slide-down">
-            {/* Search Input Box */}
-            {isSearchable && (
-              <div className="p-2.5 border-b border-slate-100 bg-slate-50/70">
-                <div className="relative flex items-center">
-                  <FiSearch className="absolute left-3 w-4 h-4 text-slate-400 pointer-events-none" />
-                  <input
-                    ref={searchInputRef}
-                    type="text"
-                    value={searchQuery}
-                    onChange={(e) => {
-                      setSearchQuery(e.target.value);
-                      setHighlightedIndex(0);
-                    }}
-                    placeholder="Search by name, initial, or code..."
-                    className="w-full pl-9 pr-8 py-2 text-xs sm:text-sm bg-white text-slate-900 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 outline-none transition-all placeholder:text-slate-400 font-medium"
-                  />
-                  {searchQuery && (
+        {/* Dropdown Popover Menu Rendered in Portal to float outside modals/popups */}
+        {isOpen &&
+          mounted &&
+          popoverCoords &&
+          createPortal(
+            <div
+              ref={popoverRef}
+              style={{
+                position: "fixed",
+                top:
+                  popoverCoords.placement === "top"
+                    ? undefined
+                    : `${popoverCoords.top}px`,
+                bottom:
+                  popoverCoords.placement === "top"
+                    ? `${window.innerHeight - popoverCoords.top}px`
+                    : undefined,
+                left: `${popoverCoords.left}px`,
+                width: `${popoverCoords.width}px`,
+                zIndex: 99999,
+              }}
+              className={`bg-white rounded-2xl border border-slate-200/95 shadow-2xl shadow-slate-900/25 overflow-hidden ring-1 ring-black/5 ${
+                popoverCoords.placement === "top"
+                  ? "animate-slide-up origin-bottom"
+                  : "animate-slide-down origin-top"
+              }`}
+              onKeyDown={handleKeyDown}
+            >
+              {/* Search Input Box */}
+              {isSearchable && (
+                <div className="p-2.5 border-b border-slate-100 bg-slate-50/70">
+                  <div className="relative flex items-center">
+                    <FiSearch className="absolute left-3 w-4 h-4 text-slate-400 pointer-events-none" />
+                    <input
+                      ref={searchInputRef}
+                      type="text"
+                      value={searchQuery}
+                      onChange={(e) => {
+                        setSearchQuery(e.target.value);
+                        setHighlightedIndex(0);
+                      }}
+                      placeholder="Search by name, initial, or code..."
+                      className="w-full pl-9 pr-8 py-2 text-xs sm:text-sm bg-white text-slate-900 rounded-xl border border-slate-200 focus:border-blue-500 focus:ring-2 focus:ring-blue-500/15 outline-none transition-all placeholder:text-slate-400 font-medium"
+                    />
+                    {searchQuery && (
+                      <button
+                        type="button"
+                        onClick={() => setSearchQuery("")}
+                        className="absolute right-2.5 p-1 text-slate-400 hover:text-slate-700 rounded-md"
+                      >
+                        <FiX className="w-3.5 h-3.5" />
+                      </button>
+                    )}
+                  </div>
+                </div>
+              )}
+
+              {/* Options List */}
+              <div
+                ref={listRef}
+                style={{
+                  maxHeight: popoverCoords.maxHeight
+                    ? `${Math.min(260, popoverCoords.maxHeight - (isSearchable ? 60 : 10))}px`
+                    : "240px",
+                }}
+                className="overflow-y-auto p-1.5 space-y-0.5"
+              >
+                {filteredOptions.length > 0 ? (
+                  filteredOptions.map((opt, index) => {
+                    const isSelected = opt.value === currentValue;
+                    const isHighlighted = index === highlightedIndex;
+
+                    return (
+                      <div
+                        key={opt.id}
+                        onClick={() => handleSelect(opt)}
+                        onMouseEnter={() => setHighlightedIndex(index)}
+                        className={`flex items-center justify-between px-3 py-2.5 rounded-xl cursor-pointer transition-colors text-xs sm:text-sm font-medium ${
+                          opt.isDisabled
+                            ? "opacity-40 cursor-not-allowed bg-transparent"
+                            : isSelected
+                            ? "bg-blue-50 text-blue-700 font-bold"
+                            : isHighlighted
+                            ? "bg-slate-100/90 text-slate-900"
+                            : "text-slate-700 hover:bg-slate-50"
+                        }`}
+                      >
+                        <div className="flex items-center gap-2.5 min-w-0 flex-1">
+                          <div
+                            className={`w-6 h-6 rounded-lg bg-gradient-to-tr ${opt.gradient} text-white font-bold text-[10px] flex items-center justify-center shrink-0 shadow-2xs`}
+                          >
+                            {opt.initial}
+                          </div>
+                          <span className="truncate">{opt.label}</span>
+                        </div>
+
+                        {isSelected && (
+                          <div className="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0 ml-2">
+                            <FiCheck className="w-3 h-3" />
+                          </div>
+                        )}
+                      </div>
+                    );
+                  })
+                ) : (
+                  <div className="py-6 px-4 text-center">
+                    <p className="text-xs text-slate-500 font-medium">
+                      No results found for &ldquo;<span className="font-semibold text-slate-700">{searchQuery}</span>&rdquo;
+                    </p>
                     <button
                       type="button"
                       onClick={() => setSearchQuery("")}
-                      className="absolute right-2.5 p-1 text-slate-400 hover:text-slate-700 rounded-md"
+                      className="text-xs text-blue-600 hover:text-blue-700 font-semibold mt-1.5"
                     >
-                      <FiX className="w-3.5 h-3.5" />
+                      Clear search filter
                     </button>
-                  )}
-                </div>
+                  </div>
+                )}
               </div>
-            )}
-
-            {/* Options List */}
-            <div
-              ref={listRef}
-              className="max-h-60 overflow-y-auto p-1.5 space-y-0.5"
-            >
-              {filteredOptions.length > 0 ? (
-                filteredOptions.map((opt, index) => {
-                  const isSelected = opt.value === currentValue;
-                  const isHighlighted = index === highlightedIndex;
-
-                  return (
-                    <div
-                      key={opt.id}
-                      onClick={() => handleSelect(opt)}
-                      onMouseEnter={() => setHighlightedIndex(index)}
-                      className={`flex items-center justify-between px-3 py-2.5 rounded-xl cursor-pointer transition-colors text-xs sm:text-sm font-medium ${
-                        opt.isDisabled
-                          ? "opacity-40 cursor-not-allowed bg-transparent"
-                          : isSelected
-                          ? "bg-blue-50 text-blue-700 font-bold"
-                          : isHighlighted
-                          ? "bg-slate-100/90 text-slate-900"
-                          : "text-slate-700 hover:bg-slate-50"
-                      }`}
-                    >
-                      <div className="flex items-center gap-2.5 min-w-0 flex-1">
-                        <div
-                          className={`w-6 h-6 rounded-lg bg-gradient-to-tr ${opt.gradient} text-white font-bold text-[10px] flex items-center justify-center shrink-0 shadow-2xs`}
-                        >
-                          {opt.initial}
-                        </div>
-                        <span className="truncate">{opt.label}</span>
-                      </div>
-
-                      {isSelected && (
-                        <div className="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center shrink-0 ml-2">
-                          <FiCheck className="w-3 h-3" />
-                        </div>
-                      )}
-                    </div>
-                  );
-                })
-              ) : (
-                <div className="py-6 px-4 text-center">
-                  <p className="text-xs text-slate-500 font-medium">
-                    No results found for &ldquo;<span className="font-semibold text-slate-700">{searchQuery}</span>&rdquo;
-                  </p>
-                  <button
-                    type="button"
-                    onClick={() => setSearchQuery("")}
-                    className="text-xs text-blue-600 hover:text-blue-700 font-semibold mt-1.5"
-                  >
-                    Clear search filter
-                  </button>
-                </div>
-              )}
-            </div>
-          </div>
-        )}
+            </div>,
+            document.body
+          )}
       </div>
     );
   }

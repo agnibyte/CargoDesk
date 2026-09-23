@@ -31,6 +31,7 @@ export default function DriverForm({
   setDriverList,
   modalData,
   isEdit,
+  focusField,
   onClose,
   toggleModal,
 }) {
@@ -143,6 +144,74 @@ export default function DriverForm({
       setSupportingDocs([]);
     }
   }, [isEdit, modalData, reset, fleets]);
+
+  // Auto-scroll and highlight target field from table cell right-click
+  useEffect(() => {
+    if (!focusField || !isEdit) return;
+
+    const timer = setTimeout(() => {
+      const FIELD_MAP = {
+        profile_photo: "profile_photo",
+        photo: "profile_photo",
+        avatar: "profile_photo",
+        driver_name: "driver_name",
+        name: "driver_name",
+        contact_number: "contact_number",
+        contact: "contact_number",
+        contactNo: "contact_number",
+        alt_contact_number: "alt_contact_number",
+        blood_group: "blood_group",
+        license_number: "license_number",
+        license_type: "license_type",
+        license_expiry: "license_expiry",
+        expiryDate: "license_expiry",
+        experience_years: "experience_years",
+        experience: "experience_years",
+        supporting_documents: "supporting_documents",
+        documents: "supporting_documents",
+        assigned_vehicle: "assigned_vehicle",
+        vehicle_number: "assigned_vehicle",
+        vehicleNo: "assigned_vehicle",
+        fleet_id: "assigned_vehicle",
+        status: "status",
+        emergency_contact: "emergency_contact",
+        address: "address",
+        notes: "notes",
+      };
+
+      const targetKey = FIELD_MAP[focusField] || focusField;
+      const el =
+        document.querySelector(`[data-field="${targetKey}"]`) ||
+        document.querySelector(`[name="${targetKey}"]`) ||
+        document.getElementById(targetKey) ||
+        document.querySelector(`[data-field="${focusField}"]`) ||
+        document.querySelector(`[name="${focusField}"]`);
+
+      if (el) {
+        el.scrollIntoView({ behavior: "smooth", block: "center" });
+
+        // Add visual glowing focus ring
+        el.classList.add("ring-4", "ring-blue-500/40", "bg-blue-50/30", "transition-all", "duration-500", "rounded-xl");
+
+        const focusable =
+          el.tagName === "INPUT" || el.tagName === "SELECT" || el.tagName === "TEXTAREA"
+            ? el
+            : el.querySelector("input, select, textarea, button");
+
+        if (focusable && typeof focusable.focus === "function") {
+          try {
+            focusable.focus({ preventScroll: true });
+          } catch (_) {}
+        }
+
+        setTimeout(() => {
+          el.classList.remove("ring-4", "ring-blue-500/40", "bg-blue-50/30");
+        }, 2200);
+      }
+    }, 280);
+
+    return () => clearTimeout(timer);
+  }, [focusField, isEdit, modalData]);
 
   // Construct options for CustomSearch dropdown
   const fleetOptions = useMemo(() => {
@@ -382,7 +451,11 @@ export default function DriverForm({
         className="px-5 md:px-6 space-y-5 max-h-[82vh] overflow-y-auto"
       >
         {/* 1. Profile Photo Header Banner */}
-        <div className="bg-gradient-to-r from-blue-50/80 via-indigo-50/50 to-slate-50 border border-blue-100 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-center gap-5 shadow-2xs">
+        <div
+          data-field="profile_photo"
+          id="profile_photo"
+          className="bg-gradient-to-r from-blue-50/80 via-indigo-50/50 to-slate-50 border border-blue-100 rounded-2xl p-4 sm:p-5 flex flex-col sm:flex-row items-center gap-5 shadow-2xs transition-all"
+        >
           {/* Avatar / Photo preview */}
           <div className="relative group shrink-0">
             <div className="w-20 h-20 sm:w-22 sm:h-22 rounded-2xl overflow-hidden bg-white border-2 border-white shadow-md flex items-center justify-center text-slate-400 relative">
@@ -639,7 +712,11 @@ export default function DriverForm({
         </div>
 
         {/* 4. Supporting Documents Upload Section */}
-        <div className="bg-slate-50/70 border border-slate-200/80 rounded-2xl p-4 sm:p-5 space-y-4 shadow-2xs">
+        <div
+          data-field="supporting_documents"
+          id="supporting_documents"
+          className="bg-slate-50/70 border border-slate-200/80 rounded-2xl p-4 sm:p-5 space-y-4 shadow-2xs transition-all"
+        >
           <div className="flex items-center justify-between pb-2 border-b border-slate-200/60">
             <div className="flex items-center gap-2.5">
               <div className="w-8 h-8 rounded-xl bg-amber-50 text-amber-600 flex items-center justify-center font-bold text-sm shadow-2xs">
@@ -788,7 +865,11 @@ export default function DriverForm({
 
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             {/* Assigned Vehicle Custom Search */}
-            <div className="md:col-span-2 space-y-2">
+            <div
+              data-field="assigned_vehicle"
+              id="assigned_vehicle"
+              className="md:col-span-2 space-y-2 transition-all p-1"
+            >
               <label className="block text-xs font-bold text-slate-700">
                 Assigned Fleet Vehicle{" "}
                 <span className="text-slate-400 font-normal">
@@ -866,7 +947,11 @@ export default function DriverForm({
             </div>
 
             {/* Operational Status */}
-            <div>
+            <div
+              data-field="status"
+              id="status"
+              className="transition-all p-1"
+            >
               <label className="block text-xs font-bold text-slate-700 mb-1.5">
                 Operational Status
               </label>

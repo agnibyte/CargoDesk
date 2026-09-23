@@ -38,6 +38,7 @@ export default function DriversWrapper({ pageData }) {
   const [isLoading, setIsLoading] = useState(!pageData?.drivers && !contextDrivers.length);
   const [docsModalOpen, setDocsModalOpen] = useState(false);
   const [selectedDriverForDocs, setSelectedDriverForDocs] = useState(null);
+  const [focusField, setFocusField] = useState(null);
 
   // Sync with context drivers whenever updated
   useEffect(() => {
@@ -156,11 +157,15 @@ export default function DriversWrapper({ pageData }) {
   };
 
   // Handle Edit Driver
-  const onClickEdit = (id) => {
-    const selectedItem = driverList.find((item) => item.id == id);
+  const onClickEdit = (id, row, field) => {
+    const targetId = id ?? row?.id;
+    const selectedItem =
+      (typeof row === "object" && row !== null && row.id ? row : null) ||
+      driverList.find((item) => item.id == targetId);
     if (selectedItem) {
       setModalData(selectedItem);
       setIsEdit(true);
+      setFocusField(field || null);
       setDriverModal(true);
     }
   };
@@ -505,13 +510,17 @@ export default function DriversWrapper({ pageData }) {
       <CommonModal
         modalTitle={isEdit ? "Edit Driver Details" : "Add New Driver"}
         modalOpen={driverModal}
-        setModalOpen={setDriverModal}
+        setModalOpen={(open) => {
+          setDriverModal(open);
+          if (!open) setFocusField(null);
+        }}
         modalSize="w-11/12 md:w-[680px]"
       >
         <DriverForm
           setDriverList={setDriverList}
           modalData={modalData}
           isEdit={isEdit}
+          focusField={focusField}
           toggleModal={() => setDriverModal(false)}
           onClose={() => setDriverModal(false)}
         />

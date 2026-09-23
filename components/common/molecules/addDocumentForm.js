@@ -1,13 +1,15 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useForm, Controller } from "react-hook-form";
 import moment from "moment";
 import { DOCUMENTS_TYPE_LIST, vehicleNoListArr } from "@/utilities/dummyData";
 import { getConstant } from "@/utilities/utils";
+import { useFleetDriver } from "@/context/fleetDriverContext";
 import {
   FloatingInput,
   FloatingSelect,
+  FloatingDatePicker,
   FloatingTextarea,
 } from "../floatingInput";
 import { FiMic, FiCheck, FiFileText } from "react-icons/fi";
@@ -24,6 +26,7 @@ export default function AddDocumentForm({
   isLoading,
 }) {
   const [isListening, setIsListening] = useState(false);
+  const { fleets } = useFleetDriver() || { fleets: [] };
 
   const defaultValues = {
     vehicleNo: "",
@@ -38,6 +41,7 @@ export default function AddDocumentForm({
     setValue,
     watch,
     reset,
+    control,
     formState: { errors },
   } = useForm({
     defaultValues,
@@ -45,22 +49,92 @@ export default function AddDocumentForm({
 
   const watchedNote = watch("note");
 
+  // Dynamic vehicle options combining real fleets and fallback dummy vehicles
+  const vehicleOptions = useMemo(() => {
+    const list = [{ value: "", label: "Select Vehicle Number" }];
+    const seen = new Set();
+
+    // 1. Add fleets from database / context
+    if (Array.isArray(fleets)) {
+      fleets.forEach((f) => {
+        const vNum = f.vehicle_number?.trim();
+        if (vNum && !seen.has(vNum.toUpperCase())) {
+          seen.add(vNum.toUpperCase());
+          list.push({
+            value: vNum,
+            label: `${vNum}${f.vehicle_type ? ` (${f.vehicle_type})` : ""}`,
+            id: f.id,
+            fleet: f,
+          });
+        }
+      });
+    }
+
+    // 2. Add fallback predefined vehicles if not already present
+    if (Array.isArray(vehicleNoListArr)) {
+      vehicleNoListArr.forEach((v) => {
+        const vLabel = v.label?.trim() || v.value?.trim();
+        if (vLabel && !seen.has(vLabel.toUpperCase())) {
+          seen.add(vLabel.toUpperCase());
+          list.push({
+            value: vLabel,
+            label: v.label || v.value,
+            id: v.id,
+          });
+        }
+      });
+    }
+
+    return list;
+  }, [fleets]);
+
+  // Standardized document type options
+  const documentTypeOptions = useMemo(() => {
+    return [
+      { value: "", label: "Select Document Type" },
+      ...DOCUMENTS_TYPE_LIST.map((d) => ({
+        value: (d.value || d.label).toLowerCase(),
+        label: d.label,
+      })),
+    ];
+  }, []);
+
+  // Sync form values on edit or reset
   useEffect(() => {
     if (isEdit && reminderData) {
-      // Resolve vehicleNo (could be object or string)
+      // Resolve vehicleNo (could be object, formatted string, or lowercase)
       let vNo = "";
       if (typeof reminderData.vehicleNo === "object" && reminderData.vehicleNo !== null) {
-        vNo = reminderData.vehicleNo.value || "";
+        vNo = reminderData.vehicleNo.value || reminderData.vehicleNo.label || "";
       } else if (reminderData.vehicleNo) {
-        vNo = reminderData.vehicleNo;
+        vNo = String(reminderData.vehicleNo);
       }
 
-      // Resolve documentType (could be object or string)
+      // Check if matched in vehicleOptions
+      const matchedVeh = vehicleOptions.find(
+        (opt) =>
+          opt.value?.toUpperCase() === vNo.toUpperCase() ||
+          opt.label?.toUpperCase() === vNo.toUpperCase()
+      );
+      if (matchedVeh && matchedVeh.value) {
+        vNo = matchedVeh.value;
+      }
+
+      // Resolve documentType
       let docType = "";
       if (typeof reminderData.documentType === "object" && reminderData.documentType !== null) {
-        docType = reminderData.documentType.value || "";
+        docType = reminderData.documentType.value || reminderData.documentType.label || "";
       } else if (reminderData.documentType) {
-        docType = reminderData.documentType;
+        docType = String(reminderData.documentType);
+      }
+
+      const matchedDoc = documentTypeOptions.find(
+        (opt) =>
+          opt.value?.toLowerCase() === docType.toLowerCase() ||
+          opt.label?.toLowerCase() === docType.toLowerCase()
+      );
+      if (matchedDoc && matchedDoc.value) {
+        docType = matchedDoc.value;
       }
 
       const expDate = reminderData.expiryDate
@@ -76,7 +150,7 @@ export default function AddDocumentForm({
     } else {
       reset(defaultValues);
     }
-  }, [isEdit, reminderData, reset]);
+  }, [isEdit, reminderData, reset, vehicleOptions, documentTypeOptions]);
 
   // Speech recognition handler
   const handleSpeechRecognition = () => {
@@ -121,11 +195,15 @@ export default function AddDocumentForm({
   const onSubmit = (data) => {
     const formattedExpiryDate = moment(data.expiryDate).toISOString();
 
-    const selectedVehicleObj = vehicleNoListArr.find(
-      (v) => v.value === data.vehicleNo || v.label === data.vehicleNo
+    const selectedVehicleObj = vehicleOptions.find(
+      (v) =>
+        v.value?.toUpperCase() === String(data.vehicleNo).toUpperCase() ||
+        v.label?.toUpperCase() === String(data.vehicleNo).toUpperCase()
     );
-    const selectedDocObj = DOCUMENTS_TYPE_LIST.find(
-      (d) => d.value === data.documentType || d.label === data.documentType
+    const selectedDocObj = documentTypeOptions.find(
+      (d) =>
+        d.value?.toLowerCase() === String(data.documentType).toLowerCase() ||
+        d.label?.toLowerCase() === String(data.documentType).toLowerCase()
     );
 
     const payload = {
@@ -150,59 +228,88 @@ export default function AddDocumentForm({
     reset(defaultValues);
   };
 
-  // Convert dummyData arrays into label/value option items for FloatingSelect
-  const vehicleOptions = [
-    { value: "", label: "Select Vehicle Number" },
-    ...vehicleNoListArr.map((v) => ({
-      value: v.value || v.label,
-      label: v.label,
-    })),
-  ];
-
-  const documentTypeOptions = [
-    { value: "", label: "Select Document Type" },
-    ...DOCUMENTS_TYPE_LIST.map((d) => ({
-      value: d.value || d.label,
-      label: d.label,
-    })),
-  ];
-
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="px-4 sm:px-6 py-3 space-y-4 bg-slate-50 rounded-xl">
       {/* Vehicle Number Field */}
-      <FloatingSelect
-        id="doc_vehicle_no"
-        label="Vehicle Number"
-        required
-        options={vehicleOptions}
-        error={errors.vehicleNo}
-        {...register("vehicleNo", {
-          required: "Please select vehicle number",
-        })}
+      <Controller
+        name="vehicleNo"
+        control={control}
+        rules={{ required: "Please select vehicle number" }}
+        render={({ field }) => (
+          <FloatingSelect
+            id="doc_vehicle_no"
+            label="Vehicle Number"
+            required
+            options={vehicleOptions}
+            error={errors.vehicleNo}
+            value={field.value}
+            selectedValue={field.value}
+            onChange={(val) => {
+              const actualVal =
+                val && typeof val === "object"
+                  ? val.value !== undefined
+                    ? val.value
+                    : val.target?.value
+                  : val;
+              field.onChange(actualVal || "");
+            }}
+            onBlur={field.onBlur}
+          />
+        )}
       />
 
       {/* Document Type Field */}
-      <FloatingSelect
-        id="doc_type"
-        label="Document Type"
-        required
-        options={documentTypeOptions}
-        error={errors.documentType}
-        {...register("documentType", {
-          required: "Please select document type",
-        })}
+      <Controller
+        name="documentType"
+        control={control}
+        rules={{ required: "Please select document type" }}
+        render={({ field }) => (
+          <FloatingSelect
+            id="doc_type"
+            label="Document Type"
+            required
+            options={documentTypeOptions}
+            error={errors.documentType}
+            value={field.value}
+            selectedValue={field.value}
+            onChange={(val) => {
+              const actualVal =
+                val && typeof val === "object"
+                  ? val.value !== undefined
+                    ? val.value
+                    : val.target?.value
+                  : val;
+              field.onChange(actualVal || "");
+            }}
+            onBlur={field.onBlur}
+          />
+        )}
       />
 
-      {/* Expiry Date Field */}
-      <FloatingInput
-        id="doc_expiry_date"
-        label="Select Expiry Date"
-        required
-        type="date"
-        error={errors.expiryDate}
-        {...register("expiryDate", {
-          required: "Please enter the expiry date",
-        })}
+      {/* Expiry Date Field with Material UI X Date Picker */}
+      <Controller
+        name="expiryDate"
+        control={control}
+        rules={{ required: "Please enter the expiry date" }}
+        render={({ field }) => (
+          <FloatingDatePicker
+            id="doc_expiry_date"
+            name="expiryDate"
+            label="Select Expiry Date"
+            required
+            format="DD/MM/YYYY"
+            error={errors.expiryDate}
+            value={field.value}
+            onChange={(val) => {
+              const formatted =
+                val && moment(val).isValid()
+                  ? moment(val).format("YYYY-MM-DD")
+                  : val;
+              field.onChange(formatted);
+            }}
+            onBlur={field.onBlur}
+          />
+        )}
       />
 
       {/* Add Note with Voice Recording */}

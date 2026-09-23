@@ -258,6 +258,7 @@ const renderDocumentsCell = (value, row, onClickDocuments) => {
 // 6. Action Menu Cell
 const renderActionCell = ({
   row,
+  rowId,
   activeMenuId,
   setActiveMenuId,
   actionMenuRef,
@@ -265,7 +266,8 @@ const renderActionCell = ({
   onClickDelete,
   customActions,
 }) => {
-  const isMenuOpen = activeMenuId === row.id;
+  const currentId = rowId !== undefined ? rowId : row.id;
+  const isMenuOpen = activeMenuId === currentId;
 
   return (
     <div
@@ -285,10 +287,10 @@ const renderActionCell = ({
       )}
 
       {/* 3-dots Menu Button */}
-      {(onClickDelete || customActions) && (
+      {(onClickDelete || customActions || onClickEdit) && (
         <button
           type="button"
-          onClick={() => setActiveMenuId(isMenuOpen ? null : row.id)}
+          onClick={() => setActiveMenuId(isMenuOpen ? null : currentId)}
           title="More options"
           className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors cursor-pointer"
         >
@@ -828,6 +830,7 @@ export default function DocumentTable({
   onClickEdit,
   onClickDocuments,
   onRowClick,
+  onRowContextMenu,
   selected = [],
   setSelected = () => {},
   selectable = true,
@@ -858,16 +861,37 @@ export default function DocumentTable({
   );
   const [activeMenuId, setActiveMenuId] = useState(null);
   const actionMenuRef = useRef(null);
+  const [contextMenu, setContextMenu] = useState(null);
+  const contextMenuRef = useRef(null);
 
-  // Close action dropdown menu on outside click
+  // Close menus on outside click / escape / scroll
   useEffect(() => {
     const handleOutsideClick = (e) => {
       if (actionMenuRef.current && !actionMenuRef.current.contains(e.target)) {
         setActiveMenuId(null);
       }
+      if (contextMenuRef.current && !contextMenuRef.current.contains(e.target)) {
+        setContextMenu(null);
+      }
     };
+    const handleKeyDown = (e) => {
+      if (e.key === "Escape") {
+        setActiveMenuId(null);
+        setContextMenu(null);
+      }
+    };
+    const handleScroll = () => {
+      setContextMenu(null);
+    };
+
     document.addEventListener("mousedown", handleOutsideClick);
-    return () => document.removeEventListener("mousedown", handleOutsideClick);
+    document.addEventListener("keydown", handleKeyDown);
+    window.addEventListener("scroll", handleScroll, true);
+    return () => {
+      document.removeEventListener("mousedown", handleOutsideClick);
+      document.removeEventListener("keydown", handleKeyDown);
+      window.removeEventListener("scroll", handleScroll, true);
+    };
   }, []);
 
   // Sorting handlers
@@ -1121,6 +1145,35 @@ export default function DocumentTable({
                         handleClickRow(e, rowId);
                       }
                     }}
+                    onContextMenu={(e) => {
+                      e.preventDefault();
+                      e.stopPropagation();
+                      if (onRowContextMenu) {
+                        onRowContextMenu(row, e);
+                      } else {
+                        const clickX = e.clientX;
+                        const clickY = e.clientY;
+                        const menuWidth = 175;
+                        const menuHeight = 180;
+
+                        const posX =
+                          clickX + menuWidth > window.innerWidth
+                            ? Math.max(10, clickX - menuWidth)
+                            : clickX;
+                        const posY =
+                          clickY + menuHeight > window.innerHeight
+                            ? Math.max(10, clickY - menuHeight)
+                            : clickY;
+
+                        setContextMenu({
+                          x: posX,
+                          y: posY,
+                          row,
+                          rowId,
+                        });
+                        setActiveMenuId(null);
+                      }
+                    }}
                     className={`transition-colors ${
                       onRowClick || selectable ? "cursor-pointer" : ""
                     } ${
@@ -1163,6 +1216,7 @@ export default function DocumentTable({
                           >
                             {renderActionCell({
                               row,
+                              rowId,
                               activeMenuId,
                               setActiveMenuId,
                               actionMenuRef,
@@ -1177,6 +1231,37 @@ export default function DocumentTable({
                       return (
                         <td
                           key={headCell.id}
+                          onContextMenu={(e) => {
+                            e.preventDefault();
+                            e.stopPropagation();
+                            if (onRowContextMenu) {
+                              onRowContextMenu(row, e, headCell.id);
+                            } else {
+                              const clickX = e.clientX;
+                              const clickY = e.clientY;
+                              const menuWidth = 175;
+                              const menuHeight = 180;
+
+                              const posX =
+                                clickX + menuWidth > window.innerWidth
+                                  ? Math.max(10, clickX - menuWidth)
+                                  : clickX;
+                              const posY =
+                                clickY + menuHeight > window.innerHeight
+                                  ? Math.max(10, clickY - menuHeight)
+                                  : clickY;
+
+                              setContextMenu({
+                                x: posX,
+                                y: posY,
+                                row,
+                                rowId,
+                                field: headCell.id,
+                                label: headCell.label,
+                              });
+                              setActiveMenuId(null);
+                            }
+                          }}
                           className={`py-3.5 px-4 text-slate-700 whitespace-nowrap ${alignClass} ${
                             headCell.className || ""
                           }`}
@@ -1259,6 +1344,109 @@ export default function DocumentTable({
               </button>
             </div>
           )}
+        </div>
+      )}
+
+      {/* Positioned Right-Click Context Menu Popup */}
+      {contextMenu && (
+        <div
+          ref={contextMenuRef}
+          style={{
+            top: `${contextMenu.y}px`,
+            left: `${contextMenu.x}px`,
+          }}
+          className="fixed w-48 bg-white/95 backdrop-blur-sm rounded-xl shadow-2xl border border-slate-200 py-1.5 z-[9999] animate-dropdown text-left divide-y divide-slate-100"
+          onClick={(e) => e.stopPropagation()}
+        >
+          <div className="px-3 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider bg-slate-50/70 flex items-center justify-between">
+            <span>Actions</span>
+            <span className="text-[10px] text-slate-400 font-normal">
+              #{contextMenu.rowId}
+            </span>
+          </div>
+
+          <div className="py-1">
+            {onClickEdit && (
+              <button
+                type="button"
+                onClick={() => {
+                  const targetRow = contextMenu.row;
+                  const targetField = contextMenu.field;
+                  setContextMenu(null);
+                  onClickEdit(targetRow.id, targetRow, targetField);
+                }}
+                className="w-full flex items-center gap-2.5 px-3 py-1.5 text-xs text-slate-700 hover:bg-amber-50 hover:text-amber-800 transition-colors cursor-pointer"
+              >
+                <FiEdit className="w-3.5 h-3.5 text-amber-500" />
+                <span className="font-medium">
+                  {contextMenu.label &&
+                  contextMenu.field !== "action" &&
+                  contextMenu.field !== "id"
+                    ? `Edit (${contextMenu.label})`
+                    : "Edit Record"}
+                </span>
+              </button>
+            )}
+
+            {onClickDocuments && (
+              <button
+                type="button"
+                onClick={() => {
+                  const targetRow = contextMenu.row;
+                  const docs =
+                    targetRow.supporting_documents ||
+                    targetRow.documents ||
+                    [];
+                  setContextMenu(null);
+                  onClickDocuments(targetRow, docs);
+                }}
+                className="w-full flex items-center gap-2.5 px-3 py-1.5 text-xs text-slate-700 hover:bg-blue-50 hover:text-blue-800 transition-colors cursor-pointer"
+              >
+                <FiFileText className="w-3.5 h-3.5 text-blue-500" />
+                <span className="font-medium">View Documents</span>
+              </button>
+            )}
+
+            {/* Custom Actions */}
+            {customActions &&
+              (typeof customActions === "function"
+                ? customActions(contextMenu.row, () => setContextMenu(null))
+                : customActions.map((action, idx) => (
+                    <button
+                      key={idx}
+                      type="button"
+                      onClick={() => {
+                        const targetRow = contextMenu.row;
+                        setContextMenu(null);
+                        action.onClick && action.onClick(targetRow);
+                      }}
+                      className={`w-full flex items-center gap-2.5 px-3 py-1.5 text-xs hover:bg-slate-50 transition-colors cursor-pointer ${
+                        action.className || "text-slate-700"
+                      }`}
+                    >
+                      {action.icon && (
+                        <span className="w-3.5 h-3.5">{action.icon}</span>
+                      )}
+                      <span className="font-medium">{action.label}</span>
+                    </button>
+                  )))}
+
+            {/* Delete Action */}
+            {onClickDelete && (
+              <button
+                type="button"
+                onClick={() => {
+                  const targetRow = contextMenu.row;
+                  setContextMenu(null);
+                  onClickDelete([targetRow.id], targetRow);
+                }}
+                className="w-full flex items-center gap-2.5 px-3 py-1.5 text-xs text-rose-600 hover:bg-rose-50 hover:text-rose-700 transition-colors cursor-pointer"
+              >
+                <FiTrash2 className="w-3.5 h-3.5 text-rose-500" />
+                <span className="font-medium">Delete</span>
+              </button>
+            )}
+          </div>
         </div>
       )}
     </div>
