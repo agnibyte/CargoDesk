@@ -118,6 +118,7 @@ const defaultSeedDrivers = [
 
 export async function ensureDriverTable() {
   if (isTableInitialized) return;
+  isTableInitialized = true;
   try {
     const createTableQuery = `
       CREATE TABLE IF NOT EXISTS drivers (
@@ -144,26 +145,6 @@ export async function ensureDriverTable() {
     `;
     await executeQuery(createTableQuery);
 
-    // Ensure columns exist if table was previously created with older schema
-    try {
-      const existingCols = await executeQuery(`SHOW COLUMNS FROM drivers`);
-      const colNames = Array.isArray(existingCols)
-        ? existingCols.map((c) => c.Field || c.field)
-        : [];
-
-      if (!colNames.includes("profile_photo")) {
-        await executeQuery(`ALTER TABLE drivers ADD COLUMN profile_photo LONGTEXT NULL`);
-      }
-      if (!colNames.includes("supporting_documents")) {
-        await executeQuery(`ALTER TABLE drivers ADD COLUMN supporting_documents LONGTEXT NULL`);
-      }
-      if (!colNames.includes("fleet_id")) {
-        await executeQuery(`ALTER TABLE drivers ADD COLUMN fleet_id INT NULL`);
-      }
-    } catch (colErr) {
-      console.warn("Could not check/alter driver table columns:", colErr?.message);
-    }
-
     // Check count, seed default records if table is brand new/empty
     const countRes = await executeQuery(`SELECT COUNT(*) as total FROM drivers`);
     const count = countRes?.[0]?.total || 0;
@@ -176,8 +157,8 @@ export async function ensureDriverTable() {
         }
       }
     }
-    isTableInitialized = true;
   } catch (error) {
+    isTableInitialized = false;
     console.error("Error inspecting/initializing drivers table:", error);
   }
 }
