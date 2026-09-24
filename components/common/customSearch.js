@@ -441,6 +441,7 @@ const CustomSearch = forwardRef(
         e.preventDefault();
         if (!isOpen) {
           setIsOpen(true);
+          updatePopoverPosition();
         } else {
           setHighlightedIndex((prev) =>
             prev < filteredOptions.length - 1 ? prev + 1 : 0
@@ -450,20 +451,29 @@ const CustomSearch = forwardRef(
         e.preventDefault();
         if (!isOpen) {
           setIsOpen(true);
+          updatePopoverPosition();
         } else {
           setHighlightedIndex((prev) =>
             prev > 0 ? prev - 1 : filteredOptions.length - 1
           );
         }
       } else if (e.key === "Enter") {
-        e.preventDefault();
         if (isOpen && filteredOptions[highlightedIndex]) {
+          e.preventDefault();
           handleSelect(filteredOptions[highlightedIndex]);
-        } else {
+        } else if (!isOpen) {
+          e.preventDefault();
           setIsOpen(true);
+          updatePopoverPosition();
         }
-      } else if (e.key === "Escape" || e.key === "Tab") {
+      } else if (e.key === " " && !isOpen && e.target === containerRef.current?.querySelector('[tabindex="0"]')) {
+        // Space opens dropdown if trigger is focused
+        e.preventDefault();
+        setIsOpen(true);
+        updatePopoverPosition();
+      } else if (e.key === "Escape") {
         if (isOpen) {
+          e.preventDefault();
           setIsOpen(false);
           if (onBlur) {
             const blurEvent = createSyntheticEvent(
@@ -475,6 +485,30 @@ const CustomSearch = forwardRef(
               id
             );
             onBlur(blurEvent);
+          }
+        }
+      } else if (e.key === "Tab") {
+        if (isOpen) {
+          setIsOpen(false);
+          // Allow standard Tab focus move
+          if (containerRef.current) {
+            const form = containerRef.current.closest("form") || document;
+            const focusables = Array.from(
+              form.querySelectorAll(
+                'input:not([type="hidden"]):not([disabled]):not([tabindex="-1"]), select:not([disabled]):not([tabindex="-1"]), textarea:not([disabled]):not([tabindex="-1"]), button:not([disabled]):not([tabindex="-1"]), [tabindex="0"]:not([disabled])'
+              )
+            ).filter((el) => el.offsetParent !== null);
+
+            const triggerEl = containerRef.current.querySelector('[tabindex="0"]') || containerRef.current;
+            const currentIndex = focusables.indexOf(triggerEl);
+
+            if (currentIndex !== -1) {
+              const nextIndex = e.shiftKey ? currentIndex - 1 : currentIndex + 1;
+              if (focusables[nextIndex]) {
+                e.preventDefault();
+                focusables[nextIndex].focus();
+              }
+            }
           }
         }
       }
@@ -508,16 +542,18 @@ const CustomSearch = forwardRef(
           ref={inputRef}
           type="hidden"
           name={name}
-          id={id}
+          id={id ? `${id}_hidden` : undefined}
           value={currentValue}
           readOnly
         />
 
         {/* Dropdown Trigger Display Box */}
         <div
+          id={id}
+          data-field={name || id}
           onClick={toggleDropdown}
           tabIndex={disabled ? -1 : 0}
-          className={`w-full min-h-[48px] px-3.5 py-2.5 flex items-center justify-between gap-2 bg-white text-slate-900 rounded-xl cursor-pointer transition-all duration-200 ${className}`}
+          className={`w-full min-h-[48px] px-3.5 py-2.5 flex items-center justify-between gap-2 bg-white text-slate-900 rounded-xl cursor-pointer transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-[#4bb7ff]/30 ${className}`}
         >
           <div className="flex items-center gap-2.5 min-w-0 flex-1">
             {selectedOption && selectedOption.value ? (
@@ -542,6 +578,7 @@ const CustomSearch = forwardRef(
             {allowClear && selectedOption && selectedOption.value && !disabled && (
               <button
                 type="button"
+                tabIndex={-1}
                 onClick={handleClear}
                 className="p-1 rounded-md text-slate-400 hover:text-slate-700 hover:bg-slate-100 transition-colors"
                 title="Clear selection"

@@ -93,15 +93,27 @@ export function highlightAndFocusField(fieldName, customMap = {}, duration = 220
   const mergedMap = { ...GLOBAL_FIELD_MAP, ...customMap };
   const targetKey = mergedMap[fieldName] || fieldName;
 
+  const isHiddenInput = (node) => node && node.tagName === "INPUT" && node.type === "hidden";
+
   // Search by priority: exact ID -> data-field -> name -> contains id
-  const el =
-    document.getElementById(targetKey) ||
-    document.querySelector(`[data-field="${targetKey}"]`) ||
-    document.querySelector(`[name="${targetKey}"]`) ||
-    document.getElementById(fieldName) ||
-    document.querySelector(`[data-field="${fieldName}"]`) ||
-    document.querySelector(`[name="${fieldName}"]`) ||
-    document.querySelector(`[id*="${targetKey}"]`);
+  let el = document.getElementById(targetKey);
+  if (isHiddenInput(el)) {
+    el =
+      el.parentElement?.querySelector('[tabindex="0"]') ||
+      document.querySelector(`[data-field="${targetKey}"]`);
+  }
+
+  if (!el) el = document.querySelector(`[data-field="${targetKey}"]`);
+  if (!el) el = document.querySelector(`[name="${targetKey}"]:not([type="hidden"])`);
+  if (!el) el = document.getElementById(fieldName);
+  if (isHiddenInput(el)) {
+    el =
+      el.parentElement?.querySelector('[tabindex="0"]') ||
+      document.querySelector(`[data-field="${fieldName}"]`);
+  }
+  if (!el) el = document.querySelector(`[data-field="${fieldName}"]`);
+  if (!el) el = document.querySelector(`[name="${fieldName}"]:not([type="hidden"])`);
+  if (!el) el = document.querySelector(`[id*="${targetKey}"]:not([type="hidden"])`);
 
   if (!el) return false;
 
@@ -128,12 +140,15 @@ export function highlightAndFocusField(fieldName, customMap = {}, duration = 220
     "rounded-2xl"
   );
 
-  // Focus the actual input/textarea/select element
-  const focusable =
-    el.tagName === "INPUT" || el.tagName === "SELECT" || el.tagName === "TEXTAREA"
+  // Focus the actual input/textarea/select/tabindex element
+  let focusable =
+    (el.tagName === "INPUT" && el.type !== "hidden") ||
+    el.tagName === "SELECT" ||
+    el.tagName === "TEXTAREA" ||
+    el.getAttribute("tabindex") === "0"
       ? el
-      : el.querySelector("input, select, textarea, button") ||
-        container.querySelector("input, select, textarea, button");
+      : el.querySelector('input:not([type="hidden"]), select, textarea, [tabindex="0"], button') ||
+        container.querySelector('input:not([type="hidden"]), select, textarea, [tabindex="0"], button');
 
   if (focusable && typeof focusable.focus === "function") {
     try {

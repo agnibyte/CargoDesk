@@ -154,7 +154,7 @@ export default function AddDocumentForm({
   }, [isEdit, reminderData, reset, vehicleOptions, documentTypeOptions]);
 
   // Reusable platform-wide auto-scroll and highlight target field
-  useAutoFocusField(focusField, true, [reminderData, isEdit]);
+  useAutoFocusField(focusField || "vehicleNo", true, [reminderData, isEdit]);
 
   // Speech recognition handler
   const handleSpeechRecognition = () => {
@@ -337,6 +337,7 @@ export default function AddDocumentForm({
           rightElement={
             <button
               type="button"
+              tabIndex={-1}
               onClick={handleSpeechRecognition}
               title={isListening ? "Listening..." : "Voice input"}
               className={`p-1.5 rounded-lg transition-all cursor-pointer ${

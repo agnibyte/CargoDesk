@@ -497,6 +497,8 @@ export const FloatingDatePicker = forwardRef(
                       } ${className}`,
                     },
                     inputProps: {
+                      id: pickerId,
+                      "data-field": pickerId,
                       className: "!py-0.5 text-slate-900 font-semibold text-sm placeholder:text-slate-400/60",
                       placeholder: placeholder,
                     },
@@ -508,6 +510,9 @@ export const FloatingDatePicker = forwardRef(
                       setIsFocused(false);
                       if (onBlur) onBlur(e);
                     },
+                  },
+                  openPickerButton: {
+                    tabIndex: -1,
                   },
                   popper: {
                     sx: {
