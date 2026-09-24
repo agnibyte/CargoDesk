@@ -1,14 +1,16 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
-import { useForm, useWatch } from "react-hook-form";
+import { useForm, useWatch, Controller } from "react-hook-form";
 import moment from "moment";
 import { postApiData } from "@/utilities/services/apiService";
 import { showToast } from "@/utilities/toastService";
 import { vehicleNoListArr } from "@/utilities/dummyData";
+import useAutoFocusField from "@/hooks/useAutoFocusField";
 import {
   FloatingInput,
   FloatingSelect,
+  FloatingDatePicker,
   FloatingTextarea,
 } from "../common/floatingInput";
 import {
@@ -45,25 +47,32 @@ const PAYMENT_MODES = [
   "Cash",
 ];
 
-export default function EmiForm({ setEmiList, modalData, isEdit, onClose, toggleModal }) {
-  const defaultFormData = {
-    vehicle_number: "",
-    loan_name: "",
-    bank_name: "",
-    loan_account_no: "",
-    loan_amount: "",
-    down_payment: "",
-    emi_amount: "",
-    interest_rate: "",
-    tenure_months: "",
-    emis_paid: "0",
-    start_date: "",
-    due_date: "",
-    payment_mode: "NACH / Auto-Debit",
-    status: "Active",
-    notes: "",
-  };
+const DEFAULT_EMI_DATA = {
+  vehicle_number: "",
+  loan_name: "",
+  bank_name: "",
+  loan_account_no: "",
+  loan_amount: "",
+  down_payment: "",
+  emi_amount: "",
+  interest_rate: "",
+  tenure_months: "",
+  emis_paid: "0",
+  start_date: "",
+  due_date: "",
+  payment_mode: "NACH / Auto-Debit",
+  status: "Active",
+  notes: "",
+};
 
+export default function EmiForm({
+  setEmiList,
+  modalData,
+  isEdit,
+  focusField,
+  onClose,
+  toggleModal,
+}) {
   const [apiLoading, setApiLoading] = useState(false);
 
   const {
@@ -74,7 +83,7 @@ export default function EmiForm({ setEmiList, modalData, isEdit, onClose, toggle
     formState: { errors },
     reset,
   } = useForm({
-    defaultValues: defaultFormData,
+    defaultValues: DEFAULT_EMI_DATA,
   });
 
   // Real-time financial calculations
@@ -128,8 +137,13 @@ export default function EmiForm({ setEmiList, modalData, isEdit, onClose, toggle
             : "Closed",
         notes: modalData.notes || modalData.note || "",
       });
+    } else {
+      reset(DEFAULT_EMI_DATA);
     }
   }, [isEdit, modalData, reset]);
+
+  // Reusable platform-wide auto-scroll and highlight target field
+  useAutoFocusField(focusField, Boolean(focusField), [modalData, isEdit]);
 
   const handleClose = () => {
     if (onClose) onClose();
@@ -183,7 +197,7 @@ export default function EmiForm({ setEmiList, modalData, isEdit, onClose, toggle
         ]);
       }
 
-      reset(defaultFormData);
+      reset(DEFAULT_EMI_DATA);
       handleClose();
     } else {
       showToast(response?.message || "Failed to save EMI record", "error");
@@ -195,7 +209,7 @@ export default function EmiForm({ setEmiList, modalData, isEdit, onClose, toggle
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="px-5 md:px-6 space-y-6 max-h-[82vh] overflow-y-auto"
+      className="px-4 sm:px-6 py-4 space-y-4 bg-slate-50 max-h-[82vh] overflow-y-auto"
     >
       {/* 1. Vehicle & Lender Details Section */}
       <div className="bg-slate-50/70 border border-slate-200/80 rounded-2xl p-4 sm:p-5 space-y-4 shadow-2xs">
@@ -215,59 +229,67 @@ export default function EmiForm({ setEmiList, modalData, isEdit, onClose, toggle
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Vehicle Number */}
-          <FloatingInput
-            id="emi_vehicle_number"
-            label="Vehicle Number (Optional)"
-            list="vehicleSuggestionsList"
-            placeholder="e.g. MH 04 EF 9101"
-            className="uppercase font-medium"
-            {...register("vehicle_number", {
-              onChange: (e) =>
-                setValue("vehicle_number", e.target.value.toUpperCase()),
-            })}
-          >
-            <datalist id="vehicleSuggestionsList">
-              {vehicleNoListArr.map((item) => (
-                <option key={item.id} value={item.label} />
-              ))}
-            </datalist>
-          </FloatingInput>
+          <div data-field-container data-field="vehicle_number">
+            <FloatingInput
+              id="emi_vehicle_number"
+              label="Vehicle Number (Optional)"
+              list="vehicleSuggestionsList"
+              placeholder="e.g. MH 04 EF 9101"
+              className="uppercase font-medium"
+              {...register("vehicle_number", {
+                onChange: (e) =>
+                  setValue("vehicle_number", e.target.value.toUpperCase()),
+              })}
+            >
+              <datalist id="vehicleSuggestionsList">
+                {vehicleNoListArr.map((item) => (
+                  <option key={item.id} value={item.label} />
+                ))}
+              </datalist>
+            </FloatingInput>
+          </div>
 
           {/* Loan / Item Name */}
-          <FloatingInput
-            id="emi_loan_name"
-            label="Loan / Item Name"
-            required
-            placeholder="e.g. Truck Chassis Loan, Vehicle EMI"
-            error={errors.loan_name}
-            {...register("loan_name", { required: "Loan Name is required" })}
-          />
+          <div data-field-container data-field="loan_name">
+            <FloatingInput
+              id="emi_loan_name"
+              label="Loan / Item Name"
+              required
+              placeholder="e.g. Truck Chassis Loan, Vehicle EMI"
+              error={errors.loan_name}
+              {...register("loan_name", { required: "Loan Name is required" })}
+            />
+          </div>
 
           {/* Financier / Bank Name */}
-          <FloatingInput
-            id="emi_bank_name"
-            label="Financier / Bank Name"
-            list="bankOptionsList"
-            placeholder="e.g. HDFC Bank, Tata Capital, Cholamandalam"
-            error={errors.bank_name}
-            {...register("bank_name")}
-          >
-            <datalist id="bankOptionsList">
-              {FINANCIER_OPTIONS.map((bank) => (
-                <option key={bank} value={bank} />
-              ))}
-            </datalist>
-          </FloatingInput>
+          <div data-field-container data-field="bank_name">
+            <FloatingInput
+              id="emi_bank_name"
+              label="Financier / Bank Name"
+              list="bankOptionsList"
+              placeholder="e.g. HDFC Bank, Tata Capital, Cholamandalam"
+              error={errors.bank_name}
+              {...register("bank_name")}
+            >
+              <datalist id="bankOptionsList">
+                {FINANCIER_OPTIONS.map((bank) => (
+                  <option key={bank} value={bank} />
+                ))}
+              </datalist>
+            </FloatingInput>
+          </div>
 
           {/* Loan Agreement / Account Number */}
-          <FloatingInput
-            id="emi_loan_account_no"
-            label="Loan Agreement / A/C No."
-            placeholder="e.g. LN-9842109"
-            className="font-mono"
-            error={errors.loan_account_no}
-            {...register("loan_account_no")}
-          />
+          <div data-field-container data-field="loan_account_no">
+            <FloatingInput
+              id="emi_loan_account_no"
+              label="Loan Agreement / A/C No."
+              placeholder="e.g. LN-9842109"
+              className="font-mono"
+              error={errors.loan_account_no}
+              {...register("loan_account_no")}
+            />
+          </div>
         </div>
       </div>
 
@@ -289,58 +311,66 @@ export default function EmiForm({ setEmiList, modalData, isEdit, onClose, toggle
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Loan Principal Amount */}
-          <FloatingInput
-            id="emi_loan_amount"
-            label="Loan Principal Amount (₹)"
-            required
-            type="number"
-            step="any"
-            placeholder="e.g. 1500000"
-            className="font-semibold"
-            error={errors.loan_amount}
-            {...register("loan_amount", {
-              required: "Loan Amount is required",
-              min: { value: 1, message: "Must be greater than 0" },
-            })}
-          />
+          <div data-field-container data-field="loan_amount">
+            <FloatingInput
+              id="emi_loan_amount"
+              label="Loan Principal Amount (₹)"
+              required
+              type="number"
+              step="any"
+              placeholder="e.g. 1500000"
+              className="font-semibold"
+              error={errors.loan_amount}
+              {...register("loan_amount", {
+                required: "Loan Amount is required",
+                min: { value: 1, message: "Must be greater than 0" },
+              })}
+            />
+          </div>
 
           {/* Monthly EMI Amount */}
-          <FloatingInput
-            id="emi_amount"
-            label="Monthly EMI Amount (₹)"
-            required
-            type="number"
-            step="any"
-            placeholder="e.g. 42500"
-            className="font-bold text-blue-600"
-            error={errors.emi_amount}
-            {...register("emi_amount", {
-              required: "EMI Amount is required",
-              min: { value: 1, message: "Must be greater than 0" },
-            })}
-          />
+          <div data-field-container data-field="emi_amount">
+            <FloatingInput
+              id="emi_amount"
+              label="Monthly EMI Amount (₹)"
+              required
+              type="number"
+              step="any"
+              placeholder="e.g. 42500"
+              className="font-bold text-blue-600"
+              error={errors.emi_amount}
+              {...register("emi_amount", {
+                required: "EMI Amount is required",
+                min: { value: 1, message: "Must be greater than 0" },
+              })}
+            />
+          </div>
 
           {/* Down Payment */}
-          <FloatingInput
-            id="emi_down_payment"
-            label="Down Payment Paid (₹) (Optional)"
-            type="number"
-            step="any"
-            placeholder="e.g. 250000"
-            error={errors.down_payment}
-            {...register("down_payment")}
-          />
+          <div data-field-container data-field="down_payment">
+            <FloatingInput
+              id="emi_down_payment"
+              label="Down Payment Paid (₹) (Optional)"
+              type="number"
+              step="any"
+              placeholder="e.g. 250000"
+              error={errors.down_payment}
+              {...register("down_payment")}
+            />
+          </div>
 
           {/* Interest Rate */}
-          <FloatingInput
-            id="emi_interest_rate"
-            label="Interest Rate (% p.a.) (Optional)"
-            type="number"
-            step="0.01"
-            placeholder="e.g. 9.5"
-            error={errors.interest_rate}
-            {...register("interest_rate")}
-          />
+          <div data-field-container data-field="interest_rate">
+            <FloatingInput
+              id="emi_interest_rate"
+              label="Interest Rate (% p.a.) (Optional)"
+              type="number"
+              step="0.01"
+              placeholder="e.g. 9.5"
+              error={errors.interest_rate}
+              {...register("interest_rate")}
+            />
+          </div>
         </div>
       </div>
 
@@ -362,69 +392,111 @@ export default function EmiForm({ setEmiList, modalData, isEdit, onClose, toggle
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Total Tenure (Months) */}
-          <FloatingInput
-            id="emi_tenure_months"
-            label="Total Tenure (Months)"
-            required
-            type="number"
-            placeholder="e.g. 36"
-            error={errors.tenure_months}
-            {...register("tenure_months", {
-              required: "Tenure is required",
-              min: { value: 1, message: "Must be at least 1 month" },
-            })}
-          />
+          <div data-field-container data-field="tenure_months">
+            <FloatingInput
+              id="emi_tenure_months"
+              label="Total Tenure (Months)"
+              required
+              type="number"
+              placeholder="e.g. 36"
+              error={errors.tenure_months}
+              {...register("tenure_months", {
+                required: "Tenure is required",
+                min: { value: 1, message: "Must be at least 1 month" },
+              })}
+            />
+          </div>
 
           {/* EMIs Paid */}
-          <FloatingInput
-            id="emi_emis_paid"
-            label="EMIs Paid So Far (Installments)"
-            type="number"
-            min="0"
-            placeholder="e.g. 12"
-            error={errors.emis_paid}
-            {...register("emis_paid")}
-          />
+          <div data-field-container data-field="emis_paid">
+            <FloatingInput
+              id="emi_emis_paid"
+              label="EMIs Paid So Far (Installments)"
+              type="number"
+              min="0"
+              placeholder="e.g. 12"
+              error={errors.emis_paid}
+              {...register("emis_paid")}
+            />
+          </div>
 
-          {/* Start Date */}
-          <FloatingInput
-            id="emi_start_date"
-            label="Loan Start Date"
-            required
-            type="date"
-            error={errors.start_date}
-            {...register("start_date", {
-              required: "Start Date is required",
-            })}
-          />
+          {/* Start Date using FloatingDatePicker */}
+          <div data-field-container data-field="start_date">
+            <Controller
+              name="start_date"
+              control={control}
+              rules={{ required: "Start Date is required" }}
+              render={({ field }) => (
+                <FloatingDatePicker
+                  id="emi_start_date"
+                  name="start_date"
+                  label="Loan Start Date"
+                  required
+                  format="DD/MM/YYYY"
+                  error={errors.start_date}
+                  value={field.value}
+                  onChange={(val) => {
+                    const formatted =
+                      val && moment(val).isValid()
+                        ? moment(val).format("YYYY-MM-DD")
+                        : val;
+                    field.onChange(formatted || "");
+                  }}
+                  onBlur={field.onBlur}
+                />
+              )}
+            />
+          </div>
 
-          {/* Monthly Due Date */}
-          <FloatingInput
-            id="emi_due_date"
-            label="Monthly Due Date"
-            required
-            type="date"
-            error={errors.due_date}
-            {...register("due_date", { required: "Due Date is required" })}
-          />
+          {/* Monthly Due Date using FloatingDatePicker */}
+          <div data-field-container data-field="due_date">
+            <Controller
+              name="due_date"
+              control={control}
+              rules={{ required: "Due Date is required" }}
+              render={({ field }) => (
+                <FloatingDatePicker
+                  id="emi_due_date"
+                  name="due_date"
+                  label="Monthly Due Date"
+                  required
+                  format="DD/MM/YYYY"
+                  error={errors.due_date}
+                  value={field.value}
+                  onChange={(val) => {
+                    const formatted =
+                      val && moment(val).isValid()
+                        ? moment(val).format("YYYY-MM-DD")
+                        : val;
+                    field.onChange(formatted || "");
+                  }}
+                  onBlur={field.onBlur}
+                />
+              )}
+            />
+          </div>
 
           {/* Payment Mode */}
-          <FloatingSelect
-            id="emi_payment_mode"
-            label="Payment Mode"
-            options={PAYMENT_MODES}
-            error={errors.payment_mode}
-            {...register("payment_mode")}
-          />
+          <div data-field-container data-field="payment_mode">
+            <FloatingSelect
+              id="emi_payment_mode"
+              label="Payment Mode"
+              options={PAYMENT_MODES}
+              error={errors.payment_mode}
+              {...register("payment_mode")}
+            />
+          </div>
 
           {/* Status */}
-          <FloatingSelect
-            id="emi_status"
-            label="Loan Status"
-            options={["Active", "Closed"]}
-            error={errors.status}
-            {...register("status")}
-          />
+          <div data-field-container data-field="status">
+            <FloatingSelect
+              id="emi_status"
+              label="Loan Status"
+              options={["Active", "Closed"]}
+              error={errors.status}
+              {...register("status")}
+            />
+          </div>
         </div>
       </div>
 
@@ -444,7 +516,7 @@ export default function EmiForm({ setEmiList, modalData, isEdit, onClose, toggle
           </div>
         </div>
 
-        <div>
+        <div data-field-container data-field="notes">
           <FloatingTextarea
             id="emi_notes"
             label="Notes & Remarks"
@@ -509,12 +581,12 @@ export default function EmiForm({ setEmiList, modalData, isEdit, onClose, toggle
       )}
 
       {/* 6. Form Footer Action Buttons */}
-      <div className="flex items-center justify-end gap-3 pt-2 border-t border-slate-100 sticky bottom-0 bg-white py-2">
+      <div className="pt-2 flex items-center justify-end gap-2">
         <button
           type="button"
           onClick={handleClose}
           disabled={apiLoading}
-          className="px-5 py-2.5 text-xs sm:text-sm font-semibold rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer disabled:opacity-50"
+          className="px-4 py-2.5 text-xs sm:text-sm font-semibold rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer disabled:opacity-50"
         >
           Cancel
         </button>

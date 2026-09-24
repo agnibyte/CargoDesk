@@ -19,10 +19,12 @@ export default function EmiSection() {
   const [deleteLoad, setDeleteLoad] = useState(false);
   const [deleteError, setDeleteError] = useState("");
   const [modalData, setModalData] = useState({});
+  const [focusField, setFocusField] = useState(null);
 
   const onClickAddDocument = () => {
     setIsEdit(false);
     setModalData({});
+    setFocusField(null);
     setEmiModal(true);
   };
 
@@ -46,11 +48,15 @@ export default function EmiSection() {
     fetchEmiList();
   }, []);
 
-  const onClickEdit = (id) => {
-    const selectedItem = emiList.find((item) => item.id == id);
+  const onClickEdit = (id, row, field) => {
+    const targetId = id ?? row?.id;
+    const selectedItem =
+      (typeof row === "object" && row !== null && row.id ? row : null) ||
+      emiList.find((item) => item.id == targetId);
     if (selectedItem) {
       setModalData(selectedItem);
       setIsEdit(true);
+      setFocusField(field || null);
       setEmiModal(true);
     }
   };
@@ -232,6 +238,8 @@ export default function EmiSection() {
             setEmiList={setEmiList}
             modalData={modalData}
             isEdit={isEdit}
+            focusField={focusField}
+            toggleModal={() => setEmiModal(false)}
             onClose={() => setEmiModal(false)}
           />
         </CommonModal>

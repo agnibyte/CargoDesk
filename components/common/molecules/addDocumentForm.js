@@ -16,6 +16,13 @@ import { FiMic, FiCheck, FiFileText } from "react-icons/fi";
 import { ImSpinner9 } from "react-icons/im";
 import useAutoFocusField from "@/hooks/useAutoFocusField";
 
+const DEFAULT_DOC_VALUES = {
+  vehicleNo: "",
+  documentType: "",
+  expiryDate: moment().format("YYYY-MM-DD"),
+  note: "",
+};
+
 export default function AddDocumentForm({
   setReminderModal,
   addReminderData,
@@ -29,13 +36,6 @@ export default function AddDocumentForm({
   const [isListening, setIsListening] = useState(false);
   const { fleets } = useFleetDriver() || { fleets: [] };
 
-  const defaultValues = {
-    vehicleNo: "",
-    documentType: "",
-    expiryDate: moment().format("YYYY-MM-DD"),
-    note: "",
-  };
-
   const {
     register,
     handleSubmit,
@@ -45,7 +45,7 @@ export default function AddDocumentForm({
     control,
     formState: { errors },
   } = useForm({
-    defaultValues,
+    defaultValues: DEFAULT_DOC_VALUES,
   });
 
   const watchedNote = watch("note");
@@ -149,7 +149,7 @@ export default function AddDocumentForm({
         note: reminderData.note || "",
       });
     } else {
-      reset(defaultValues);
+      reset(DEFAULT_DOC_VALUES);
     }
   }, [isEdit, reminderData, reset, vehicleOptions, documentTypeOptions]);
 

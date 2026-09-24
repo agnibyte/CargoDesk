@@ -1,146 +1,190 @@
-import { reminderValidation } from "@/utilities/formValidation";
-import commonStyle from "@/styles/common/common.module.scss";
-import React, { useState } from "react";
-import { Controller, useForm } from "react-hook-form";
-import CustomSearch from "../customSearch";
-import CustomDatePicker from "../customDatePicker";
+"use client";
+
+import React, { useEffect } from "react";
+import { useForm, Controller } from "react-hook-form";
+import moment from "moment";
 import {
   FloatingInput,
   FloatingTextarea,
   FloatingSelect,
+  FloatingDatePicker,
 } from "../floatingInput";
-import moment from "moment";
+import { reminderValidation } from "@/utilities/formValidation";
+import useAutoFocusField from "@/hooks/useAutoFocusField";
+import { FiCheck } from "react-icons/fi";
+import { ImSpinner9 } from "react-icons/im";
 
-const AddReminderForm = ({
+const PRIORITY_OPTIONS = [
+  { label: "Low", value: "low" },
+  { label: "Medium", value: "medium" },
+  { label: "High", value: "high" },
+];
+
+const DEFAULT_REMINDER_DATA = {
+  title: "",
+  description: "",
+  date: moment().format("YYYY-MM-DD"),
+  priority: "medium",
+};
+
+export default function AddReminderForm({
   setReminderModal,
   reminderData,
-  setReminderData,
+  isEdit,
+  focusField,
   addReminderData,
-}) => {
+  updateReminderData,
+  isLoading,
+}) {
   const {
     register,
     handleSubmit,
     reset,
     control,
     formState: { errors },
-    clearErrors: clearErrors,
-    trigger,
-    setValue,
-  } = useForm();
+  } = useForm({
+    defaultValues: DEFAULT_REMINDER_DATA,
+  });
 
-  const validation = {
-    title: register("title", reminderValidation.title),
-    description: register("description", reminderValidation.description),
-    date: register("date", reminderValidation.date),
-    priority: register("priority", reminderValidation.priority),
-    // gender: register("gender", reminderValidation.gender),
-  };
-  const defaultData = {
-    title: "t1",
-    description: "d1",
-    date: "",
-    priority: "",
-  };
-  const [formData, setFormData] = useState(defaultData);
+  useEffect(() => {
+    if (isEdit && reminderData) {
+      reset({
+        title: reminderData.title || "",
+        description: reminderData.description || "",
+        date: reminderData.date
+          ? moment(reminderData.date).format("YYYY-MM-DD")
+          : moment().format("YYYY-MM-DD"),
+        priority: reminderData.priority || "medium",
+      });
+    } else {
+      reset(DEFAULT_REMINDER_DATA);
+    }
+  }, [isEdit, reminderData, reset]);
 
-  const updateSelectedForm = (type, value) => {
-    const temp = { ...formData };
-    temp[type] = value;
-    setFormData(temp);
-  };
+  // Platform-wide auto-scroll and highlight target field
+  useAutoFocusField(focusField, Boolean(focusField), [reminderData, isEdit]);
 
-  const submitform = () => {
-    addReminderData(formData);
-    setFormData(defaultData);
-    setReminderModal(false);
-    reset();
-  };
+  const onSubmit = (data) => {
+    const formattedDate = data.date
+      ? moment(data.date).toISOString()
+      : moment().toISOString();
 
-  const priorityListArr = [
-    {
-      label: "Low",
-      value: "low",
-    },
-    {
-      label: "Medium",
-      value: "medium",
-    },
-    {
-      label: "High",
-      value: "high",
-    },
-  ];
+    const payload = {
+      ...reminderData,
+      title: data.title ? data.title.trim() : "",
+      description: data.description ? data.description.trim() : "",
+      date: formattedDate,
+      priority: data.priority || "medium",
+    };
 
-  const handleDateChange = (date) => {
-    updateSelectedForm("date", date);
-    trigger("date");
-    setValue("date", date);
+    if (isEdit && updateReminderData) {
+      updateReminderData(payload);
+    } else if (addReminderData) {
+      addReminderData(payload);
+    }
+
+    if (setReminderModal) {
+      setReminderModal(false);
+    }
+    reset(defaultValues);
   };
 
   return (
-    <div className="container">
-      <div className="">
-        <div className="card-body">
-          <form onSubmit={handleSubmit(submitform)} className="space-y-4">
-            <FloatingInput
-              id="reminder_title"
-              label="Title"
-              placeholder="Enter title"
-              value={formData.title}
-              error={errors?.title}
-              {...validation.title}
-              onChange={(e) => updateSelectedForm("title", e.target.value)}
-            />
-
-            <FloatingTextarea
-              id="reminder_description"
-              label="Description"
-              placeholder="Enter description"
-              rows={3}
-              value={formData.description}
-              error={errors?.description}
-              {...validation.description}
-              onChange={(e) =>
-                updateSelectedForm("description", e.target.value)
-              }
-            />
-
-            <div className="relative">
-              <label className="block text-xs font-bold text-slate-700 mb-1.5">
-                Select Date
-              </label>
-              <CustomDatePicker onChange={handleDateChange} />
-              {errors?.date && (
-                <p className="text-red-500 text-xs font-normal mt-1.5 pl-1">
-                  {errors.date.message}
-                </p>
-              )}
-            </div>
-
-            <FloatingSelect
-              id="reminder_priority"
-              label="Priority"
-              options={priorityListArr}
-              value={formData.priority}
-              error={errors?.priority}
-              {...validation.priority}
-              onChange={(e) => {
-                clearErrors("priority");
-                updateSelectedForm("priority", e.target.value);
-              }}
-            />
-
-            <button
-              type="submit"
-              className="w-full py-2.5 px-4 bg-blue-600 hover:bg-blue-700 text-white rounded-xl text-xs sm:text-sm font-bold shadow-md shadow-blue-500/20 hover:shadow-lg transition-all cursor-pointer flex items-center justify-center gap-2 mt-4"
-            >
-              Add Reminder
-            </button>
-          </form>
-        </div>
+    <form onSubmit={handleSubmit(onSubmit)} className="px-4 sm:px-6 py-4 space-y-4 bg-slate-50">
+      {/* Title Field */}
+      <div data-field-container data-field="title">
+        <FloatingInput
+          id="reminder_title"
+          label="Reminder Title"
+          required
+          placeholder="Enter title..."
+          error={errors?.title}
+          {...register("title", reminderValidation.title || { required: "Title is required" })}
+        />
       </div>
-    </div>
-  );
-};
 
-export default AddReminderForm;
+      {/* Description Field */}
+      <div data-field-container data-field="description">
+        <FloatingTextarea
+          id="reminder_description"
+          label="Description (Optional)"
+          placeholder="Enter description..."
+          rows={3}
+          error={errors?.description}
+          {...register("description", reminderValidation.description)}
+        />
+      </div>
+
+      {/* Date Field using FloatingDatePicker */}
+      <div data-field-container data-field="date">
+        <Controller
+          name="date"
+          control={control}
+          rules={reminderValidation.date || { required: "Please select a date" }}
+          render={({ field }) => (
+            <FloatingDatePicker
+              id="reminder_date"
+              name="date"
+              label="Reminder Date"
+              required
+              format="DD/MM/YYYY"
+              error={errors?.date}
+              value={field.value}
+              onChange={(val) => {
+                const formatted =
+                  val && moment(val).isValid()
+                    ? moment(val).format("YYYY-MM-DD")
+                    : val;
+                field.onChange(formatted || "");
+              }}
+              onBlur={field.onBlur}
+            />
+          )}
+        />
+      </div>
+
+      {/* Priority Select */}
+      <div data-field-container data-field="priority">
+        <FloatingSelect
+          id="reminder_priority"
+          label="Priority"
+          options={PRIORITY_OPTIONS}
+          error={errors?.priority}
+          {...register("priority", reminderValidation.priority)}
+        />
+      </div>
+
+      {/* Form Action Buttons */}
+      <div className="pt-2 flex items-center justify-end gap-2">
+        {setReminderModal && (
+          <button
+            type="button"
+            onClick={() => setReminderModal(false)}
+            disabled={isLoading}
+            className="px-4 py-2.5 text-xs sm:text-sm font-semibold rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer disabled:opacity-50"
+          >
+            Cancel
+          </button>
+        )}
+
+        <button
+          type="submit"
+          disabled={isLoading}
+          className="px-6 py-2.5 bg-blue-600 hover:bg-blue-700 active:scale-[0.98] text-white text-xs sm:text-sm font-semibold rounded-xl shadow-sm shadow-blue-600/25 hover:shadow-md transition-all cursor-pointer flex items-center justify-center gap-2 disabled:opacity-60 disabled:cursor-not-allowed"
+        >
+          {isLoading ? (
+            <>
+              <ImSpinner9 className="w-4 h-4 animate-spin" />
+              <span>Saving...</span>
+            </>
+          ) : (
+            <>
+              <FiCheck className="w-4 h-4" />
+              <span>{isEdit ? "Update Reminder" : "Add Reminder"}</span>
+            </>
+          )}
+        </button>
+      </div>
+    </form>
+  );
+}

@@ -12,6 +12,7 @@ import { useFleetDriver } from "@/context/fleetDriverContext";
 import { postApiData } from "@/utilities/services/apiService";
 import { showToast } from "@/utilities/toastService";
 import { vehicleNoListArr } from "@/utilities/dummyData";
+import useAutoFocusField from "@/hooks/useAutoFocusField";
 import {
   FLEET_VEHICLE_TYPES,
   FLEET_FUEL_TYPES,
@@ -28,29 +29,30 @@ import {
 } from "react-icons/fi";
 import { ImSpinner9 } from "react-icons/im";
 
+const DEFAULT_FLEET_DATA = {
+  vehicle_number: "",
+  vehicle_model: "",
+  vehicle_type: FLEET_VEHICLE_TYPES[0] || "Heavy Truck (16-25T)",
+  capacity: "",
+  fuel_type: "Diesel",
+  ownership_type: "Owned",
+  manufacturing_year: new Date().getFullYear().toString(),
+  gps_tracking_id: "",
+  chassis_number: "",
+  engine_number: "",
+  status: "Active",
+  notes: "",
+};
+
 export default function FleetForm({
   setFleetList,
   modalData,
   isEdit,
+  focusField,
   onClose,
   toggleModal,
 }) {
   const { drivers, refreshAll } = useFleetDriver();
-
-  const defaultFormData = {
-    vehicle_number: "",
-    vehicle_model: "",
-    vehicle_type: FLEET_VEHICLE_TYPES[0] || "Heavy Truck (16-25T)",
-    capacity: "",
-    fuel_type: "Diesel",
-    ownership_type: "Owned",
-    manufacturing_year: new Date().getFullYear().toString(),
-    gps_tracking_id: "",
-    chassis_number: "",
-    engine_number: "",
-    status: "Active",
-    notes: "",
-  };
 
   const [selectedDriverId, setSelectedDriverId] = useState("");
   const [apiLoading, setApiLoading] = useState(false);
@@ -62,7 +64,7 @@ export default function FleetForm({
     formState: { errors },
     reset,
   } = useForm({
-    defaultValues: defaultFormData,
+    defaultValues: DEFAULT_FLEET_DATA,
   });
 
   // Populate data when editing
@@ -95,10 +97,13 @@ export default function FleetForm({
       }
       setSelectedDriverId(initialDriverId ? String(initialDriverId) : "");
     } else {
-      reset(defaultFormData);
+      reset(DEFAULT_FLEET_DATA);
       setSelectedDriverId("");
     }
   }, [isEdit, modalData, reset, drivers]);
+
+  // Reusable platform-wide auto-scroll and highlight target field
+  useAutoFocusField(focusField, Boolean(focusField), [modalData, isEdit]);
 
   // Construct options for CustomSearch
   const driverOptions = useMemo(() => {
@@ -139,7 +144,7 @@ export default function FleetForm({
   // Check if selected driver is currently assigned elsewhere
   const isDriverReassigned = useMemo(() => {
     if (!selectedDriver || !selectedDriver.fleet_id) return false;
-    if (!modalData?.id) return true; // Adding new fleet and driver already has a fleet
+    if (!modalData?.id) return true;
     return Number(selectedDriver.fleet_id) !== Number(modalData.id);
   }, [selectedDriver, modalData]);
 
@@ -196,7 +201,6 @@ export default function FleetForm({
       await refreshAll();
 
       if (setFleetList) {
-        // Also update local list if provided
         if (isEdit) {
           setFleetList((prev) =>
             prev.map((item) =>
@@ -226,7 +230,7 @@ export default function FleetForm({
         }
       }
 
-      reset(defaultFormData);
+      reset(DEFAULT_FLEET_DATA);
       setSelectedDriverId("");
       handleClose();
     } else {
@@ -239,7 +243,7 @@ export default function FleetForm({
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="px-5 md:px-6 space-y-5 max-h-[82vh] overflow-y-auto"
+      className="px-4 sm:px-6 py-4 space-y-4 bg-slate-50 max-h-[82vh] overflow-y-auto"
     >
       {/* 1. Vehicle Identity & Model */}
       <div className="bg-slate-50/70 border border-slate-200/80 rounded-2xl p-4 sm:p-5 space-y-4 shadow-2xs">
@@ -259,59 +263,67 @@ export default function FleetForm({
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Vehicle Registration Number */}
-          <FloatingInput
-            id="fleet_vehicle_number"
-            label="Vehicle Registration No."
-            required
-            list="fleetVehicleSuggestions"
-            placeholder="e.g. MH 04 EF 9101"
-            className="uppercase font-semibold"
-            error={errors.vehicle_number}
-            {...register("vehicle_number", {
-              required: "Vehicle Registration Number is required",
-              onChange: (e) =>
-                setValue("vehicle_number", e.target.value.toUpperCase()),
-            })}
-          >
-            <datalist id="fleetVehicleSuggestions">
-              {vehicleNoListArr.map((item) => (
-                <option key={item.id} value={item.label} />
-              ))}
-            </datalist>
-          </FloatingInput>
+          <div data-field-container data-field="vehicle_number">
+            <FloatingInput
+              id="fleet_vehicle_number"
+              label="Vehicle Registration No."
+              required
+              list="fleetVehicleSuggestions"
+              placeholder="e.g. MH 04 EF 9101"
+              className="uppercase font-semibold"
+              error={errors.vehicle_number}
+              {...register("vehicle_number", {
+                required: "Vehicle Registration Number is required",
+                onChange: (e) =>
+                  setValue("vehicle_number", e.target.value.toUpperCase()),
+              })}
+            >
+              <datalist id="fleetVehicleSuggestions">
+                {vehicleNoListArr.map((item) => (
+                  <option key={item.id} value={item.label} />
+                ))}
+              </datalist>
+            </FloatingInput>
+          </div>
 
           {/* Model & Make */}
-          <FloatingInput
-            id="fleet_vehicle_model"
-            label="Make & Model"
-            required
-            placeholder="e.g. Tata Prima 5530.S / Ashok Leyland 2820"
-            error={errors.vehicle_model}
-            {...register("vehicle_model", {
-              required: "Make & Model is required",
-            })}
-          />
+          <div data-field-container data-field="vehicle_model">
+            <FloatingInput
+              id="fleet_vehicle_model"
+              label="Make & Model"
+              required
+              placeholder="e.g. Tata Prima 5530.S / Ashok Leyland 2820"
+              error={errors.vehicle_model}
+              {...register("vehicle_model", {
+                required: "Make & Model is required",
+              })}
+            />
+          </div>
 
           {/* Vehicle Type */}
-          <FloatingSelect
-            id="fleet_vehicle_type"
-            label="Vehicle Type / Body"
-            required
-            options={FLEET_VEHICLE_TYPES}
-            error={errors.vehicle_type}
-            {...register("vehicle_type", {
-              required: "Vehicle Type is required",
-            })}
-          />
+          <div data-field-container data-field="vehicle_type">
+            <FloatingSelect
+              id="fleet_vehicle_type"
+              label="Vehicle Type / Body"
+              required
+              options={FLEET_VEHICLE_TYPES}
+              error={errors.vehicle_type}
+              {...register("vehicle_type", {
+                required: "Vehicle Type is required",
+              })}
+            />
+          </div>
 
           {/* Fuel Type */}
-          <FloatingSelect
-            id="fleet_fuel_type"
-            label="Fuel Type"
-            options={FLEET_FUEL_TYPES}
-            error={errors.fuel_type}
-            {...register("fuel_type")}
-          />
+          <div data-field-container data-field="fuel_type">
+            <FloatingSelect
+              id="fleet_fuel_type"
+              label="Fuel Type"
+              options={FLEET_FUEL_TYPES}
+              error={errors.fuel_type}
+              {...register("fuel_type")}
+            />
+          </div>
         </div>
       </div>
 
@@ -333,52 +345,60 @@ export default function FleetForm({
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {/* Payload Capacity */}
-          <FloatingInput
-            id="fleet_capacity"
-            label="Payload Capacity"
-            required
-            placeholder="e.g. 25 Tons / 35 Tons / 18 Cu.M"
-            className="font-semibold"
-            error={errors.capacity}
-            {...register("capacity", {
-              required: "Payload Capacity is required",
-            })}
-          />
+          <div data-field-container data-field="capacity">
+            <FloatingInput
+              id="fleet_capacity"
+              label="Payload Capacity"
+              required
+              placeholder="e.g. 25 Tons / 35 Tons / 18 Cu.M"
+              className="font-semibold"
+              error={errors.capacity}
+              {...register("capacity", {
+                required: "Payload Capacity is required",
+              })}
+            />
+          </div>
 
           {/* Manufacturing Year */}
-          <FloatingInput
-            id="fleet_manufacturing_year"
-            label="Manufacturing / Model Year"
-            type="number"
-            min="1990"
-            max="2035"
-            placeholder="e.g. 2023"
-            error={errors.manufacturing_year}
-            {...register("manufacturing_year")}
-          />
+          <div data-field-container data-field="manufacturing_year">
+            <FloatingInput
+              id="fleet_manufacturing_year"
+              label="Manufacturing / Model Year"
+              type="number"
+              min="1990"
+              max="2035"
+              placeholder="e.g. 2023"
+              error={errors.manufacturing_year}
+              {...register("manufacturing_year")}
+            />
+          </div>
 
           {/* Ownership Type */}
-          <FloatingSelect
-            id="fleet_ownership_type"
-            label="Ownership Type"
-            options={FLEET_OWNERSHIP_TYPES}
-            error={errors.ownership_type}
-            {...register("ownership_type")}
-          />
+          <div data-field-container data-field="ownership_type">
+            <FloatingSelect
+              id="fleet_ownership_type"
+              label="Ownership Type"
+              options={FLEET_OWNERSHIP_TYPES}
+              error={errors.ownership_type}
+              {...register("ownership_type")}
+            />
+          </div>
 
           {/* GPS Tracking Device ID */}
-          <FloatingInput
-            id="fleet_gps_tracking_id"
-            label="GPS Tracking ID / Fastag (Optional)"
-            placeholder="e.g. GPS-TRK-9101"
-            className="font-mono"
-            error={errors.gps_tracking_id}
-            {...register("gps_tracking_id")}
-          />
+          <div data-field-container data-field="gps_tracking_id">
+            <FloatingInput
+              id="fleet_gps_tracking_id"
+              label="GPS Tracking ID / Fastag (Optional)"
+              placeholder="e.g. GPS-TRK-9101"
+              className="font-mono"
+              error={errors.gps_tracking_id}
+              {...register("gps_tracking_id")}
+            />
+          </div>
         </div>
       </div>
 
-      {/* 3. Driver Assignment (Single Source of Truth via customSearch) */}
+      {/* 3. Driver Assignment */}
       <div className="bg-slate-50/70 border border-slate-200/80 rounded-2xl p-4 sm:p-5 space-y-4 shadow-2xs">
         <div className="flex items-center justify-between pb-2 border-b border-slate-200/60">
           <div className="flex items-center gap-2.5">
@@ -403,7 +423,7 @@ export default function FleetForm({
 
         <div className="space-y-3">
           {/* Driver Selection Dropdown using CustomSearch */}
-          <div>
+          <div data-field-container data-field="driver_id">
             <label className="block text-xs font-bold text-slate-700 mb-1.5">
               Select Transport Driver
             </label>
@@ -474,8 +494,9 @@ export default function FleetForm({
                 </span>
                 <button
                   type="button"
+                  tabIndex={-1}
                   onClick={() => setSelectedDriverId("")}
-                  className="text-xs text-rose-500 hover:text-rose-700 font-semibold px-2 py-1 rounded-lg hover:bg-rose-50 transition-colors"
+                  className="text-xs text-rose-500 hover:text-rose-700 font-semibold px-2 py-1 rounded-lg hover:bg-rose-50 transition-colors cursor-pointer"
                 >
                   Unassign
                 </button>
@@ -503,33 +524,37 @@ export default function FleetForm({
 
         <div className="space-y-4">
           {/* Status Selection */}
-          <FloatingSelect
-            id="fleet_status"
-            label="Operational Status"
-            options={FLEET_STATUS_OPTIONS}
-            error={errors.status}
-            {...register("status")}
-          />
+          <div data-field-container data-field="status">
+            <FloatingSelect
+              id="fleet_status"
+              label="Operational Status"
+              options={FLEET_STATUS_OPTIONS}
+              error={errors.status}
+              {...register("status")}
+            />
+          </div>
 
           {/* Notes */}
-          <FloatingTextarea
-            id="fleet_notes"
-            label="Notes & Remarks"
-            rows={3}
-            placeholder="e.g. Dedicated for North Corridor route. Tyre replacement scheduled next month..."
-            error={errors.notes}
-            {...register("notes")}
-          />
+          <div data-field-container data-field="notes">
+            <FloatingTextarea
+              id="fleet_notes"
+              label="Notes & Remarks"
+              rows={3}
+              placeholder="e.g. Dedicated for North Corridor route. Tyre replacement scheduled next month..."
+              error={errors.notes}
+              {...register("notes")}
+            />
+          </div>
         </div>
       </div>
 
       {/* Form Action Buttons */}
-      <div className="flex items-center justify-end gap-3 pt-2 border-t border-slate-100 sticky bottom-0 bg-white py-2">
+      <div className="pt-2 flex items-center justify-end gap-2">
         <button
           type="button"
           onClick={handleClose}
           disabled={apiLoading}
-          className="px-5 py-2.5 text-xs sm:text-sm font-semibold rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer disabled:opacity-50"
+          className="px-4 py-2.5 text-xs sm:text-sm font-semibold rounded-xl border border-slate-200 text-slate-700 hover:bg-slate-50 transition-colors cursor-pointer disabled:opacity-50"
         >
           Cancel
         </button>
