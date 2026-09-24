@@ -209,7 +209,7 @@ export default function EmiForm({
   return (
     <form
       onSubmit={handleSubmit(onSubmit)}
-      className="px-4 sm:px-6 py-4 space-y-4 bg-slate-50 max-h-[82vh] overflow-y-auto"
+      className="px-4 sm:px-6 py-4 space-y-4 bg-slate-50"
     >
       {/* 1. Vehicle & Lender Details Section */}
       <div className="bg-slate-50/70 border border-slate-200/80 rounded-2xl p-4 sm:p-5 space-y-4 shadow-2xs">

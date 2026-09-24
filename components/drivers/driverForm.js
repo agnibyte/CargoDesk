@@ -392,7 +392,7 @@ export default function DriverForm({
     <>
       <form
         onSubmit={handleSubmit(onSubmit)}
-        className="px-4 sm:px-6 py-4 space-y-4 bg-slate-50 max-h-[82vh] overflow-y-auto"
+        className="px-4 sm:px-6 py-4 space-y-4 bg-slate-50"
       >
         {/* 1. Profile Photo Header Banner */}
         <div
