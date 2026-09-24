@@ -994,6 +994,14 @@ export default function DocumentTable({
                 Edit
               </button>
             )}
+            <button
+              onClick={() => {
+                setSelected([]);
+              }}
+              className="px-3 py-1.5 text-xs font-semibold bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-lg shadow-2xs transition-colors cursor-pointer"
+            >
+              Cancel
+            </button>
             {onClickDelete && (
               <button
                 onClick={() => onClickDelete(selected)}

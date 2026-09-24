@@ -153,8 +153,8 @@ export default function AddDocumentForm({
     }
   }, [isEdit, reminderData, reset, vehicleOptions, documentTypeOptions]);
 
-  // Reusable platform-wide auto-scroll and highlight target field
-  useAutoFocusField(focusField || "vehicleNo", true, [reminderData, isEdit]);
+  // Reusable platform-wide auto-scroll and highlight target field (only when triggered from table cell)
+  useAutoFocusField(focusField, Boolean(focusField), [reminderData, isEdit]);
 
   // Speech recognition handler
   const handleSpeechRecognition = () => {

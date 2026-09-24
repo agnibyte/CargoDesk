@@ -553,7 +553,7 @@ const CustomSearch = forwardRef(
           data-field={name || id}
           onClick={toggleDropdown}
           tabIndex={disabled ? -1 : 0}
-          className={`w-full min-h-[48px] px-3.5 py-2.5 flex items-center justify-between gap-2 bg-white text-slate-900 rounded-xl cursor-pointer transition-all duration-200 outline-none focus-visible:ring-2 focus-visible:ring-[#4bb7ff]/30 ${className}`}
+          className={`w-full min-h-[48px] px-3.5 py-2.5 flex items-center justify-between gap-2 bg-white text-slate-900 rounded-xl cursor-pointer transition-all duration-200 outline-none focus:outline-none ${className}`}
         >
           <div className="flex items-center gap-2.5 min-w-0 flex-1">
             {selectedOption && selectedOption.value ? (
