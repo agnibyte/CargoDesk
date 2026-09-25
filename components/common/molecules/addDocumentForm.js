@@ -16,7 +16,7 @@ import { FiMic, FiCheck, FiFileText } from "react-icons/fi";
 import { ImSpinner9 } from "react-icons/im";
 import useAutoFocusField from "@/hooks/useAutoFocusField";
 
-const DEFAULT_DOC_VALUES = {
+const defaultValues  = {
   vehicleNo: "",
   documentType: "",
   expiryDate: moment().format("YYYY-MM-DD"),
@@ -51,7 +51,7 @@ export default function AddDocumentForm({
     control,
     formState: { errors },
   } = useForm({
-    defaultValues: DEFAULT_DOC_VALUES,
+    defaultValues: defaultValues ,
   });
 
   const watchedNote = watch("note");
@@ -95,15 +95,17 @@ export default function AddDocumentForm({
     ];
   }, []);
 
-  // Sync form values on edit or reset
+  // Sync form values on edit, prefill, or reset
   useEffect(() => {
-    if (isEdit && reminderData) {
+    if (reminderData) {
       // Resolve vehicleNo (could be object, formatted string, or lowercase)
       let vNo = "";
       if (typeof reminderData.vehicleNo === "object" && reminderData.vehicleNo !== null) {
         vNo = reminderData.vehicleNo.value || reminderData.vehicleNo.label || "";
       } else if (reminderData.vehicleNo) {
         vNo = String(reminderData.vehicleNo);
+      } else if (reminderData.vehicle_number) {
+        vNo = String(reminderData.vehicle_number);
       }
 
       // Check if matched in vehicleOptions
@@ -144,7 +146,7 @@ export default function AddDocumentForm({
         note: reminderData.note || "",
       });
     } else {
-      reset(DEFAULT_DOC_VALUES);
+      reset(defaultValues);
     }
   }, [isEdit, reminderData, reset, vehicleOptions, documentTypeOptions]);
 

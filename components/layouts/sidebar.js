@@ -101,6 +101,9 @@ export default function Sidebar({
     if (item.exact) {
       return currentPath === item.path;
     }
+    if (item.path === "/fleets" && (currentPath.startsWith("/fleet/") || currentPath.startsWith("/fleets"))) {
+      return true;
+    }
     return currentPath === item.path || currentPath.startsWith(item.path + "/");
   };
 

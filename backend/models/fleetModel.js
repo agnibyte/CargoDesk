@@ -1,4 +1,5 @@
 import executeQuery, { executeTransaction } from "@/helpers/dbConnection";
+import { logFleetActivity } from "./fleetActivityModel";
 
 let isTableInitialized = false;
 
@@ -149,6 +150,112 @@ export function getAllFleetsModel() {
   });
 }
 
+export function getFleetByIdModel(id) {
+  return new Promise(async (resolve, reject) => {
+    try {
+      await ensureFleetTable();
+      const fleetId = Number(id);
+      if (!fleetId || isNaN(fleetId)) {
+        return resolve({ status: false, message: "Invalid fleet ID" });
+      }
+
+      const selectQuery = `
+        SELECT 
+          f.*,
+          d.id AS driver_id,
+          d.driver_name AS driver_name,
+          d.contact_number AS driver_contact,
+          d.license_number AS driver_license_number,
+          d.license_type AS driver_license_type,
+          d.status AS driver_status,
+          d.profile_photo AS driver_profile_photo
+        FROM fleets f
+        LEFT JOIN drivers d ON d.fleet_id = f.id
+        WHERE f.id = ?
+        LIMIT 1
+      `;
+      const rows = await executeQuery(selectQuery, [fleetId]);
+
+      if (!Array.isArray(rows) || rows.length === 0) {
+        return resolve({ status: false, message: "Fleet not found" });
+      }
+
+      const fleet = rows[0];
+
+      // Fetch dynamic counts for tabs: Documents, EMI, Drivers, Maintenance
+      const [docRes, emiRes, driverRes, maintRes] = await Promise.all([
+        executeQuery(
+          `SELECT COUNT(*) AS total FROM vehicle_documents WHERE vehicleNo = ?`,
+          [fleet.vehicle_number]
+        ).catch(() => [{ total: 0 }]),
+        executeQuery(
+          `SELECT COUNT(*) AS total FROM emi_master WHERE vehicle_number = ?`,
+          [fleet.vehicle_number]
+        ).catch(() => [{ total: 0 }]),
+        executeQuery(
+          `SELECT COUNT(*) AS total FROM drivers WHERE fleet_id = ?`,
+          [fleet.id]
+        ).catch(() => [{ total: 0 }]),
+        executeQuery(
+          `SELECT COUNT(*) AS total FROM fleet_activity_history WHERE fleet_id = ? AND operation_type = 'MAINTENANCE'`,
+          [fleet.id]
+        ).catch(() => [{ total: 0 }]),
+      ]);
+
+      const counts = {
+        documents: docRes?.[0]?.total || 0,
+        emi: emiRes?.[0]?.total || 0,
+        driver: driverRes?.[0]?.total || (fleet.driver_id ? 1 : 0),
+        maintenance: maintRes?.[0]?.total || (fleet.status === "Maintenance" ? 1 : 0),
+      };
+
+      // Auto-ensure driver assignment is recorded in activity history if driver is linked
+      if (fleet.driver_id && fleet.driver_name) {
+        try {
+          const existingDriverAct = await executeQuery(
+            `SELECT id FROM fleet_activity_history WHERE fleet_id = ? AND operation_type = 'DRIVER' LIMIT 1`,
+            [fleet.id]
+          );
+          if (!existingDriverAct || existingDriverAct.length === 0) {
+            await logFleetActivity({
+              fleetId: fleet.id,
+              operationType: "DRIVER",
+              entityType: "DRIVER_ALLOCATION",
+              entityId: String(fleet.driver_id),
+              action: "ASSIGN",
+              title: "Driver assigned",
+              description: `Driver: ${fleet.driver_name}`,
+              oldValue: null,
+              newValue: { driver_id: fleet.driver_id, driver_name: fleet.driver_name },
+              changedFields: ["driver_id", "driver_name"],
+              performedByName: "Admin User",
+              source: "driver",
+              metadata: { vehicle_number: fleet.vehicle_number, driver_name: fleet.driver_name },
+            });
+          }
+        } catch (syncErr) {
+          console.warn("Could not sync driver activity:", syncErr?.message);
+        }
+      }
+
+      resolve({
+        status: true,
+        data: {
+          ...fleet,
+          counts,
+        },
+        message: "Fleet details fetched successfully",
+      });
+    } catch (error) {
+      console.error("Error fetching fleet by ID:", error);
+      resolve({
+        status: false,
+        message: error?.message || "Failed to fetch fleet details",
+      });
+    }
+  });
+}
+
 export function addNewFleetModel(data) {
   return new Promise(async (resolve, reject) => {
     try {
@@ -206,6 +313,42 @@ export function addNewFleetModel(data) {
       });
 
       if (result && result.affectedRows > 0) {
+        const newFleetId = result.insertId;
+        // Centralized Fleet Activity Logging: Registration
+        await logFleetActivity({
+          fleetId: newFleetId,
+          operationType: "FLEET",
+          entityType: "VEHICLE_INFO",
+          entityId: String(newFleetId),
+          action: "CREATE",
+          title: "Fleet vehicle registered",
+          description: `Vehicle ${payload.vehicle_number} (${payload.vehicle_model || payload.vehicle_type || "Commercial"}) registered to fleet`,
+          oldValue: null,
+          newValue: payload,
+          changedFields: Object.keys(payload),
+          performedByName: data.performedByName || "Admin User",
+          source: "fleets",
+          metadata: { vehicle_number: payload.vehicle_number, model: payload.vehicle_model },
+        });
+
+        // Activity Logging: Driver Assignment during registration
+        if (parsedDriverId) {
+          await logFleetActivity({
+            fleetId: newFleetId,
+            operationType: "DRIVER",
+            entityType: "DRIVER_ALLOCATION",
+            entityId: String(parsedDriverId),
+            action: "ASSIGN",
+            title: "Driver assigned on registration",
+            description: `Driver (ID: ${parsedDriverId}) assigned to vehicle ${payload.vehicle_number}`,
+            oldValue: null,
+            newValue: { driver_id: parsedDriverId },
+            changedFields: ["driver_id"],
+            performedByName: data.performedByName || "Admin User",
+            source: "fleet-driver",
+          });
+        }
+
         resolve({
           status: true,
           id: result.insertId,
@@ -266,6 +409,13 @@ export function updateFleetModel(id, data) {
         (key) => updateData[key] === undefined && delete updateData[key]
       );
 
+      // Fetch old record and old driver for diffing and audit trail
+      const oldRows = await executeQuery(`SELECT * FROM fleets WHERE id = ?`, [id]);
+      const oldFleet = Array.isArray(oldRows) && oldRows.length > 0 ? oldRows[0] : null;
+
+      const oldDriverRows = await executeQuery(`SELECT id, driver_name FROM drivers WHERE fleet_id = ?`, [id]);
+      const oldDriver = Array.isArray(oldDriverRows) && oldDriverRows.length > 0 ? oldDriverRows[0] : null;
+
       await executeTransaction(async (queryFn) => {
         if (Object.keys(updateData).length > 0) {
           await queryFn(`UPDATE fleets SET ? WHERE id = ?`, [updateData, id]);
@@ -287,6 +437,85 @@ export function updateFleetModel(id, data) {
           }
         }
       });
+
+      // Centralized Activity Logging for Fleet Update
+      if (oldFleet) {
+        // Status change specific audit log
+        if (updateData.status && updateData.status !== oldFleet.status) {
+          await logFleetActivity({
+            fleetId: id,
+            operationType: "STATUS",
+            entityType: "STATUS_CHANGE",
+            entityId: String(id),
+            action: updateData.status === "Active" ? "ACTIVATE" : "UPDATE",
+            title: "Vehicle status changed",
+            description: `${oldFleet.status} → ${updateData.status}`,
+            oldValue: { status: oldFleet.status },
+            newValue: { status: updateData.status },
+            changedFields: ["status"],
+            performedByName: data.performedByName || "Admin User",
+            source: "fleets",
+          });
+        }
+
+        // Driver Assignment Change Audit Log
+        if (parsedDriverId !== undefined && (parsedDriverId !== (oldDriver?.id || null))) {
+          if (parsedDriverId) {
+            const newDriverRows = await executeQuery(`SELECT id, driver_name FROM drivers WHERE id = ?`, [parsedDriverId]);
+            const newDriverName = newDriverRows?.[0]?.driver_name || `Driver #${parsedDriverId}`;
+            await logFleetActivity({
+              fleetId: id,
+              operationType: "DRIVER",
+              entityType: "DRIVER_ALLOCATION",
+              entityId: String(parsedDriverId),
+              action: "ASSIGN",
+              title: "Driver assigned",
+              description: `Driver: ${newDriverName}`,
+              oldValue: oldDriver ? { driver_id: oldDriver.id, driver_name: oldDriver.driver_name } : null,
+              newValue: { driver_id: parsedDriverId, driver_name: newDriverName },
+              changedFields: ["driver_id", "driver_name"],
+              performedByName: data.performedByName || "Admin User",
+              source: "fleet-driver",
+            });
+          } else if (oldDriver) {
+            await logFleetActivity({
+              fleetId: id,
+              operationType: "DRIVER",
+              entityType: "DRIVER_ALLOCATION",
+              entityId: String(oldDriver.id),
+              action: "UNASSIGN",
+              title: "Driver removed",
+              description: `${oldDriver.driver_name} unassigned from vehicle`,
+              oldValue: { driver_id: oldDriver.id, driver_name: oldDriver.driver_name },
+              newValue: null,
+              changedFields: ["driver_id"],
+              performedByName: data.performedByName || "Admin User",
+              source: "fleet-driver",
+            });
+          }
+        }
+
+        // General Fleet Vehicle Details Update
+        const hasOtherChanges = Object.keys(updateData).some(
+          (k) => k !== "status" && String(oldFleet[k] ?? "") !== String(updateData[k] ?? "")
+        );
+
+        if (hasOtherChanges) {
+          await logFleetActivity({
+            fleetId: id,
+            operationType: "FLEET",
+            entityType: "VEHICLE_DETAILS",
+            entityId: String(id),
+            action: "UPDATE",
+            title: "Vehicle details updated",
+            description: `Vehicle details updated for ${updateData.vehicle_number || oldFleet.vehicle_number}`,
+            oldValue: oldFleet,
+            newValue: { ...oldFleet, ...updateData },
+            performedByName: data.performedByName || "Admin User",
+            source: "fleets",
+          });
+        }
+      }
 
       resolve({ status: true, message: "Fleet vehicle updated successfully" });
     } catch (error) {
@@ -315,6 +544,9 @@ export function deleteFleetModel(ids) {
 
       await ensureFleetTable();
 
+      // Fetch fleet info before deletion for permanent audit logging
+      const fleetRows = await executeQuery(`SELECT id, vehicle_number, vehicle_model FROM fleets WHERE id IN (?)`, [ids]);
+
       const result = await executeTransaction(async (queryFn) => {
         // Unassign any drivers assigned to the fleets being deleted
         await queryFn(`UPDATE drivers SET fleet_id = NULL WHERE fleet_id IN (?)`, [ids]);
@@ -324,6 +556,26 @@ export function deleteFleetModel(ids) {
       });
 
       if (result.affectedRows > 0) {
+        // Centralized Activity Logging for Fleet Deletion
+        if (Array.isArray(fleetRows)) {
+          for (const f of fleetRows) {
+            await logFleetActivity({
+              fleetId: f.id,
+              operationType: "FLEET",
+              entityType: "VEHICLE_INFO",
+              entityId: String(f.id),
+              action: "DELETE",
+              title: "Fleet vehicle deleted",
+              description: `Vehicle ${f.vehicle_number} (${f.vehicle_model || "Fleet vehicle"}) removed from fleet system`,
+              oldValue: f,
+              newValue: null,
+              changedFields: ["deleted"],
+              performedByName: "Admin User",
+              source: "fleets",
+            });
+          }
+        }
+
         resolve({
           status: true,
           message: `${result.affectedRows} fleet vehicle${result.affectedRows > 1 ? "s" : ""} deleted successfully`,

@@ -1,6 +1,7 @@
 import executeQuery from "@/helpers/dbConnection";
 import { getConstant } from "@/utilities/utils";
 import moment from "moment";
+import { logFleetActivity } from "./fleetActivityModel";
 
 export function addNewVehicleDocument(request) {
   return new Promise((resolve, reject) => {
@@ -31,8 +32,29 @@ export function addNewVehicleDocument(request) {
     const insertQuery = `INSERT INTO vehicle_documents SET ?`;
 
     executeQuery(insertQuery, [tempObj])
-      .then((insertResult) => {
+      .then(async (insertResult) => {
         if (insertResult.affectedRows > 0) {
+          const docId = insertResult.insertId;
+          // Log Fleet Activity for document upload
+          await logFleetActivity({
+            fleetId: request.fleetId || null,
+            vehicleNo: request.vehicleNo,
+            operationType: "DOCUMENT",
+            entityType: (request.documentType || "DOCUMENT").toUpperCase(),
+            entityId: String(docId),
+            action: "UPLOAD",
+            title: `${request.documentType || "Document"} uploaded`,
+            description: request.expiryDate
+              ? `Document expiry: ${moment(request.expiryDate).format("DD MMM YYYY")}`
+              : `${request.documentType || "Document"} uploaded for vehicle ${request.vehicleNo}`,
+            oldValue: null,
+            newValue: tempObj,
+            changedFields: Object.keys(tempObj),
+            performedByName: request.performedByName || "Admin User",
+            source: "documents",
+            metadata: { vehicleNo: request.vehicleNo, documentType: request.documentType, expiryDate: request.expiryDate },
+          });
+
           resolve({
             success: true,
             id: insertResult.insertId,
@@ -68,52 +90,104 @@ export function getAllVehicleDocuments() {
 }
 
 export function deleteVehicleDocumentByIds(ids) {
-  return new Promise((resolve, reject) => {
+  return new Promise(async (resolve, reject) => {
     if (!Array.isArray(ids) || ids.length == 0) {
       return reject(new Error("Invalid or empty array of IDs"));
     }
 
-    const placeholders = ids.map(() => "?").join(","); // Create placeholders for the query
-    const deleteQuery = `DELETE FROM vehicle_documents WHERE id IN (${placeholders})`;
+    try {
+      // Fetch documents before deletion for permanent audit logging
+      const placeholders = ids.map(() => "?").join(",");
+      const existingDocs = await executeQuery(`SELECT * FROM vehicle_documents WHERE id IN (${placeholders})`, ids);
 
-    executeQuery(deleteQuery, ids)
-      .then((deleteResult) => {
-        if (deleteResult.affectedRows > 0) {
-          resolve({
-            success: true,
-            message: `${deleteResult.affectedRows} vehicle document(s) deleted successfully`,
-          });
-        } else {
-          reject(new Error("No records found with the given IDs"));
+      const deleteQuery = `DELETE FROM vehicle_documents WHERE id IN (${placeholders})`;
+      const deleteResult = await executeQuery(deleteQuery, ids);
+
+      if (deleteResult.affectedRows > 0) {
+        if (Array.isArray(existingDocs)) {
+          for (const doc of existingDocs) {
+            await logFleetActivity({
+              fleetId: doc.fleetId || null,
+              vehicleNo: doc.vehicleNo,
+              operationType: "DOCUMENT",
+              entityType: (doc.documentType || "DOCUMENT").toUpperCase(),
+              entityId: String(doc.id),
+              action: "DELETE",
+              title: `${doc.documentType || "Document"} deleted`,
+              description: `${doc.documentType || "Document"} removed for vehicle ${doc.vehicleNo}`,
+              oldValue: doc,
+              newValue: null,
+              changedFields: ["deleted"],
+              performedByName: "Admin User",
+              source: "documents",
+            });
+          }
         }
-      })
-      .catch((error) => {
-        console.error("Error deleting vehicle documents:", error);
-        reject(error);
-      });
+
+        resolve({
+          success: true,
+          message: `${deleteResult.affectedRows} vehicle document(s) deleted successfully`,
+        });
+      } else {
+        reject(new Error("No records found with the given IDs"));
+      }
+    } catch (error) {
+      console.error("Error deleting vehicle documents:", error);
+      reject(error);
+    }
   });
 }
 
 export function editVehicleDocumentById(id, updatedFields) {
-  return new Promise((resolve, reject) => {
-    const updateQuery = `UPDATE vehicle_documents SET ? WHERE id = ?`;
+  return new Promise(async (resolve, reject) => {
+    try {
+      // Fetch old document record before update for audit diff
+      const oldRows = await executeQuery(`SELECT * FROM vehicle_documents WHERE id = ?`, [id]);
+      const oldDoc = Array.isArray(oldRows) && oldRows.length > 0 ? oldRows[0] : null;
 
-    executeQuery(updateQuery, [updatedFields, id])
-      .then((updateResult) => {
-        if (updateResult.affectedRows > 0) {
-          resolve({
-            success: true,
-            message: "Vehicle document updated successfully",
+      const updateQuery = `UPDATE vehicle_documents SET ? WHERE id = ?`;
+      const updateResult = await executeQuery(updateQuery, [updatedFields, id]);
+
+      if (updateResult.affectedRows > 0) {
+        if (oldDoc) {
+          const isExpiryChanged = updatedFields.expiryDate && oldDoc.expiryDate !== updatedFields.expiryDate;
+          let description = `${updatedFields.documentType || oldDoc.documentType || "Document"} updated`;
+
+          if (isExpiryChanged) {
+            const oldExpFormatted = oldDoc.expiryDate ? moment(oldDoc.expiryDate).format("DD MMM YYYY") : "N/A";
+            const newExpFormatted = moment(updatedFields.expiryDate).format("DD MMM YYYY");
+            description = `Expiry date changed from ${oldExpFormatted} → ${newExpFormatted}`;
+          }
+
+          await logFleetActivity({
+            fleetId: updatedFields.fleetId || oldDoc.fleetId || null,
+            vehicleNo: updatedFields.vehicleNo || oldDoc.vehicleNo,
+            operationType: "DOCUMENT",
+            entityType: (updatedFields.documentType || oldDoc.documentType || "DOCUMENT").toUpperCase(),
+            entityId: String(id),
+            action: isExpiryChanged ? "RENEW" : "UPDATE",
+            title: `${updatedFields.documentType || oldDoc.documentType || "Document"} updated`,
+            description,
+            oldValue: oldDoc,
+            newValue: { ...oldDoc, ...updatedFields },
+            performedByName: updatedFields.performedByName || "Admin User",
+            source: "documents",
+            metadata: { vehicleNo: updatedFields.vehicleNo || oldDoc.vehicleNo },
           });
-        } else {
-          reject(
-            new Error("No record found with the given ID or no changes made")
-          );
         }
-      })
-      .catch((error) => {
-        console.error("Error updating vehicle document:", error);
-        reject(error);
-      });
+
+        resolve({
+          success: true,
+          message: "Vehicle document updated successfully",
+        });
+      } else {
+        reject(
+          new Error("No record found with the given ID or no changes made")
+        );
+      }
+    } catch (error) {
+      console.error("Error updating vehicle document:", error);
+      reject(error);
+    }
   });
 }

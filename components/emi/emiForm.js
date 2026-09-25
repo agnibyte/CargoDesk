@@ -139,9 +139,9 @@ export default function EmiForm({
       ? moment(watchedStartDate).add(tenure, "months").format("DD MMM YYYY")
       : null;
 
-  // Populate data when editing
+  // Populate data when editing or prefilling
   useEffect(() => {
-    if (isEdit && modalData) {
+    if (modalData) {
       reset({
         vehicle_number: modalData.vehicle_number || modalData.vehicleNo || "",
         loan_name: modalData.loan_name || "",
