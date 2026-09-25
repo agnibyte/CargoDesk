@@ -1,11 +1,11 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useState, useMemo } from "react";
 import { useForm, useWatch, Controller } from "react-hook-form";
 import moment from "moment";
 import { postApiData } from "@/utilities/services/apiService";
 import { showToast } from "@/utilities/toastService";
-import { vehicleNoListArr } from "@/utilities/dummyData";
+import { useFleetDriver } from "@/context/fleetDriverContext";
 import useAutoFocusField from "@/hooks/useAutoFocusField";
 import {
   FloatingInput,
@@ -73,7 +73,39 @@ export default function EmiForm({
   onClose,
   toggleModal,
 }) {
+  const { fleets = [], refreshFleets } = useFleetDriver() || {};
   const [apiLoading, setApiLoading] = useState(false);
+
+  useEffect(() => {
+    if (Array.isArray(fleets) && fleets.length === 0 && refreshFleets) {
+      refreshFleets();
+    }
+  }, [fleets, refreshFleets]);
+
+  const vehicleOptions = useMemo(() => {
+    const list = [{ value: "", label: "Select Vehicle Number (Optional)" }];
+    const seen = new Set();
+    if (Array.isArray(fleets)) {
+      fleets.forEach((f) => {
+        const vNum = f.vehicle_number?.trim();
+        if (vNum && !seen.has(vNum.toUpperCase())) {
+          seen.add(vNum.toUpperCase());
+          const labelSuffix = f.vehicle_model
+            ? ` (${f.vehicle_model})`
+            : f.vehicle_type
+            ? ` (${f.vehicle_type})`
+            : "";
+          list.push({
+            value: vNum,
+            label: `${vNum}${labelSuffix}`,
+            id: f.id,
+            fleet: f,
+          });
+        }
+      });
+    }
+    return list;
+  }, [fleets]);
 
   const {
     register,
@@ -228,25 +260,33 @@ export default function EmiForm({
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {/* Vehicle Number */}
+          {/* Vehicle Number using dynamic fleets */}
           <div data-field-container data-field="vehicle_number">
-            <FloatingInput
-              id="emi_vehicle_number"
-              label="Vehicle Number (Optional)"
-              list="vehicleSuggestionsList"
-              placeholder="e.g. MH 04 EF 9101"
-              className="uppercase font-medium"
-              {...register("vehicle_number", {
-                onChange: (e) =>
-                  setValue("vehicle_number", e.target.value.toUpperCase()),
-              })}
-            >
-              <datalist id="vehicleSuggestionsList">
-                {vehicleNoListArr.map((item) => (
-                  <option key={item.id} value={item.label} />
-                ))}
-              </datalist>
-            </FloatingInput>
+            <Controller
+              name="vehicle_number"
+              control={control}
+              render={({ field }) => (
+                <FloatingSelect
+                  id="emi_vehicle_number"
+                  name="vehicle_number"
+                  label="Vehicle Number (Optional)"
+                  options={vehicleOptions}
+                  error={errors.vehicle_number}
+                  value={field.value || ""}
+                  selectedValue={field.value || ""}
+                  onChange={(val) => {
+                    const actualVal =
+                      val && typeof val === "object"
+                        ? val.value !== undefined
+                          ? val.value
+                          : val.target?.value
+                        : val;
+                    field.onChange(actualVal || "");
+                  }}
+                  onBlur={field.onBlur}
+                />
+              )}
+            />
           </div>
 
           {/* Loan / Item Name */}

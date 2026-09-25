@@ -3,7 +3,7 @@
 import React, { useEffect, useState, useMemo } from "react";
 import { useForm, Controller } from "react-hook-form";
 import moment from "moment";
-import { DOCUMENTS_TYPE_LIST, vehicleNoListArr } from "@/utilities/dummyData";
+import { DOCUMENTS_TYPE_LIST } from "@/utilities/dummyData";
 import { getConstant } from "@/utilities/utils";
 import { useFleetDriver } from "@/context/fleetDriverContext";
 import {
@@ -34,7 +34,13 @@ export default function AddDocumentForm({
   isLoading,
 }) {
   const [isListening, setIsListening] = useState(false);
-  const { fleets } = useFleetDriver() || { fleets: [] };
+  const { fleets = [], refreshFleets } = useFleetDriver() || {};
+
+  useEffect(() => {
+    if (Array.isArray(fleets) && fleets.length === 0 && refreshFleets) {
+      refreshFleets();
+    }
+  }, [fleets, refreshFleets]);
 
   const {
     register,
@@ -50,37 +56,26 @@ export default function AddDocumentForm({
 
   const watchedNote = watch("note");
 
-  // Dynamic vehicle options combining real fleets and fallback dummy vehicles
+  // Dynamic vehicle options populated from common fleets context
   const vehicleOptions = useMemo(() => {
     const list = [{ value: "", label: "Select Vehicle Number" }];
     const seen = new Set();
 
-    // 1. Add fleets from database / context
     if (Array.isArray(fleets)) {
       fleets.forEach((f) => {
         const vNum = f.vehicle_number?.trim();
         if (vNum && !seen.has(vNum.toUpperCase())) {
           seen.add(vNum.toUpperCase());
+          const labelSuffix = f.vehicle_model
+            ? ` (${f.vehicle_model})`
+            : f.vehicle_type
+            ? ` (${f.vehicle_type})`
+            : "";
           list.push({
             value: vNum,
-            label: `${vNum}${f.vehicle_type ? ` (${f.vehicle_type})` : ""}`,
+            label: `${vNum}${labelSuffix}`,
             id: f.id,
             fleet: f,
-          });
-        }
-      });
-    }
-
-    // 2. Add fallback predefined vehicles if not already present
-    if (Array.isArray(vehicleNoListArr)) {
-      vehicleNoListArr.forEach((v) => {
-        const vLabel = v.label?.trim() || v.value?.trim();
-        if (vLabel && !seen.has(vLabel.toUpperCase())) {
-          seen.add(vLabel.toUpperCase());
-          list.push({
-            value: vLabel,
-            label: v.label || v.value,
-            id: v.id,
           });
         }
       });

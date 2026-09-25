@@ -47,18 +47,22 @@ export function FleetDriverProvider({ children, initialFleets = [], initialDrive
     }
   }, [refreshFleets, refreshDrivers]);
 
-  // Sync SSR data when available from pageProps
+  // Sync SSR data when available from pageProps, or fetch on mount if empty
   useEffect(() => {
     if (initialFleets && initialFleets.length > 0) {
       setFleets(initialFleets);
+    } else if (fleets.length === 0) {
+      refreshFleets();
     }
-  }, [initialFleets]);
+  }, [initialFleets, fleets.length, refreshFleets]);
 
   useEffect(() => {
     if (initialDrivers && initialDrivers.length > 0) {
       setDrivers(initialDrivers);
+    } else if (drivers.length === 0) {
+      refreshDrivers();
     }
-  }, [initialDrivers]);
+  }, [initialDrivers, drivers.length, refreshDrivers]);
 
   // Helper selector: Get assigned driver for a fleet
   const getAssignedDriver = useCallback(
