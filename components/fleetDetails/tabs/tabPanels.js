@@ -261,7 +261,8 @@ export function EmiPanel({ fleet }) {
       {emis.length > 0 ? (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           {emis.map((emi) => {
-            const isPaid = (emi.status || "").toLowerCase() === "paid" || emi.status === "Completed";
+            // const isPaid = (emi?.status || "").toLowerCase() === "paid" || emi.status === "Completed";
+            const isPaid = "paid";
             return (
               <div
                 key={emi.id}

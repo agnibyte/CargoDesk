@@ -1,123 +1,9 @@
 import executeQuery, { executeTransaction } from "@/helpers/dbConnection";
 import { logFleetActivity } from "./fleetActivityModel";
 
-let isTableInitialized = false;
-
-// Default initial fleets seed in case database is freshly configured
-const defaultSeedFleets = [
-  {
-    vehicle_number: "MH 04 EF 9101",
-    vehicle_model: "Tata Prima 5530.S",
-    vehicle_type: "Multi-Axle Trailer (28-40T)",
-    capacity: "35 Tons",
-    fuel_type: "Diesel",
-    ownership_type: "Owned",
-    manufacturing_year: "2023",
-    gps_tracking_id: "GPS-TRK-9101",
-    chassis_number: "MAT5530SXYZ12345",
-    status: "Active",
-    notes: "Assigned for western corridor express freight.",
-  },
-  {
-    vehicle_number: "MH 12 UV 0123",
-    vehicle_model: "Ashok Leyland 2820-6x2",
-    vehicle_type: "Heavy Truck (16-25T)",
-    capacity: "20 Tons",
-    fuel_type: "Diesel",
-    ownership_type: "Owned",
-    manufacturing_year: "2022",
-    gps_tracking_id: "GPS-TRK-0123",
-    chassis_number: "AL2820AB567890",
-    status: "In Transit",
-    notes: "Currently on route Pune -> Ahmedabad.",
-  },
-  {
-    vehicle_number: "MH 01 JB 1122",
-    vehicle_model: "BharatBenz 3528R",
-    vehicle_type: "Container Body (20-32 FT)",
-    capacity: "25 Tons",
-    fuel_type: "Diesel",
-    ownership_type: "Leased / Financed",
-    manufacturing_year: "2023",
-    gps_tracking_id: "GPS-TRK-1122",
-    chassis_number: "BB3528RC998877",
-    status: "Active",
-    notes: "High-value container consignment vehicle.",
-  },
-  {
-    vehicle_number: "MH 03 CD 5678",
-    vehicle_model: "Eicher Pro 6028",
-    vehicle_type: "Tanker (Chemical/Oil)",
-    capacity: "18 KL / 20 Tons",
-    fuel_type: "CNG",
-    ownership_type: "Attached / Vendor",
-    manufacturing_year: "2021",
-    gps_tracking_id: "GPS-TRK-5678",
-    chassis_number: "EP6028D112233",
-    status: "Maintenance",
-    notes: "Periodic brake inspection and wheel alignment scheduled.",
-  },
-  {
-    vehicle_number: "MH 05 GH 2345",
-    vehicle_model: "Mahindra Blazo X 28",
-    vehicle_type: "Tipper / Dumper",
-    capacity: "16 Cu.M",
-    fuel_type: "Diesel",
-    ownership_type: "Owned",
-    manufacturing_year: "2022",
-    gps_tracking_id: "GPS-TRK-2345",
-    chassis_number: "MBX28E445566",
-    status: "Active",
-    notes: "Operating on civil construction materials route.",
-  },
-];
-
-export async function ensureFleetTable() {
-  if (isTableInitialized) return;
-  try {
-    const createTableQuery = `
-      CREATE TABLE IF NOT EXISTS fleets (
-        id INT AUTO_INCREMENT PRIMARY KEY,
-        vehicle_number VARCHAR(50) NOT NULL UNIQUE,
-        vehicle_model VARCHAR(100) NULL,
-        vehicle_type VARCHAR(100) NULL,
-        capacity VARCHAR(50) NULL,
-        fuel_type VARCHAR(50) NULL,
-        ownership_type VARCHAR(50) NULL,
-        manufacturing_year VARCHAR(10) NULL,
-        gps_tracking_id VARCHAR(100) NULL,
-        chassis_number VARCHAR(100) NULL,
-        engine_number VARCHAR(100) NULL,
-        status VARCHAR(50) DEFAULT 'Active',
-        notes TEXT NULL,
-        created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
-        updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
-      ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-    `;
-    await executeQuery(createTableQuery);
-
-    // Check count, seed default records if table is brand new/empty
-    const countRes = await executeQuery(`SELECT COUNT(*) as total FROM fleets`);
-    const count = countRes?.[0]?.total || 0;
-    if (count === 0) {
-      for (const item of defaultSeedFleets) {
-        try {
-          await executeQuery(`INSERT INTO fleets SET ?`, item);
-        } catch (seedErr) {
-          console.warn("Fleet seed item error:", seedErr?.message);
-        }
-      }
-    }
-    isTableInitialized = true;
-  } catch (error) {
-    console.error("Error inspecting/initializing fleets table:", error);
-  }
-}
-
 export function getAllFleetsModel() {
   return new Promise(async (resolve, reject) => {
     try {
-      await ensureFleetTable();
       const selectQuery = `
         SELECT 
           f.*,
@@ -135,18 +21,15 @@ export function getAllFleetsModel() {
       const rows = await executeQuery(selectQuery);
       resolve({
         status: true,
-        data:
-          Array.isArray(rows) && rows.length > 0
-            ? rows
-            : defaultSeedFleets.map((f, idx) => ({ id: idx + 1, ...f })),
+        data: Array.isArray(rows) ? rows : [],
         message: "Fleets fetched successfully",
       });
     } catch (error) {
       console.error("Error fetching fleets:", error);
-      // Fallback to default records if db fails
+      // Fallback to empty array if db fails
       resolve({
         status: true,
-        data: defaultSeedFleets.map((f, idx) => ({ id: idx + 1, ...f })),
+        data: [],
         message: "Fleets retrieved from fallback dataset",
       });
     }
@@ -156,7 +39,6 @@ export function getAllFleetsModel() {
 export function getFleetByIdModel(id) {
   return new Promise(async (resolve, reject) => {
     try {
-      await ensureFleetTable();
       const fleetId = Number(id);
       if (!fleetId || isNaN(fleetId)) {
         return resolve({ status: false, message: "Invalid fleet ID" });
@@ -186,7 +68,7 @@ export function getFleetByIdModel(id) {
       const fleet = rows[0];
 
       const docQuery = `SELECT * FROM vehicle_documents WHERE fleet_id = ? OR (fleet_id IS NULL AND REPLACE(REPLACE(vehicleNo, ' ', ''), '-', '') COLLATE utf8mb4_general_ci = REPLACE(REPLACE(?, ' ', ''), '-', '') COLLATE utf8mb4_general_ci) ORDER BY id DESC`;
-      const emiQuery = `SELECT * FROM emi_master WHERE fleet_id = ? OR REPLACE(REPLACE(vehicle_number, ' ', ''), '-', '') COLLATE utf8mb4_general_ci = REPLACE(REPLACE(?, ' ', ''), '-', '') COLLATE utf8mb4_general_ci ORDER BY id DESC`;
+      const emiQuery = `SELECT * FROM emi_master WHERE (fleet_id IS NOT NULL AND fleet_id = ?) OR (fleet_id IS NULL AND REPLACE(REPLACE(vehicle_number, ' ', ''), '-', '') COLLATE utf8mb4_general_ci = REPLACE(REPLACE(?, ' ', ''), '-', '') COLLATE utf8mb4_general_ci) ORDER BY id DESC`;
       const driverQuery = `SELECT COUNT(*) AS total FROM drivers WHERE fleet_id = ?`;
       const maintQuery = `SELECT COUNT(*) AS total FROM fleet_activity_history WHERE fleet_id = ? AND operation_type = 'MAINTENANCE'`;
       // Fetch dynamic records for tabs: Documents, EMI, Drivers, Maintenance
@@ -255,9 +137,11 @@ export function getFleetByIdModel(id) {
         try {
           const existingDocActs = await executeQuery(
             `SELECT entity_id FROM fleet_activity_history WHERE fleet_id = ? AND operation_type = 'DOCUMENT'`,
-            [fleet.id]
+            [fleet.id],
           );
-          const loggedDocIds = new Set((existingDocActs || []).map((a) => String(a.entity_id)));
+          const loggedDocIds = new Set(
+            (existingDocActs || []).map((a) => String(a.entity_id)),
+          );
           for (const doc of documents) {
             if (doc.id && !loggedDocIds.has(String(doc.id))) {
               await logFleetActivity({
@@ -277,12 +161,58 @@ export function getFleetByIdModel(id) {
                 performedByName: "Admin User",
                 performedAt: doc.createdAt || doc.created_at || null,
                 source: "documents",
-                metadata: { fleet_id: fleet.id, vehicleNo: fleet.vehicle_number, documentType: doc.documentType, expiryDate: doc.expiryDate },
+                metadata: {
+                  fleet_id: fleet.id,
+                  vehicleNo: fleet.vehicle_number,
+                  documentType: doc.documentType,
+                  expiryDate: doc.expiryDate,
+                },
               });
             }
           }
         } catch (docSyncErr) {
           console.warn("Could not sync doc activity:", docSyncErr?.message);
+        }
+      }
+
+      // Auto-ensure EMIs are recorded in activity history if not already present
+      if (Array.isArray(emis) && emis.length > 0) {
+        try {
+          const existingEmiActs = await executeQuery(
+            `SELECT entity_id FROM fleet_activity_history WHERE fleet_id = ? AND operation_type = 'EMI'`,
+            [fleet.id],
+          );
+          const loggedEmiIds = new Set(
+            (existingEmiActs || []).map((a) => String(a.entity_id)),
+          );
+          for (const emi of emis) {
+            if (emi.id && !loggedEmiIds.has(String(emi.id))) {
+              await logFleetActivity({
+                fleetId: fleet.id,
+                vehicleNo: fleet.vehicle_number,
+                operationType: "EMI",
+                entityType: "FINANCE_EMI",
+                entityId: String(emi.id),
+                action: "CREATE",
+                title: "EMI record added",
+                description: `Loan ${emi.loan_name || emi.bank_name || "Facility"} added (₹${emi.emi_amount || 0}/mo for vehicle ${fleet.vehicle_number})`,
+                oldValue: null,
+                newValue: emi,
+                changedFields: Object.keys(emi),
+                performedByName: "Admin User",
+                performedAt: emi.created_at || emi.createdAt || null,
+                source: "emi",
+                metadata: {
+                  fleet_id: fleet.id,
+                  vehicle_number: fleet.vehicle_number,
+                  loan_account_no: emi.loan_account_no,
+                  bank_name: emi.bank_name,
+                },
+              });
+            }
+          }
+        } catch (emiSyncErr) {
+          console.warn("Could not sync emi activity:", emiSyncErr?.message);
         }
       }
 
@@ -309,8 +239,6 @@ export function getFleetByIdModel(id) {
 export function addNewFleetModel(data) {
   return new Promise(async (resolve, reject) => {
     try {
-      await ensureFleetTable();
-
       const {
         vehicle_number,
         vehicle_model,
@@ -648,8 +576,6 @@ export function deleteFleetModel(ids) {
           message: "No vehicle IDs provided for deletion",
         });
       }
-
-      await ensureFleetTable();
 
       // Fetch fleet info before deletion for permanent audit logging
       const fleetRows = await executeQuery(

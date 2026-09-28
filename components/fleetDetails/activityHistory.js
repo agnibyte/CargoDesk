@@ -133,13 +133,13 @@ export default function ActivityHistory({
     setPage(1);
   };
 
-  // Group activities chronologically by date
+  // Group activities chronologically by date using UTC->local conversion
   const groupedActivities = useMemo(() => {
     const groups = {};
     (activities || []).forEach((act) => {
-      const dateKey = act.performedAt
-        ? moment(act.performedAt).format("YYYY-MM-DD")
-        : moment().format("YYYY-MM-DD");
+      const rawDate = act.performedAt || act.createdAt;
+      const m = rawDate ? moment.utc(rawDate).local() : moment();
+      const dateKey = m.format("YYYY-MM-DD");
       if (!groups[dateKey]) {
         groups[dateKey] = [];
       }
@@ -250,14 +250,19 @@ export default function ActivityHistory({
     );
   };
 
+  //  const categoryTabs = [
+  //   { id: "all", label: "All", count: summary.all || activities.length },
+  //   { id: "documents", label: "Documents", count: summary.documents || 0 },
+  //   { id: "driver", label: "Driver", count: summary.driver || 0 },
+  //   { id: "emi", label: "EMI", count: summary.emi || 0 },
+  //   { id: "maintenance", label: "Maintenance", count: summary.maintenance || 0 },
+  //   { id: "vehicle_details", label: "Vehicle Details", count: summary.vehicleDetails || 0 },
+  //   { id: "status", label: "Status", count: summary.status || 0 },
+  // ];
+
+
   const categoryTabs = [
-    { id: "all", label: "All", count: summary.all || activities.length },
-    { id: "documents", label: "Documents", count: summary.documents || 0 },
-    { id: "driver", label: "Driver", count: summary.driver || 0 },
-    { id: "emi", label: "EMI", count: summary.emi || 0 },
-    { id: "maintenance", label: "Maintenance", count: summary.maintenance || 0 },
-    { id: "vehicle_details", label: "Vehicle Details", count: summary.vehicleDetails || 0 },
-    { id: "status", label: "Status", count: summary.status || 0 },
+    { id: "all", label: "All Activities", count: activities.length || summary.all || 0 },
   ];
 
   const dateFilterLabels = {
@@ -503,9 +508,10 @@ export default function ActivityHistory({
                       activity.entityType
                     );
                     const CategoryIcon = style.icon;
-                    const formattedTime = activity.performedAt
-                      ? moment(activity.performedAt).format("hh:mm A")
-                      : "12:00 PM";
+                    const rawTimestamp = activity.performedAt || activity.createdAt;
+                    const formattedTime = rawTimestamp
+                      ? moment.utc(rawTimestamp).local().format("hh:mm A")
+                      : "";
 
                     return (
                       <div

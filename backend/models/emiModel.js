@@ -42,11 +42,29 @@ async function ensureEmiTableColumns() {
 export function addNewEmiModel(data) {
   return new Promise(async (resolve, reject) => {
     try {
-      // await ensureEmiTableColumns();
+      let fleetId = data.fleet_id || data.fleetId || null;
+      let vehicle_number = data.vehicle_number || null;
+
+      // Fallback lookup if only one identifier is provided
+      if (fleetId && !vehicle_number) {
+        const fleetRows = await executeQuery(`SELECT vehicle_number FROM fleets WHERE id = ? LIMIT 1`, [fleetId]);
+        if (fleetRows?.[0]?.vehicle_number) {
+          vehicle_number = fleetRows[0].vehicle_number;
+        }
+      } else if (!fleetId && vehicle_number) {
+        const clean = String(vehicle_number).replace(/[^a-zA-Z0-9]/g, "");
+        const fleetRows = await executeQuery(
+          `SELECT id, vehicle_number FROM fleets WHERE REPLACE(REPLACE(vehicle_number, ' ', ''), '-', '') COLLATE utf8mb4_general_ci = ? LIMIT 1`,
+          [clean]
+        );
+        if (fleetRows?.[0]) {
+          fleetId = fleetRows[0].id;
+          vehicle_number = fleetRows[0].vehicle_number;
+        }
+      }
 
       const insertQuery = `INSERT INTO emi_master SET ?`;
       const {
-        vehicle_number,
         loan_name,
         bank_name,
         loan_account_no,
@@ -63,6 +81,7 @@ export function addNewEmiModel(data) {
       } = data;
 
       const payload = {
+        fleet_id: fleetId ? Number(fleetId) : null,
         vehicle_number: vehicle_number || null,
         loan_name: loan_name || null,
         bank_name: bank_name || null,
@@ -85,25 +104,27 @@ export function addNewEmiModel(data) {
         const emiId = result.insertId;
         // Centralized Fleet Activity Logging for EMI addition
         await logFleetActivity({
-          fleetId: data.fleetId || null,
+          fleetId: fleetId || null,
           vehicleNo: vehicle_number,
           operationType: "EMI",
           entityType: "FINANCE_EMI",
           entityId: String(emiId),
           action: "CREATE",
           title: "EMI record added",
-          description: `Loan ${loan_name || bank_name || "Facility"} added (₹${emi_amount || 0}/mo for vehicle ${vehicle_number || "fleet"})`,
+          description: `Loan ${loan_name || bank_name || "Facility"} added (₹${emi_amount || 0}/mo for vehicle ${vehicle_number || `Fleet #${fleetId}`})`,
           oldValue: null,
           newValue: payload,
           changedFields: Object.keys(payload),
           performedByName: data.performedByName || "Admin User",
           source: "emi",
-          metadata: { vehicle_number, loan_account_no, bank_name },
+          metadata: { fleet_id: fleetId, vehicle_number, loan_account_no, bank_name },
         });
 
         resolve({
           status: true,
           id: result.insertId,
+          fleet_id: fleetId,
+          vehicle_number,
           message: "EMI details added successfully",
         });
       } else {
@@ -132,18 +153,22 @@ export function addNewEmiModel(data) {
 export function getAllEmisModel() {
   return new Promise(async (resolve, reject) => {
     try {
-      // await ensureEmiTableColumns();
       const selectQuery = `
         SELECT 
           e.*,
-          f.id AS fleet_id,
+          COALESCE(e.fleet_id, f.id) AS fleet_id,
+          COALESCE(f.vehicle_number, e.vehicle_number) AS vehicle_number,
           f.vehicle_model,
           f.vehicle_type,
           f.status AS vehicle_status
         FROM emi_master e
         LEFT JOIN fleets f ON (
-          REPLACE(REPLACE(e.vehicle_number, ' ', ''), '-', '') COLLATE utf8mb4_general_ci = 
-          REPLACE(REPLACE(f.vehicle_number, ' ', ''), '-', '') COLLATE utf8mb4_general_ci
+          (e.fleet_id IS NOT NULL AND e.fleet_id = f.id)
+          OR (
+            e.fleet_id IS NULL 
+            AND REPLACE(REPLACE(e.vehicle_number, ' ', ''), '-', '') COLLATE utf8mb4_general_ci = 
+                REPLACE(REPLACE(f.vehicle_number, ' ', ''), '-', '') COLLATE utf8mb4_general_ci
+          )
         )
         ORDER BY e.created_at DESC
       `;
@@ -171,8 +196,12 @@ export function updateEmiModel(id, data) {
       const oldRows = await executeQuery(`SELECT * FROM emi_master WHERE id = ?`, [id]);
       const oldEmi = Array.isArray(oldRows) && oldRows.length > 0 ? oldRows[0] : null;
 
+      const fleetId = data.fleet_id || data.fleetId || oldEmi?.fleet_id || null;
+      const vehicle_number = data.vehicle_number || oldEmi?.vehicle_number || null;
+
       const updateData = {
-        vehicle_number: data.vehicle_number || null,
+        fleet_id: fleetId ? Number(fleetId) : null,
+        vehicle_number: vehicle_number || null,
         loan_name: data.loan_name || null,
         bank_name: data.bank_name || null,
         loan_account_no: data.loan_account_no || null,

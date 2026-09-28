@@ -38,8 +38,9 @@ export default function ActivityDetailModal({
     metadata,
   } = activity;
 
-  const formattedDate = performedAt
-    ? moment(performedAt).format("DD MMM YYYY, hh:mm A")
+  const rawTimestamp = performedAt || activity.createdAt;
+  const formattedDate = rawTimestamp
+    ? moment.utc(rawTimestamp).local().format("DD MMM YYYY, hh:mm A")
     : "N/A";
 
   const renderValue = (val) => {
