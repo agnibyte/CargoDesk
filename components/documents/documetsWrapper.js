@@ -25,7 +25,9 @@ export default function DocumetsWrapper({ pageData }) {
 
   const addReminderData = async (data) => {
     const payload = {
-      vehicleNo: data.vehicleNo,
+      fleet_id: data.fleet_id || data.fleetId || null,
+      fleetId: data.fleet_id || data.fleetId || null,
+      vehicleNo: data.vehicleNo || null,
       documentType: data.documentType,
       expiryDate: data.expiryDate,
       note: data.note,
@@ -33,8 +35,17 @@ export default function DocumetsWrapper({ pageData }) {
     setAddLoading(true);
     try {
       const response = await postApiData("ADD_NEW_VEHICALE_DOCUMENTS", payload);
-      if (response.status) {
-        const LatestData = [...documentTableData, { id: response.id, ...data }];
+      if (response.status || response.success) {
+        const docId = response.id || response.data?.id;
+        const LatestData = [
+          ...documentTableData,
+          {
+            ...data,
+            id: docId,
+            fleet_id: response.fleet_id || data.fleet_id || data.fleetId,
+            vehicleNo: response.vehicleNo || data.vehicleNo,
+          },
+        ];
         setDocumentTableData(LatestData);
         setReminderModal(false);
       }
@@ -47,7 +58,9 @@ export default function DocumetsWrapper({ pageData }) {
   const updateReminderData = async (updatedData) => {
     const payload = {
       id: updatedData.id,
-      vehicleNo: updatedData.vehicleNo,
+      fleet_id: updatedData.fleet_id || updatedData.fleetId || null,
+      fleetId: updatedData.fleet_id || updatedData.fleetId || null,
+      vehicleNo: updatedData.vehicleNo || null,
       documentType: updatedData.documentType,
       expiryDate: updatedData.expiryDate,
       note: updatedData.note,
@@ -55,7 +68,7 @@ export default function DocumetsWrapper({ pageData }) {
     setUpdateLoading(true);
     try {
       const response = await postApiData("UPDATE_VEHICALE_DOCUMENTS", payload);
-      if (response.status) {
+      if (response.status || response.success) {
         setDocumentTableData((prevData) =>
           prevData.map((item) =>
             item.id === updatedData.id ? { ...item, ...updatedData } : item

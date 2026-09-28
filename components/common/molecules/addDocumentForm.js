@@ -16,8 +16,8 @@ import { FiMic, FiCheck, FiFileText } from "react-icons/fi";
 import { ImSpinner9 } from "react-icons/im";
 import useAutoFocusField from "@/hooks/useAutoFocusField";
 
-const defaultValues  = {
-  vehicleNo: "",
+const defaultValues = {
+  fleet_id: "",
   documentType: "",
   expiryDate: moment().format("YYYY-MM-DD"),
   note: "",
@@ -51,30 +51,31 @@ export default function AddDocumentForm({
     control,
     formState: { errors },
   } = useForm({
-    defaultValues: defaultValues ,
+    defaultValues: defaultValues,
   });
 
   const watchedNote = watch("note");
 
-  // Dynamic vehicle options populated from common fleets context
+  // Dynamic vehicle options keyed by unique vehicle primary ID (fleet_id)
   const vehicleOptions = useMemo(() => {
-    const list = [{ value: "", label: "Select Vehicle Number" }];
+    const list = [{ value: "", label: "Select Vehicle" }];
     const seen = new Set();
 
     if (Array.isArray(fleets)) {
       fleets.forEach((f) => {
-        const vNum = f.vehicle_number?.trim();
-        if (vNum && !seen.has(vNum.toUpperCase())) {
-          seen.add(vNum.toUpperCase());
+        if (f.id && !seen.has(f.id)) {
+          seen.add(f.id);
+          const vNum = f.vehicle_number?.trim() || `Vehicle #${f.id}`;
           const labelSuffix = f.vehicle_model
             ? ` (${f.vehicle_model})`
             : f.vehicle_type
             ? ` (${f.vehicle_type})`
             : "";
           list.push({
-            value: vNum,
+            value: String(f.id),
             label: `${vNum}${labelSuffix}`,
             id: f.id,
+            vehicle_number: f.vehicle_number,
             fleet: f,
           });
         }
@@ -98,24 +99,27 @@ export default function AddDocumentForm({
   // Sync form values on edit, prefill, or reset
   useEffect(() => {
     if (reminderData) {
-      // Resolve vehicleNo (could be object, formatted string, or lowercase)
-      let vNo = "";
-      if (typeof reminderData.vehicleNo === "object" && reminderData.vehicleNo !== null) {
-        vNo = reminderData.vehicleNo.value || reminderData.vehicleNo.label || "";
-      } else if (reminderData.vehicleNo) {
-        vNo = String(reminderData.vehicleNo);
-      } else if (reminderData.vehicle_number) {
-        vNo = String(reminderData.vehicle_number);
+      let fleetIdVal = "";
+      if (reminderData.fleet_id) {
+        fleetIdVal = String(reminderData.fleet_id);
+      } else if (reminderData.fleetId) {
+        fleetIdVal = String(reminderData.fleetId);
+      } else if (reminderData.id && !reminderData.documentType && !reminderData.loan_amount) {
+        fleetIdVal = String(reminderData.id);
       }
 
-      // Check if matched in vehicleOptions
-      const matchedVeh = vehicleOptions.find(
-        (opt) =>
-          opt.value?.toUpperCase() === vNo.toUpperCase() ||
-          opt.label?.toUpperCase() === vNo.toUpperCase()
-      );
-      if (matchedVeh && matchedVeh.value) {
-        vNo = matchedVeh.value;
+      // If fleet ID not provided directly, match from vehicleNo / vehicle_number
+      if (!fleetIdVal) {
+        const vNo = String(reminderData.vehicleNo || reminderData.vehicle_number || "").toUpperCase().replace(/[^a-zA-Z0-9]/g, "");
+        if (vNo) {
+          const matched = vehicleOptions.find((opt) => {
+            const optVeh = String(opt.vehicle_number || opt.label || "").toUpperCase().replace(/[^a-zA-Z0-9]/g, "");
+            return optVeh === vNo;
+          });
+          if (matched && matched.value) {
+            fleetIdVal = String(matched.value);
+          }
+        }
       }
 
       // Resolve documentType
@@ -140,7 +144,7 @@ export default function AddDocumentForm({
         : moment().format("YYYY-MM-DD");
 
       reset({
-        vehicleNo: vNo,
+        fleet_id: fleetIdVal,
         documentType: docType,
         expiryDate: expDate,
         note: reminderData.note || "",
@@ -199,9 +203,7 @@ export default function AddDocumentForm({
       : moment().toISOString();
 
     const selectedVehicleObj = vehicleOptions.find(
-      (v) =>
-        v.value?.toUpperCase() === String(data.vehicleNo).toUpperCase() ||
-        v.label?.toUpperCase() === String(data.vehicleNo).toUpperCase()
+      (v) => String(v.value) === String(data.fleet_id) || String(v.id) === String(data.fleet_id)
     );
     const selectedDocObj = documentTypeOptions.find(
       (d) =>
@@ -209,9 +211,14 @@ export default function AddDocumentForm({
         d.label?.toLowerCase() === String(data.documentType).toLowerCase()
     );
 
+    const primaryFleetId = Number(data.fleet_id) || selectedVehicleObj?.id || reminderData?.fleet_id || reminderData?.fleetId || null;
+
     const payload = {
       ...reminderData,
-      vehicleNo: data.vehicleNo,
+      id: reminderData?.id,
+      fleet_id: primaryFleetId,
+      fleetId: primaryFleetId,
+      vehicleNo: selectedVehicleObj?.vehicle_number || selectedVehicleObj?.label || "",
       documentType: data.documentType,
       expiryDate: formattedExpiryDate,
       note: data.note ? data.note.trim() : "",
@@ -233,20 +240,20 @@ export default function AddDocumentForm({
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="px-4 sm:px-6 py-3 space-y-4 bg-slate-50">
-      {/* Vehicle Number Field */}
-      <div data-field-container data-field="vehicleNo">
+      {/* Vehicle Selection Field (Primary ID: fleet_id) */}
+      <div data-field-container data-field="fleet_id">
         <Controller
-          name="vehicleNo"
+          name="fleet_id"
           control={control}
-          rules={{ required: "Please select vehicle number" }}
+          rules={{ required: "Please select a vehicle" }}
           render={({ field }) => (
             <FloatingSelect
-              id="doc_vehicle_no"
-              name="vehicleNo"
-              label="Vehicle Number"
+              id="doc_fleet_id"
+              name="fleet_id"
+              label="Select Vehicle"
               required
               options={vehicleOptions}
-              error={errors.vehicleNo}
+              error={errors.fleet_id}
               value={field.value}
               selectedValue={field.value}
               onChange={(val) => {
@@ -256,7 +263,7 @@ export default function AddDocumentForm({
                       ? val.value
                       : val.target?.value
                     : val;
-                field.onChange(actualVal || "");
+                field.onChange(actualVal ? String(actualVal) : "");
               }}
               onBlur={field.onBlur}
             />

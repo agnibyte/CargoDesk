@@ -116,29 +116,122 @@ export function OverviewPanel({ fleet, onNavigateTab, onAddDocument }) {
 /**
  * Documents Tab Panel
  */
-export function DocumentsPanel({ fleet, onAddDocument }) {
+export function DocumentsPanel({ fleet, onAddDocument, onEditDocument }) {
+  const documents = Array.isArray(fleet?.documents) ? fleet.documents : [];
+
   return (
-    <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-5 sm:p-6">
-      <div className="flex items-center justify-between pb-4 border-b border-slate-100">
+    <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-5 sm:p-6 space-y-5">
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
         <div>
-          <h3 className="text-base font-bold text-slate-900">Vehicle Documents</h3>
+          <div className="flex items-center gap-2">
+            <h3 className="text-base font-bold text-slate-900">Vehicle Documents</h3>
+            <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200">
+              {documents.length}
+            </span>
+          </div>
           <p className="text-xs text-slate-500 mt-0.5">
-            Compliance certificates, insurance, PUC, permit, and fitness records.
+            Compliance certificates, insurance, PUC, permit, and fitness records for vehicle {fleet?.vehicle_number || ""}.
           </p>
         </div>
         <button
           type="button"
           onClick={onAddDocument}
-          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-xl shadow-xs transition-colors"
+          className="inline-flex items-center gap-1.5 px-3.5 py-2 bg-blue-600 hover:bg-blue-700 active:scale-95 text-white text-xs font-semibold rounded-xl shadow-xs transition-all cursor-pointer"
         >
           <FiPlus className="w-4 h-4" />
           <span>Upload Document</span>
         </button>
       </div>
 
-      <div className="py-6 text-center text-slate-500 text-xs sm:text-sm">
-        <p>Use the <strong>+ Add Document</strong> button above to upload insurance, PUC, fitness, or tax certificates for vehicle {fleet?.vehicle_number}.</p>
-      </div>
+      {documents.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {documents.map((doc) => {
+            const expMoment = doc.expiryDate ? moment(doc.expiryDate) : null;
+            const isExpired = expMoment && expMoment.isBefore(moment(), "day");
+            const daysLeft = expMoment ? expMoment.diff(moment(), "days") : null;
+            const isExpiringSoon = daysLeft !== null && daysLeft >= 0 && daysLeft <= 30;
+
+            const docTypeUpper = (doc.documentType || "DOCUMENT").toUpperCase();
+
+            return (
+              <div
+                key={doc.id}
+                className="p-4 rounded-xl border border-slate-200/90 bg-slate-50/50 hover:bg-white hover:border-blue-300 hover:shadow-xs transition-all flex flex-col justify-between gap-3"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-blue-100/70 border border-blue-200 text-blue-700 flex items-center justify-center shrink-0">
+                      <FiFileText className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold text-slate-900">{docTypeUpper}</h4>
+                      <p className="text-xs text-slate-500">Doc ID: #{doc.id}</p>
+                    </div>
+                  </div>
+
+                  {isExpired ? (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-rose-50 text-rose-700 border border-rose-200">
+                      <FiAlertCircle className="w-3 h-3" /> Expired
+                    </span>
+                  ) : isExpiringSoon ? (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-amber-50 text-amber-700 border border-amber-200">
+                      <FiAlertCircle className="w-3 h-3" /> {daysLeft}d left
+                    </span>
+                  ) : expMoment ? (
+                    <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[11px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200">
+                      <FiCheckCircle className="w-3 h-3" /> Valid
+                    </span>
+                  ) : (
+                    <span className="px-2 py-0.5 rounded-full text-[11px] font-bold bg-slate-100 text-slate-600 border border-slate-200">
+                      No Expiry
+                    </span>
+                  )}
+                </div>
+
+                <div className="pt-2 border-t border-slate-200/60 grid grid-cols-2 gap-2 text-xs">
+                  <div>
+                    <span className="text-slate-400 block text-[11px]">Expiry Date</span>
+                    <span className="font-semibold text-slate-800 flex items-center gap-1 mt-0.5">
+                      <FiCalendar className="w-3 h-3 text-slate-400" />
+                      {expMoment ? expMoment.format("DD MMM YYYY") : "Permanent / None"}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 block text-[11px]">Alert Threshold</span>
+                    <span className="font-semibold text-slate-700 mt-0.5 block">
+                      {doc.alertDate ? moment(doc.alertDate).format("DD MMM YYYY") : "30 Days Prior"}
+                    </span>
+                  </div>
+                </div>
+
+                {doc.note && (
+                  <p className="text-xs text-slate-600 bg-white p-2 rounded-lg border border-slate-100 italic">
+                    &ldquo;{doc.note}&rdquo;
+                  </p>
+                )}
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="py-12 text-center flex flex-col items-center justify-center">
+          <div className="w-14 h-14 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mb-3">
+            <FiFileText className="w-7 h-7" />
+          </div>
+          <h4 className="text-sm font-bold text-slate-800">No Documents Uploaded Yet</h4>
+          <p className="text-xs text-slate-500 max-w-sm mt-1 mb-4">
+            Upload vehicle registration, insurance, PUC, permit, or fitness certificates for vehicle {fleet?.vehicle_number}.
+          </p>
+          <button
+            type="button"
+            onClick={onAddDocument}
+            className="inline-flex items-center gap-1.5 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-xl shadow-xs transition-colors cursor-pointer"
+          >
+            <FiPlus className="w-4 h-4" />
+            <span>Upload First Document</span>
+          </button>
+        </div>
+      )}
     </div>
   );
 }
@@ -147,20 +240,98 @@ export function DocumentsPanel({ fleet, onAddDocument }) {
  * EMI Tab Panel
  */
 export function EmiPanel({ fleet }) {
+  const emis = Array.isArray(fleet?.emis) ? fleet.emis : [];
+
   return (
-    <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-5 sm:p-6">
+    <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-5 sm:p-6 space-y-5">
       <div className="flex items-center justify-between pb-4 border-b border-slate-100">
         <div>
-          <h3 className="text-base font-bold text-slate-900">Loan & EMI Financing</h3>
+          <div className="flex items-center gap-2">
+            <h3 className="text-base font-bold text-slate-900">Loan & EMI Financing</h3>
+            <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
+              {emis.length} Active
+            </span>
+          </div>
           <p className="text-xs text-slate-500 mt-0.5">
-            Active finance plans, monthly installments, and payment schedules.
+            Active finance plans, monthly installments, and payment schedules for {fleet?.vehicle_number}.
           </p>
         </div>
       </div>
 
-      <div className="py-6 text-center text-slate-500 text-xs sm:text-sm">
-        <p>EMI and finance tracking for vehicle <strong>{fleet?.vehicle_number}</strong>.</p>
-      </div>
+      {emis.length > 0 ? (
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+          {emis.map((emi) => {
+            const isPaid = (emi.status || "").toLowerCase() === "paid" || emi.status === "Completed";
+            return (
+              <div
+                key={emi.id}
+                className="p-4 rounded-xl border border-slate-200/90 bg-slate-50/50 hover:bg-white hover:border-indigo-300 hover:shadow-xs transition-all flex flex-col justify-between gap-3"
+              >
+                <div className="flex items-start justify-between gap-2">
+                  <div className="flex items-center gap-3">
+                    <div className="w-10 h-10 rounded-xl bg-indigo-100/70 border border-indigo-200 text-indigo-700 flex items-center justify-center shrink-0">
+                      <FiCreditCard className="w-5 h-5" />
+                    </div>
+                    <div>
+                      <h4 className="text-sm font-bold text-slate-900">
+                        {emi.loan_name || emi.bank_name || "Vehicle Finance"}
+                      </h4>
+                      <p className="text-xs text-slate-500">A/C: {emi.loan_account_no || "N/A"}</p>
+                    </div>
+                  </div>
+                  <span
+                    className={`px-2 py-0.5 rounded-full text-[11px] font-bold border ${
+                      isPaid
+                        ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                        : "bg-blue-50 text-blue-700 border-blue-200"
+                    }`}
+                  >
+                    {emi.status || "Active"}
+                  </span>
+                </div>
+
+                <div className="pt-2 border-t border-slate-200/60 grid grid-cols-2 gap-3 text-xs">
+                  <div>
+                    <span className="text-slate-400 block text-[11px]">Monthly EMI</span>
+                    <span className="text-sm font-bold text-slate-900 mt-0.5 block">
+                      ₹{Number(emi.emi_amount || 0).toLocaleString("en-IN")}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 block text-[11px]">Total Loan</span>
+                    <span className="text-sm font-bold text-slate-700 mt-0.5 block">
+                      ₹{Number(emi.loan_amount || 0).toLocaleString("en-IN")}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 block text-[11px]">Due Date</span>
+                    <span className="font-semibold text-slate-800 flex items-center gap-1 mt-0.5">
+                      <FiCalendar className="w-3 h-3 text-slate-400" />
+                      {emi.due_date ? moment(emi.due_date).format("DD MMM YYYY") : "Monthly"}
+                    </span>
+                  </div>
+                  <div>
+                    <span className="text-slate-400 block text-[11px]">Tenure Progress</span>
+                    <span className="font-semibold text-slate-700 mt-0.5 block">
+                      {emi.emis_paid || 0} / {emi.tenure_months || 0} Months
+                    </span>
+                  </div>
+                </div>
+              </div>
+            );
+          })}
+        </div>
+      ) : (
+        <div className="py-12 text-center flex flex-col items-center justify-center">
+          <div className="w-14 h-14 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mb-3">
+            <FiCreditCard className="w-7 h-7" />
+          </div>
+          <h4 className="text-sm font-bold text-slate-800">No EMI Records Found</h4>
+          <p className="text-xs text-slate-500 max-w-sm mt-1">
+            No active finance or EMI loans linked to vehicle {fleet?.vehicle_number}.
+          </p>
+        </div>
+      )}
     </div>
   );
 }

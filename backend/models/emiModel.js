@@ -133,7 +133,20 @@ export function getAllEmisModel() {
   return new Promise(async (resolve, reject) => {
     try {
       // await ensureEmiTableColumns();
-      const selectQuery = `SELECT * FROM emi_master ORDER BY created_at DESC`;
+      const selectQuery = `
+        SELECT 
+          e.*,
+          f.id AS fleet_id,
+          f.vehicle_model,
+          f.vehicle_type,
+          f.status AS vehicle_status
+        FROM emi_master e
+        LEFT JOIN fleets f ON (
+          REPLACE(REPLACE(e.vehicle_number, ' ', ''), '-', '') COLLATE utf8mb4_general_ci = 
+          REPLACE(REPLACE(f.vehicle_number, ' ', ''), '-', '') COLLATE utf8mb4_general_ci
+        )
+        ORDER BY e.created_at DESC
+      `;
       const rows = await executeQuery(selectQuery);
       resolve({
         status: true,

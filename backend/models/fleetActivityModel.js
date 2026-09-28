@@ -6,9 +6,10 @@ import executeQuery from "@/helpers/dbConnection";
 export async function resolveFleetIdByVehicleNo(vehicleNo) {
   if (!vehicleNo || typeof vehicleNo !== "string") return null;
   try {
+    const clean = String(vehicleNo).replace(/[^a-zA-Z0-9]/g, "");
     const rows = await executeQuery(
-      `SELECT id FROM fleets WHERE UPPER(TRIM(vehicle_number)) = UPPER(TRIM(?)) LIMIT 1`,
-      [vehicleNo]
+      `SELECT id FROM fleets WHERE REPLACE(REPLACE(vehicle_number, ' ', ''), '-', '') COLLATE utf8mb4_general_ci = ? LIMIT 1`,
+      [clean]
     );
     if (Array.isArray(rows) && rows.length > 0 && rows[0].id) {
       return Number(rows[0].id);
@@ -173,13 +174,22 @@ export async function getFleetActivityHistoryModel(filters = {}) {
     // Filter by operation type (e.g. 'DOCUMENT', 'DRIVER', 'EMI', 'FLEET', 'MAINTENANCE', 'STATUS')
     const activeType = type || operationType;
     if (activeType && activeType !== "ALL" && activeType !== "all") {
-      if (activeType.toUpperCase() === "STATUS") {
+      const upperType = activeType.toUpperCase();
+      if (upperType === "STATUS") {
         conditions.push("(operation_type = 'STATUS' OR action IN ('ACTIVATE', 'DEACTIVATE') OR entity_type = 'STATUS_CHANGE')");
-      } else if (activeType.toUpperCase() === "VEHICLE_DETAILS" || activeType.toUpperCase() === "VEHICLE DETAILS") {
+      } else if (upperType === "VEHICLE_DETAILS" || upperType === "VEHICLE DETAILS" || upperType === "FLEET") {
         conditions.push("operation_type = 'FLEET'");
+      } else if (upperType === "DOCUMENTS" || upperType === "DOCUMENT") {
+        conditions.push("operation_type = 'DOCUMENT'");
+      } else if (upperType === "DRIVERS" || upperType === "DRIVER") {
+        conditions.push("operation_type = 'DRIVER'");
+      } else if (upperType === "EMIS" || upperType === "EMI") {
+        conditions.push("operation_type = 'EMI'");
+      } else if (upperType === "MAINTENANCES" || upperType === "MAINTENANCE") {
+        conditions.push("operation_type = 'MAINTENANCE'");
       } else {
         conditions.push("operation_type = ?");
-        queryParams.push(activeType.toUpperCase());
+        queryParams.push(upperType);
       }
     }
 

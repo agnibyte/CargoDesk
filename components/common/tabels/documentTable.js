@@ -40,7 +40,7 @@ const renderVehicleCell = (value, row, tableName = "") => {
   const formatted = formatVehicleNumber(value) || value || "-";
   
   // 1. Check for explicit fleet ID on row
-  let fleetId = row?.fleet_id || row?.fleetId;
+  let fleetId = row?.fleet_id || row?.fleetId || row?.assigned_fleet_id;
 
   // 2. Direct fleet record if row is from fleets table or contains vehicle fields (not document/EMI/driver item)
   if (!fleetId && row?.id) {
@@ -64,7 +64,7 @@ const renderVehicleCell = (value, row, tableName = "") => {
       <Link
         href={`/fleet/${fleetId}`}
         onClick={(e) => e.stopPropagation()}
-        className="inline-flex items-center gap-1 px-2 py-0.5 rounded-md text-xs font-bold bg-slate-100 text-slate-800 hover:bg-blue-600 hover:text-white border border-slate-200 hover:border-blue-600 uppercase tracking-wider transition-all cursor-pointer shadow-2xs group"
+        className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md text-xs font-bold bg-slate-100 text-slate-800 hover:bg-blue-600 hover:text-white border border-slate-200 hover:border-blue-600 uppercase tracking-wider transition-all cursor-pointer shadow-2xs group"
         title="View Fleet Details & Activity History"
       >
         <span>{formatted}</span>
@@ -74,10 +74,47 @@ const renderVehicleCell = (value, row, tableName = "") => {
   }
 
   return (
-    <span className="inline-flex items-center px-2 py-0.5 rounded-md text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200 uppercase tracking-wider">
+    <span className="inline-flex items-center px-2.5 py-1 rounded-md text-xs font-bold bg-slate-100 text-slate-700 border border-slate-200 uppercase tracking-wider">
       {formatted}
     </span>
   );
+};
+
+// 1b. Vehicle Model & Make / Description
+const renderVehicleModelCell = (value, row, tableName = "") => {
+  let fleetId = row?.fleet_id || row?.fleetId || row?.assigned_fleet_id;
+
+  if (!fleetId && row?.id) {
+    if (
+      tableName === "fleets" ||
+      row?.vehicle_model ||
+      row?.chassis_number ||
+      row?.engine_number ||
+      row?.ownership_type ||
+      row?.vehicle_type ||
+      row?.seating_capacity ||
+      row?.fuel_type ||
+      (row?.vehicle_number && !row?.documentType && !row?.loan_amount && !row?.document_id && !row?.license_number)
+    ) {
+      fleetId = row.id;
+    }
+  }
+
+  if (fleetId) {
+    return (
+      <Link
+        href={`/fleet/${fleetId}`}
+        onClick={(e) => e.stopPropagation()}
+        className="font-semibold text-slate-800 hover:text-blue-600 hover:underline inline-flex items-center gap-1.5 transition-colors cursor-pointer group"
+        title="View Fleet Details & Activity History"
+      >
+        <span>{value || "-"}</span>
+        <FiExternalLink className="w-3 h-3 opacity-0 group-hover:opacity-100 text-blue-500 transition-opacity" />
+      </Link>
+    );
+  }
+
+  return <span className="font-medium text-slate-800">{value || "-"}</span>;
 };
 
 // 2. Avatar / Profile Photo
@@ -417,7 +454,8 @@ const resolveCellValue = (headCell, row, index, onClickDocuments, tableName) => 
 
   // 3. Explicit or Inferred Column Type
   const typeMap = {
-    vehicle: ["vehicleNo", "vehicle_number", "assigned_vehicle", "vehicle"],
+    vehicle: ["vehicleNo", "vehicle_number", "assigned_vehicle", "vehicle", "vehicle_no"],
+    vehicleModel: ["vehicle_model", "assigned_vehicle_model", "vehicle_description", "model"],
     avatar: ["profile_photo", "photo"],
     documentType: ["documentType"],
     status: ["status"],
@@ -439,6 +477,9 @@ const resolveCellValue = (headCell, row, index, onClickDocuments, tableName) => 
   switch (type) {
     case "vehicle":
       return renderVehicleCell(rawValue, row, tableName);
+
+    case "vehicleModel":
+      return renderVehicleModelCell(rawValue, row, tableName);
 
     case "avatar":
       return renderAvatarCell(rawValue, row);

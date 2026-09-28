@@ -261,7 +261,7 @@ export default function ActivityHistory({
   ];
 
   const dateFilterLabels = {
-    all_time: "01 Jan 2025 - 25 Sep 2026",
+    all_time: "All Time",
     last_30_days: "Last 30 Days",
     last_90_days: "Last 90 Days",
     this_year: "This Year",

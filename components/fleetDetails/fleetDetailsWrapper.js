@@ -61,6 +61,12 @@ export default function FleetDetailsWrapper({
   };
 
   useEffect(() => {
+    if (initialFleet) {
+      setFleet(initialFleet);
+    }
+  }, [initialFleet]);
+
+  useEffect(() => {
     if (!initialFleet && fleetId) {
       fetchFleetDetails(fleetId);
     }
@@ -101,15 +107,18 @@ export default function FleetDetailsWrapper({
     setAddDocLoading(true);
     postApiData("ADD_NEW_VEHICALE_DOCUMENTS", {
       ...data,
+      fleet_id: fleet?.id,
       fleetId: fleet?.id,
       vehicleNo: fleet?.vehicle_number,
     })
       .then((res) => {
-        if (res?.success) {
+        if (res?.status || res?.success) {
           showToast({ message: "Document added successfully", type: "success" });
           setDocModalOpen(false);
           if (refreshAll) refreshAll();
-          if (fleet?.id) fetchFleetDetails(fleet.id);
+          if (fleet?.id) {
+            fetchFleetDetails(fleet.id);
+          }
         } else {
           showToast({ message: res?.message || "Failed to add document", type: "error" });
         }
