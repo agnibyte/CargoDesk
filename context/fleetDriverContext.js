@@ -47,22 +47,29 @@ export function FleetDriverProvider({ children, initialFleets = [], initialDrive
     }
   }, [refreshFleets, refreshDrivers]);
 
-  // Sync SSR data when available from pageProps, or fetch on mount if empty
+  const hasFetchedFleets = React.useRef(false);
+  const hasFetchedDrivers = React.useRef(false);
+
+  // Sync SSR data when available from pageProps, or fetch on initial mount once
   useEffect(() => {
     if (initialFleets && initialFleets.length > 0) {
       setFleets(initialFleets);
-    } else if (fleets.length === 0) {
+      hasFetchedFleets.current = true;
+    } else if (!hasFetchedFleets.current && fleets.length === 0) {
+      hasFetchedFleets.current = true;
       refreshFleets();
     }
-  }, [initialFleets, fleets.length, refreshFleets]);
+  }, [initialFleets, refreshFleets]);
 
   useEffect(() => {
     if (initialDrivers && initialDrivers.length > 0) {
       setDrivers(initialDrivers);
-    } else if (drivers.length === 0) {
+      hasFetchedDrivers.current = true;
+    } else if (!hasFetchedDrivers.current && drivers.length === 0) {
+      hasFetchedDrivers.current = true;
       refreshDrivers();
     }
-  }, [initialDrivers, drivers.length, refreshDrivers]);
+  }, [initialDrivers, refreshDrivers]);
 
   // Helper selector: Get assigned driver for a fleet
   const getAssignedDriver = useCallback(

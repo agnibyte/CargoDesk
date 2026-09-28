@@ -1,13 +1,14 @@
 import { getAllVehicleDocumentsController } from "@/backend/controllers/vehicleDocumentController";
 import { getAllFleetsController } from "@/backend/controllers/fleetController";
 import DocumetsWrapper from "@/components/documents/documetsWrapper";
+import { withUserSsr } from "@/utilities/withUserSsr";
 import React from "react";
 
 export default function Documents({ pageData }) {
   return <DocumetsWrapper pageData={pageData} />;
 }
 
-export async function getServerSideProps() {
+export const getServerSideProps = withUserSsr(async (context, { user }) => {
   const pageData = {};
 
   try {
@@ -31,4 +32,4 @@ export async function getServerSideProps() {
       pageData,
     },
   };
-}
+});
