@@ -8,6 +8,7 @@ import {
   FiHash,
   FiX,
   FiCheck,
+  FiUserCheck,
 } from "react-icons/fi";
 import { ImSpinner9 } from "react-icons/im";
 
@@ -64,7 +65,10 @@ export default function OrganizationModal({
   const validate = () => {
     const errs = {};
     if (!orgName.trim()) errs.orgName = "Organization name is required";
-    if (contactEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactEmail.trim())) {
+    if (
+      contactEmail &&
+      !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(contactEmail.trim())
+    ) {
       errs.contactEmail = "Please enter a valid email address";
     }
     setErrors(errs);
@@ -92,8 +96,14 @@ export default function OrganizationModal({
   };
 
   return (
-    <CommonModal modalOpen={isOpen} setModalOpen={onClose} backDrop={false}>
-      <div className="w-full max-w-lg bg-white rounded-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+    <CommonModal
+      modalOpen={isOpen}
+      setModalOpen={onClose}
+      backDrop={false}
+      modalSize="w-11/12 sm:max-w-lg"
+      noScroll={true}
+    >
+      <div className="w-full flex flex-col h-full min-h-0 overflow-hidden">
         {/* Header */}
         <div className="px-6 py-5 bg-gradient-to-r from-slate-900 via-purple-950 to-slate-900 text-white flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
@@ -120,7 +130,29 @@ export default function OrganizationModal({
         </div>
 
         {/* Form Body */}
-        <form onSubmit={handleSubmit} className="p-6 overflow-y-auto space-y-4 flex-1">
+        <form
+          onSubmit={handleSubmit}
+          className="p-6 overflow-y-auto space-y-4 flex-1 min-h-0"
+        >
+          {/* Auto Admin Provisioning Callout */}
+          {!isEdit && (
+            <div className="flex items-start gap-2.5 p-3 rounded-xl bg-purple-50/80 border border-purple-200/70 text-xs text-purple-900">
+              <FiUserCheck className="w-4 h-4 text-purple-600 shrink-0 mt-0.5" />
+              <div className="leading-relaxed">
+                <span className="font-semibold text-purple-950">Auto Admin User:</span>{" "}
+                Creating this organization will automatically provision an Admin user{" "}
+                <span className="font-bold underline decoration-purple-300">
+                  "{orgName.trim() ? `${orgName.trim()} - Admin` : "Organization - Admin"}"
+                </span>{" "}
+                with these contact details and default password{" "}
+                <code className="px-1.5 py-0.5 rounded bg-purple-200/60 font-mono text-[11px] font-semibold text-purple-900">
+                  CargoDesk@2025
+                </code>
+                .
+              </div>
+            </div>
+          )}
+
           {/* Organization Name */}
           <div>
             <label className="block text-xs font-semibold text-slate-700 mb-1">
@@ -134,11 +166,15 @@ export default function OrganizationModal({
                 onChange={(e) => handleNameChange(e.target.value)}
                 placeholder="e.g. Apex Cargo Movers Ltd"
                 className={`w-full pl-9 pr-3 py-2 text-sm rounded-xl border ${
-                  errors.orgName ? "border-rose-400 bg-rose-50/30" : "border-slate-200"
+                  errors.orgName
+                    ? "border-rose-400 bg-rose-50/30"
+                    : "border-slate-200"
                 } focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all`}
               />
             </div>
-            {errors.orgName && <p className="text-xs text-rose-500 mt-1">{errors.orgName}</p>}
+            {errors.orgName && (
+              <p className="text-xs text-rose-500 mt-1">{errors.orgName}</p>
+            )}
           </div>
 
           {/* Org Code & Phone */}
@@ -160,15 +196,42 @@ export default function OrganizationModal({
             </div>
 
             <div>
-              <label className="block text-xs font-semibold text-slate-700 mb-1">Phone Number</label>
-              <div className="relative">
-                <FiPhone className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+              <label className="block text-xs font-semibold text-slate-700 mb-1">
+                Phone Number
+              </label>
+
+              <div className="flex items-center w-full rounded-xl border border-slate-200 focus-within:ring-2 focus-within:ring-purple-500/20 focus-within:border-purple-500 transition-all overflow-hidden">
+                {/* India Flag + Country Code */}
+                <div className="flex items-center gap-2 pl-3 pr-3 py-2 bg-slate-50 border-r border-slate-200 shrink-0">
+                  {/* <span
+                    className="text-base"
+                    role="img"
+                    aria-label="India flag"
+                  >
+                    🇮🇳
+                  </span> */}
+                  <span className="text-sm font-medium text-slate-700 select-none">
+                    +91
+                  </span>
+                </div>
+
+                {/* Phone Number Input */}
                 <input
                   type="tel"
+                  inputMode="numeric"
+                  autoComplete="tel-national"
                   value={contactPhone}
-                  onChange={(e) => setContactPhone(e.target.value)}
-                  placeholder="+91 98200 11223"
-                  className="w-full pl-9 pr-3 py-2 text-sm rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all"
+                  onChange={(e) =>
+                    setContactPhone(
+                      e.target.value.replace(/\D/g, "").slice(0, 10),
+                    )
+                  }
+                  placeholder="00000 00000"
+                  minLength={10}
+                  maxLength={10}
+                  pattern="[0-9]{10}"
+                  title="Please enter a valid 10-digit phone number"
+                  className="w-full min-w-0 px-3 py-2 text-sm bg-transparent focus:outline-none"
                 />
               </div>
             </div>
@@ -176,7 +239,9 @@ export default function OrganizationModal({
 
           {/* Contact Email */}
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">Contact Email</label>
+            <label className="block text-xs font-semibold text-slate-700 mb-1">
+              Contact Email
+            </label>
             <div className="relative">
               <FiMail className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
               <input
@@ -185,18 +250,24 @@ export default function OrganizationModal({
                 onChange={(e) => setContactEmail(e.target.value)}
                 placeholder="contact@apexcargo.com"
                 className={`w-full pl-9 pr-3 py-2 text-sm rounded-xl border ${
-                  errors.contactEmail ? "border-rose-400 bg-rose-50/30" : "border-slate-200"
+                  errors.contactEmail
+                    ? "border-rose-400 bg-rose-50/30"
+                    : "border-slate-200"
                 } focus:outline-none focus:ring-2 focus:ring-purple-500/20 focus:border-purple-500 transition-all`}
               />
             </div>
             {errors.contactEmail && (
-              <p className="text-xs text-rose-500 mt-1">{errors.contactEmail}</p>
+              <p className="text-xs text-rose-500 mt-1">
+                {errors.contactEmail}
+              </p>
             )}
           </div>
 
           {/* Address */}
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">Office / Depot Address</label>
+            <label className="block text-xs font-semibold text-slate-700 mb-1">
+              Office / Depot Address
+            </label>
             <div className="relative">
               <FiMapPin className="w-4 h-4 text-slate-400 absolute left-3 top-3" />
               <textarea
@@ -211,7 +282,9 @@ export default function OrganizationModal({
 
           {/* Status */}
           <div>
-            <label className="block text-xs font-semibold text-slate-700 mb-1">Status</label>
+            <label className="block text-xs font-semibold text-slate-700 mb-1">
+              Status
+            </label>
             <div className="flex items-center gap-3">
               <button
                 type="button"
@@ -263,7 +336,9 @@ export default function OrganizationModal({
                 <span>Saving...</span>
               </>
             ) : (
-              <span>{isEdit ? "Update Organization" : "Create Organization"}</span>
+              <span>
+                {isEdit ? "Update Organization" : "Create Organization"}
+              </span>
             )}
           </button>
         </div>

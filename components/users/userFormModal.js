@@ -16,14 +16,46 @@ import {
 import { ImSpinner9 } from "react-icons/im";
 
 export const AVAILABLE_PERMISSIONS = [
-  { id: "dashboard", label: "Dashboard & Analytics", desc: "View system metrics, fleet summaries, and statistics" },
-  { id: "documents", label: "Vehicle Documents", desc: "Upload and track PUC, insurance, fitness, and permits" },
-  { id: "fleets", label: "Fleets & Vehicles", desc: "View, create, and manage vehicles and maintenance logs" },
-  { id: "drivers", label: "Driver Management", desc: "Register drivers, assign vehicles, and review licenses" },
-  { id: "invoice", label: "Invoices & Billing", desc: "Create, download, and send invoices and track EMI" },
-  { id: "dailyorders", label: "Daily Orders", desc: "Create, schedule, and track day-to-day transport orders" },
-  { id: "users", label: "Sub-Users & Roles", desc: "Invite team members, assign roles, and manage permissions" },
-  { id: "organizations", label: "Organization Management", desc: "Create organizations and assign administrators" },
+  {
+    id: "dashboard",
+    label: "Dashboard & Analytics",
+    desc: "View system metrics, fleet summaries, and statistics",
+  },
+  {
+    id: "documents",
+    label: "Vehicle Documents",
+    desc: "Upload and track PUC, insurance, fitness, and permits",
+  },
+  {
+    id: "fleets",
+    label: "Fleets & Vehicles",
+    desc: "View, create, and manage vehicles and maintenance logs",
+  },
+  {
+    id: "drivers",
+    label: "Driver Management",
+    desc: "Register drivers, assign vehicles, and review licenses",
+  },
+  {
+    id: "invoice",
+    label: "Invoices & Billing",
+    desc: "Create, download, and send invoices and track EMI",
+  },
+  {
+    id: "dailyorders",
+    label: "Daily Orders",
+    desc: "Create, schedule, and track day-to-day transport orders",
+  },
+  {
+    id: "users",
+    label: "Sub-Users & Roles",
+    desc: "Invite team members, assign roles, and manage permissions",
+  },
+  {
+    id: "organizations",
+    label: "Organization Management",
+    desc: "Create organizations and assign administrators",
+  },
 ];
 
 export const ROLE_DEFINITIONS = [
@@ -32,25 +64,45 @@ export const ROLE_DEFINITIONS = [
     name: "Super Admin",
     badgeColor: "bg-purple-100 text-purple-700 border-purple-200",
     iconColor: "text-purple-600 bg-purple-50",
-    description: "Global system control across all organizations. Can create/manage organizations and assign Admins.",
+    description:
+      "Global system control across all organizations. Can create/manage organizations and assign Admins.",
     level: "Global Access",
-    defaultPermissions: ["dashboard", "documents", "fleets", "drivers", "invoice", "dailyorders", "users", "organizations"],
+    defaultPermissions: [
+      "dashboard",
+      "documents",
+      "fleets",
+      "drivers",
+      "invoice",
+      "dailyorders",
+      "users",
+      "organizations",
+    ],
   },
   {
     key: "admin",
     name: "Organization Admin",
     badgeColor: "bg-blue-100 text-blue-700 border-blue-200",
     iconColor: "text-blue-600 bg-blue-50",
-    description: "Full administration for a company organization (fleets, drivers, billing, and staff management).",
+    description:
+      "Full administration for a company organization (fleets, drivers, billing, and staff management).",
     level: "Organization Full Access",
-    defaultPermissions: ["dashboard", "documents", "fleets", "drivers", "invoice", "dailyorders", "users"],
+    defaultPermissions: [
+      "dashboard",
+      "documents",
+      "fleets",
+      "drivers",
+      "invoice",
+      "dailyorders",
+      "users",
+    ],
   },
   {
     key: "office_staff",
     name: "Operations Coordinator",
     badgeColor: "bg-sky-100 text-sky-700 border-sky-200",
     iconColor: "text-sky-600 bg-sky-50",
-    description: "Office staff handling daily orders, customer dispatches, vehicle document verification, and billing.",
+    description:
+      "Office staff handling daily orders, customer dispatches, vehicle document verification, and billing.",
     level: "Operations Access",
     defaultPermissions: ["dashboard", "documents", "invoice", "dailyorders"],
   },
@@ -59,7 +111,8 @@ export const ROLE_DEFINITIONS = [
     name: "Fleet Maintenance Supervisor",
     badgeColor: "bg-amber-100 text-amber-700 border-amber-200",
     iconColor: "text-amber-600 bg-amber-50",
-    description: "Vehicle maintenance handling person in charge of servicing, fitness/PUC renewals, repairs, and inspections.",
+    description:
+      "Vehicle maintenance handling person in charge of servicing, fitness/PUC renewals, repairs, and inspections.",
     level: "Maintenance Access",
     defaultPermissions: ["dashboard", "fleets", "documents"],
   },
@@ -87,7 +140,9 @@ export default function UserFormModal({
   const [selectedPermissions, setSelectedPermissions] = useState([]);
   const [errors, setErrors] = useState({});
 
-  const isSuperAdmin = currentUser?.role === "super_admin" || currentUser?.email === "suraj@agnibyte.com";
+  const isSuperAdmin =
+    currentUser?.role === "super_admin" ||
+    currentUser?.email === "suraj@agnibyte.com";
 
   useEffect(() => {
     if (userData && isEdit) {
@@ -98,20 +153,33 @@ export default function UserFormModal({
 
       // Normalize legacy roles
       let normalizedRole = (userData.role || "office_staff").toLowerCase();
-      if (normalizedRole === "manager" || normalizedRole === "dispatcher") normalizedRole = "office_staff";
-      if (normalizedRole === "viewer") normalizedRole = "maintenance_supervisor";
+      if (normalizedRole === "manager" || normalizedRole === "dispatcher")
+        normalizedRole = "office_staff";
+      if (normalizedRole === "viewer")
+        normalizedRole = "maintenance_supervisor";
       setRole(normalizedRole);
 
       setOrgId(userData.orgId || "");
-      setStatus(userData.status === "Inactive" || userData.status === "0" ? "Inactive" : "Active");
+      setStatus(
+        userData.status === "Inactive" || userData.status === "0"
+          ? "Inactive"
+          : "Active",
+      );
       setPassword("");
 
       let userPerms = [];
-      if (Array.isArray(userData.permissions) && userData.permissions.length > 0) {
+      if (
+        Array.isArray(userData.permissions) &&
+        userData.permissions.length > 0
+      ) {
         userPerms = userData.permissions;
       } else {
-        const matchingRole = ROLE_DEFINITIONS.find((r) => r.key === normalizedRole);
-        userPerms = matchingRole ? matchingRole.defaultPermissions : ["dashboard"];
+        const matchingRole = ROLE_DEFINITIONS.find(
+          (r) => r.key === normalizedRole,
+        );
+        userPerms = matchingRole
+          ? matchingRole.defaultPermissions
+          : ["dashboard"];
       }
       setSelectedPermissions(userPerms);
     } else {
@@ -124,7 +192,9 @@ export default function UserFormModal({
       setOrgId(organizations?.[0]?.orgId || "");
       setStatus("Active");
       setPassword("");
-      const defaultRole = ROLE_DEFINITIONS.find((r) => r.key === (userData?.role || "office_staff"));
+      const defaultRole = ROLE_DEFINITIONS.find(
+        (r) => r.key === (userData?.role || "office_staff"),
+      );
       setSelectedPermissions(defaultRole ? defaultRole.defaultPermissions : []);
     }
     setErrors({});
@@ -140,7 +210,9 @@ export default function UserFormModal({
 
   const togglePermission = (permId) => {
     setSelectedPermissions((prev) =>
-      prev.includes(permId) ? prev.filter((p) => p !== permId) : [...prev, permId]
+      prev.includes(permId)
+        ? prev.filter((p) => p !== permId)
+        : [...prev, permId],
     );
   };
 
@@ -153,7 +225,8 @@ export default function UserFormModal({
   };
 
   const generatePassword = () => {
-    const chars = "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789!@#$%";
+    const chars =
+      "ABCDEFGHJKLMNPQRSTUVWXYZabcdefghijkmnpqrstuvwxyz23456789!@#$%";
     let generated = "";
     for (let i = 0; i < 10; i++) {
       generated += chars.charAt(Math.floor(Math.random() * chars.length));
@@ -212,8 +285,14 @@ export default function UserFormModal({
   });
 
   return (
-    <CommonModal modalOpen={isOpen} setModalOpen={onClose} backDrop={false}>
-      <div className="w-full max-w-2xl bg-white rounded-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+    <CommonModal
+      noScroll={true}
+      modalOpen={isOpen}
+      setModalOpen={onClose}
+      backDrop={false}
+      modalSize="w-11/12 sm:max-w-2xl"
+    >
+      <div className="w-full flex flex-col h-full min-h-0 overflow-hidden">
         {/* Modal Header */}
         <div className="px-6 py-5 bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 text-white flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
@@ -241,7 +320,10 @@ export default function UserFormModal({
         </div>
 
         {/* Modal Body */}
-        <form onSubmit={handleSubmit} className="p-6 overflow-y-auto space-y-5 flex-1">
+        <form
+          onSubmit={handleSubmit}
+          className="p-6 overflow-y-auto space-y-5 flex-1 min-h-0"
+        >
           {/* Section 1: User Profile Details */}
           <div>
             <h4 className="text-xs font-bold text-slate-700 uppercase tracking-wider mb-3 flex items-center gap-2">
@@ -262,18 +344,24 @@ export default function UserFormModal({
                     onChange={(e) => setFirstName(e.target.value)}
                     placeholder="e.g. Rahul"
                     className={`w-full pl-9 pr-3 py-2 text-sm rounded-xl border ${
-                      errors.firstName ? "border-rose-400 bg-rose-50/30" : "border-slate-200"
+                      errors.firstName
+                        ? "border-rose-400 bg-rose-50/30"
+                        : "border-slate-200"
                     } focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all`}
                   />
                 </div>
                 {errors.firstName && (
-                  <p className="text-xs text-rose-500 mt-1">{errors.firstName}</p>
+                  <p className="text-xs text-rose-500 mt-1">
+                    {errors.firstName}
+                  </p>
                 )}
               </div>
 
               {/* Last Name */}
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Last Name</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Last Name
+                </label>
                 <input
                   type="text"
                   value={lastName}
@@ -296,16 +384,22 @@ export default function UserFormModal({
                     onChange={(e) => setEmail(e.target.value)}
                     placeholder="user@cargodesk.com"
                     className={`w-full pl-9 pr-3 py-2 text-sm rounded-xl border ${
-                      errors.email ? "border-rose-400 bg-rose-50/30" : "border-slate-200"
+                      errors.email
+                        ? "border-rose-400 bg-rose-50/30"
+                        : "border-slate-200"
                     } focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all`}
                   />
                 </div>
-                {errors.email && <p className="text-xs text-rose-500 mt-1">{errors.email}</p>}
+                {errors.email && (
+                  <p className="text-xs text-rose-500 mt-1">{errors.email}</p>
+                )}
               </div>
 
               {/* Phone */}
               <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Phone Number</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Phone Number
+                </label>
                 <div className="relative">
                   <FiPhone className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
                   <input
@@ -328,29 +422,32 @@ export default function UserFormModal({
             </h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Organization Selector */}
-              <div>
-                <label className="block text-xs font-semibold text-slate-700 mb-1">
-                  Assign Organization
-                </label>
-                <div className="relative">
-                  <FiBriefcase className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
-                  <select
-                    value={orgId}
-                    onChange={(e) => setOrgId(e.target.value)}
-                    className="w-full pl-9 pr-3 py-2 text-sm rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium text-slate-800"
-                  >
-                    <option value="">No Organization (Global / HQ)</option>
-                    {organizations.map((org) => (
-                      <option key={org.orgId} value={org.orgId}>
-                        {org.orgName} ({org.orgCode || "ORG"})
-                      </option>
-                    ))}
-                  </select>
+              {isSuperAdmin && (
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Assign Organization
+                  </label>
+                  <div className="relative">
+                    <FiBriefcase className="w-4 h-4 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
+                    <select
+                      value={orgId}
+                      onChange={(e) => setOrgId(e.target.value)}
+                      className="w-full pl-9 pr-3 py-2 text-sm rounded-xl border border-slate-200 bg-white focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-medium text-slate-800"
+                    >
+                      <option value="">No Organization (Global / HQ)</option>
+                      {organizations.map((org) => (
+                        <option key={org.orgId} value={org.orgId}>
+                          {org.orgName} ({org.orgCode || "ORG"})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+                  <p className="text-[11px] text-slate-500 mt-1">
+                    Assign this member to a specific company or logistics
+                    center.
+                  </p>
                 </div>
-                <p className="text-[11px] text-slate-500 mt-1">
-                  Assign this member to a specific company or logistics center.
-                </p>
-              </div>
+              )}
 
               {/* Role Select */}
               <div>
@@ -378,7 +475,9 @@ export default function UserFormModal({
 
               {/* Account Status */}
               <div className="sm:col-span-2">
-                <label className="block text-xs font-semibold text-slate-700 mb-1">Account Status</label>
+                <label className="block text-xs font-semibold text-slate-700 mb-1">
+                  Account Status
+                </label>
                 <div className="flex items-center gap-3 max-w-xs">
                   <button
                     type="button"
@@ -431,9 +530,15 @@ export default function UserFormModal({
                 type={showPassword ? "text" : "password"}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
-                placeholder={isEdit ? "Leave blank to keep existing password" : "Min. 6 characters"}
+                placeholder={
+                  isEdit
+                    ? "Leave blank to keep existing password"
+                    : "Min. 6 characters"
+                }
                 className={`w-full pl-9 pr-20 py-2 text-sm rounded-xl border ${
-                  errors.password ? "border-rose-400 bg-rose-50/30" : "border-slate-200"
+                  errors.password
+                    ? "border-rose-400 bg-rose-50/30"
+                    : "border-slate-200"
                 } focus:outline-none focus:ring-2 focus:ring-blue-500/20 focus:border-blue-500 transition-all font-mono`}
               />
               <button
@@ -441,10 +546,16 @@ export default function UserFormModal({
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 p-1 text-xs"
               >
-                {showPassword ? <FiEyeOff className="w-4 h-4" /> : <FiEye className="w-4 h-4" />}
+                {showPassword ? (
+                  <FiEyeOff className="w-4 h-4" />
+                ) : (
+                  <FiEye className="w-4 h-4" />
+                )}
               </button>
             </div>
-            {errors.password && <p className="text-xs text-rose-500 mt-1">{errors.password}</p>}
+            {errors.password && (
+              <p className="text-xs text-rose-500 mt-1">{errors.password}</p>
+            )}
           </div>
 
           {/* Section 4: Granular Permissions Checklist */}
@@ -456,7 +567,8 @@ export default function UserFormModal({
                   Module Access Permissions
                 </h4>
                 <p className="text-[11px] text-slate-500">
-                  Preset automatically based on role; fine-tune permissions as required.
+                  Preset automatically based on role; fine-tune permissions as
+                  required.
                 </p>
               </div>
               <button
@@ -464,7 +576,9 @@ export default function UserFormModal({
                 onClick={handleSelectAllPermissions}
                 className="text-xs font-semibold text-blue-600 hover:text-blue-700 hover:underline"
               >
-                {selectedPermissions.length === AVAILABLE_PERMISSIONS.length ? "Deselect All" : "Select All"}
+                {selectedPermissions.length === AVAILABLE_PERMISSIONS.length
+                  ? "Deselect All"
+                  : "Select All"}
               </button>
             </div>
 
@@ -483,7 +597,9 @@ export default function UserFormModal({
                   >
                     <div
                       className={`w-4 h-4 mt-0.5 rounded flex items-center justify-center shrink-0 transition-colors ${
-                        checked ? "bg-blue-600 text-white" : "border border-slate-300 bg-white"
+                        checked
+                          ? "bg-blue-600 text-white"
+                          : "border border-slate-300 bg-white"
                       }`}
                     >
                       {checked && <FiCheck className="w-3 h-3 stroke-[3]" />}
@@ -492,7 +608,9 @@ export default function UserFormModal({
                       <p className="text-xs font-semibold text-slate-800 leading-tight truncate">
                         {perm.label}
                       </p>
-                      <p className="text-[10px] text-slate-500 leading-tight mt-0.5">{perm.desc}</p>
+                      <p className="text-[10px] text-slate-500 leading-tight mt-0.5">
+                        {perm.desc}
+                      </p>
                     </div>
                   </label>
                 );

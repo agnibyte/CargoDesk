@@ -298,6 +298,7 @@ export default function UsersWrapper({ pageData = {} }) {
           showToast({ message: res.message || "Organization created", type: "success" });
           setIsOrgModalOpen(false);
           loadOrganizations();
+          loadUsers();
         } else {
           showToast({ message: res?.message || "Failed to create organization", type: "error" });
         }

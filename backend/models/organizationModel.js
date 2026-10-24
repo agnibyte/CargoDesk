@@ -1,4 +1,5 @@
 import executeQuery from "@/helpers/dbConnection";
+import { hashWithSHA256 } from "@/utilities/utils";
 
 let isOrgTableInitialized = false;
 
@@ -124,10 +125,74 @@ export function createOrganizationModel(data) {
       const result = await executeQuery(`INSERT INTO organizations SET ?`, newOrg);
 
       if (result && result.affectedRows > 0) {
+        const orgId = result.insertId;
+
+        // Auto-create an Admin user for this organization:
+        // Organization name with suffix " - Admin" (e.g. "Raj Transport - Admin")
+        // Same contact details as organization
+        let adminUserCreated = null;
+        try {
+          const rawEmail = (data.contactEmail || "").trim().toLowerCase();
+          const cleanOrgSlug = orgName.toLowerCase().replace(/[^a-z0-9]/g, "") || `org${orgId}`;
+          let adminEmail = rawEmail;
+
+          // If no contact email was provided, generate a clean default
+          if (!adminEmail) {
+            adminEmail = `${cleanOrgSlug}.admin@cargodesk.com`;
+          }
+
+          // Ensure email is unique in users table
+          const existingUser = await executeQuery(
+            `SELECT userId FROM users WHERE LOWER(email) = ?`,
+            [adminEmail]
+          );
+
+          if (existingUser && existingUser.length > 0) {
+            adminEmail = `${cleanOrgSlug}_admin_${orgId}@cargodesk.com`;
+          }
+
+          const defaultAdminPermissions = JSON.stringify([
+            "dashboard",
+            "documents",
+            "fleets",
+            "drivers",
+            "invoice",
+            "dailyorders",
+            "users",
+          ]);
+
+          const adminUser = {
+            firstName: orgName.slice(0, 50).trim(),
+            lastName: "- Admin",
+            email: adminEmail,
+            phone: (data.contactPhone || "").trim().slice(0, 20) || null,
+            role: "admin",
+            orgId: orgId,
+            status: "1",
+            password: hashWithSHA256("CargoDesk@2025"),
+            permissions: defaultAdminPermissions,
+          };
+
+          const userInsertResult = await executeQuery(`INSERT INTO users SET ?`, adminUser);
+          if (userInsertResult && userInsertResult.affectedRows > 0) {
+            adminUserCreated = {
+              userId: userInsertResult.insertId,
+              fullName: `${adminUser.firstName} ${adminUser.lastName}`,
+              email: adminEmail,
+              role: "admin",
+            };
+          }
+        } catch (userErr) {
+          console.error("Auto admin user creation notice:", userErr?.message);
+        }
+
         resolve({
           status: true,
-          message: "Organization created successfully",
-          orgId: result.insertId,
+          message: adminUserCreated
+            ? `Organization and Admin user "${orgName} - Admin" created successfully`
+            : "Organization created successfully",
+          orgId: orgId,
+          adminUser: adminUserCreated,
         });
       } else {
         resolve({ status: false, message: "Failed to create organization" });
