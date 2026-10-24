@@ -20,9 +20,19 @@ export const internalList = {
   LOGOUT_USER: "/api/user/logout",
   GET_USER_PROFILE: "/api/user/get-user-profile",
 
-  // add new user
+  // add new user & sub-users
   ADD_NEW_USER: "/api/user/add-new-user",
   VERIFY_USER_LOGIN: "/api/user/verify-user",
+  GET_ALL_SUB_USERS: "/api/user/get-users",
+  ADD_SUB_USER: "/api/user/add-new-user",
+  UPDATE_SUB_USER: "/api/user/update-sub-user",
+  DELETE_SUB_USER: "/api/user/delete-sub-user",
+
+  // organizations
+  GET_ALL_ORGANIZATIONS: "/api/organization/get-all",
+  CREATE_ORGANIZATION: "/api/organization/create",
+  UPDATE_ORGANIZATION: "/api/organization/update",
+  DELETE_ORGANIZATION: "/api/organization/delete",
 
   // contacts
   ADD_NEW_CONTACT: "/api/contact/add-new",

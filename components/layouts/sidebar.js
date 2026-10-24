@@ -14,6 +14,7 @@ import {
   FiChevronUp,
   FiX,
   FiChevronRight,
+  FiUsers,
 } from "react-icons/fi";
 import { HiOutlineTruck } from "react-icons/hi";
 import { HiOutlineUserGroup } from "react-icons/hi";
@@ -24,6 +25,7 @@ export default function Sidebar({
   isCollapsed,
   setIsCollapsed,
   sidebarRef,
+  user,
 }) {
   const router = useRouter();
   const currentPath = router.pathname;
@@ -78,6 +80,12 @@ export default function Sidebar({
       path: "/drivers",
     },
     {
+      name: "Sub Users",
+      icon: FiUsers,
+      path: "/users",
+      adminOnly: true,
+    },
+    {
       name: "Apps",
       icon: FiGrid,
       path: "/apps",
@@ -97,11 +105,23 @@ export default function Sidebar({
     },
   ];
 
+  const userRole = (user?.role || "super_admin").toLowerCase();
+  const isSuperAdmin = userRole === "super_admin" || user?.email === "suraj@agnibyte.com";
+  const isAdmin = !user || isSuperAdmin || userRole === "admin" || userRole === "administrator";
+
+  const visibleNavItems = mainNavItems.filter((item) => {
+    if (item.adminOnly && !isAdmin) return false;
+    return true;
+  });
+
   const isActive = (item) => {
     if (item.exact) {
       return currentPath === item.path;
     }
     if (item.path === "/fleets" && (currentPath.startsWith("/fleet/") || currentPath.startsWith("/fleets"))) {
+      return true;
+    }
+    if (item.path === "/users" && currentPath.startsWith("/users")) {
       return true;
     }
     return currentPath === item.path || currentPath.startsWith(item.path + "/");
@@ -156,7 +176,7 @@ export default function Sidebar({
         {/* Main Navigation List */}
         <div className="flex-1 overflow-y-auto overflow-x-hidden px-3 py-4 space-y-1.5 sidebar-scrollbar w-full">
           <div className="space-y-1 w-full">
-            {mainNavItems.map((item) => {
+            {visibleNavItems.map((item) => {
               const active = isActive(item);
               const Icon = item.icon;
 
