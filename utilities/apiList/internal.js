@@ -11,6 +11,9 @@ export const internalList = {
   SEND_MESSAGE: "/api/sendMessage",
   ADD_MSG_TEMPLATE: "/api/message/add-template",
   DELETE_MSG_TEMPLATE: "/api/message/delete-template",
+  GET_WHATSAPP_STATUS: "/api/whatsapp/status",
+  CONNECT_WHATSAPP_GATEWAY: "/api/whatsapp/connect",
+  LOGOUT_WHATSAPP_GATEWAY: "/api/whatsapp/logout",
 
   // login api
   VERIFY_USER: "/api/user/verify-user",
