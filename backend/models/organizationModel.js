@@ -1,5 +1,6 @@
 import executeQuery from "@/helpers/dbConnection";
 import { hashWithSHA256 } from "@/utilities/utils";
+import { ALL_MODULE_IDS } from "@/utilities/organizationModules";
 
 let isOrgTableInitialized = false;
 
@@ -23,9 +24,13 @@ export async function ensureOrganizationsTable() {
     `;
     await executeQuery(createTableQuery);
 
-    // Try adding orgId to users if not present
+    // Check existing columns in organizations table before ALTER
     try {
-      await executeQuery("ALTER TABLE users ADD COLUMN orgId INT NULL");
+      const orgCols = await executeQuery("SHOW COLUMNS FROM organizations");
+      const orgColNames = (Array.isArray(orgCols) ? orgCols : []).map((c) => c.Field);
+      if (!orgColNames.includes("allowedModules")) {
+        await executeQuery("ALTER TABLE organizations ADD COLUMN allowedModules TEXT NULL");
+      }
     } catch (_) {}
 
     // Check count, seed default primary organization if empty
@@ -73,9 +78,32 @@ export function getAllOrganizationsModel() {
       `;
       const rows = await executeQuery(sql);
 
+      const parsedRows = (Array.isArray(rows) ? rows : []).map((org) => {
+        let modules = [];
+        if (org.allowedModules) {
+          try {
+            modules =
+              typeof org.allowedModules === "string"
+                ? JSON.parse(org.allowedModules)
+                : org.allowedModules;
+          } catch (_) {
+            modules = String(org.allowedModules)
+              .split(",")
+              .map((m) => m.trim());
+          }
+        } else {
+          modules = ALL_MODULE_IDS;
+        }
+
+        return {
+          ...org,
+          allowedModules: Array.isArray(modules) && modules.length > 0 ? modules : ALL_MODULE_IDS,
+        };
+      });
+
       resolve({
         status: true,
-        data: Array.isArray(rows) ? rows : [],
+        data: parsedRows,
         message: "Organizations fetched successfully",
       });
     } catch (error) {
@@ -113,6 +141,16 @@ export function createOrganizationModel(data) {
 
       const orgCode = (data.orgCode || orgName.substring(0, 4).toUpperCase() + "-" + Math.floor(100 + Math.random() * 900)).trim();
 
+      let allowedModulesStr = null;
+      if (data.allowedModules) {
+        allowedModulesStr =
+          typeof data.allowedModules === "string"
+            ? data.allowedModules
+            : JSON.stringify(data.allowedModules);
+      } else {
+        allowedModulesStr = JSON.stringify(ALL_MODULE_IDS);
+      }
+
       const newOrg = {
         orgName,
         orgCode,
@@ -120,6 +158,7 @@ export function createOrganizationModel(data) {
         contactPhone: (data.contactPhone || "").trim(),
         address: (data.address || "").trim(),
         status: data.status || "Active",
+        allowedModules: allowedModulesStr,
       };
 
       const result = await executeQuery(`INSERT INTO organizations SET ?`, newOrg);
@@ -224,6 +263,12 @@ export function updateOrganizationModel(data) {
       if (data.contactPhone !== undefined) updateFields.contactPhone = data.contactPhone.trim();
       if (data.address !== undefined) updateFields.address = data.address.trim();
       if (data.status !== undefined) updateFields.status = data.status;
+      if (data.allowedModules !== undefined) {
+        updateFields.allowedModules =
+          typeof data.allowedModules === "string"
+            ? data.allowedModules
+            : JSON.stringify(data.allowedModules);
+      }
 
       const result = await executeQuery(`UPDATE organizations SET ? WHERE orgId = ?`, [updateFields, orgId]);
 

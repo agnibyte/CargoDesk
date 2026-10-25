@@ -12,6 +12,7 @@ export const PUBLIC_ROUTES = [
   "/404",
   "/500",
   "/403",
+  "/module-blocked",
 ];
 
 // Route prefix patterns that are public

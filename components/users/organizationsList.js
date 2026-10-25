@@ -10,6 +10,7 @@ import {
   FiPhone,
   FiMapPin,
   FiUserPlus,
+  FiLayers,
 } from "react-icons/fi";
 
 export default function OrganizationsList({
@@ -134,6 +135,23 @@ export default function OrganizationsList({
                       </p>
                       <p className="text-base font-bold text-slate-800 mt-0.5">{memberCount}</p>
                     </div>
+                  </div>
+
+                  {/* Module Access Provisioning Indicator */}
+                  <div className="mt-2.5 flex items-center justify-between text-[11px] bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-100">
+                    <span className="font-semibold text-slate-600 flex items-center gap-1.5">
+                      <FiLayers className="w-3.5 h-3.5 text-purple-600" />
+                      Module Access:
+                    </span>
+                    {Array.isArray(org.allowedModules) && org.allowedModules.length < 9 ? (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200">
+                        {org.allowedModules.length}/9 Active (Blocked {9 - org.allowedModules.length})
+                      </span>
+                    ) : (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
+                        All 9 Modules Active
+                      </span>
+                    )}
                   </div>
                 </div>
 

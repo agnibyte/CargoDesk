@@ -7,6 +7,8 @@ import OrganizationModal from "./organizationModal";
 import OrganizationsList from "./organizationsList";
 import { postApiData } from "@/utilities/services/apiService";
 import { showToast } from "@/utilities/toastService";
+import DocumentTable from "../common/tabels/documentTable";
+import { userTableHeadCells } from "@/utilities/masterData";
 import {
   FiUsers,
   FiPlus,
@@ -37,6 +39,7 @@ export default function UsersWrapper({ pageData = {} }) {
   const [roleFilter, setRoleFilter] = useState("all");
   const [orgFilter, setOrgFilter] = useState("all");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [selected, setSelected] = useState([]);
 
   // User Form modal state
   const [isFormModalOpen, setIsFormModalOpen] = useState(false);
@@ -170,9 +173,197 @@ export default function UsersWrapper({ pageData = {} }) {
         if (statusFilter === "inactive" && isActive) return false;
       }
 
+      // 5. Tenant Organization Isolation: Non-superadmins only see their own organization members
+      if (!isSuperAdmin && currentUser?.orgId) {
+        if (Number(u.orgId) !== Number(currentUser.orgId) && u.role !== "super_admin") {
+          return false;
+        }
+      }
+
       return true;
     });
-  }, [users, searchTerm, roleFilter, orgFilter, statusFilter]);
+  }, [users, searchTerm, roleFilter, orgFilter, statusFilter, isSuperAdmin, currentUser]);
+
+  // Formatted data for DocumentTable
+  const finalDisplayData = useMemo(() => {
+    return filteredUsers.map((u, index) => {
+      const fullName = `${u.firstName || ""} ${u.lastName || ""}`.trim() || "User";
+      const initial = (u.firstName ? u.firstName.charAt(0) : "U").toUpperCase();
+      const isActive = (u.status || "").toLowerCase() === "active" || u.status === "1";
+      const isSuper = u.email === "suraj@agnibyte.com" || u.role === "super_admin";
+
+      return {
+        ...u,
+        id: u.userId ?? index + 1,
+        member: fullName,
+        fullName,
+        initial,
+        isActive,
+        isSuper,
+      };
+    });
+  }, [filteredUsers]);
+
+  // Dynamic table head cells with custom renderers
+  const userHeadCells = useMemo(() => {
+    return userTableHeadCells.map((headCell) => {
+      if (headCell.id === "member") {
+        return {
+          ...headCell,
+          render: (_, row) => {
+            const fullName = row.fullName || `${row.firstName || ""} ${row.lastName || ""}`.trim() || "User";
+            const initial = row.initial || (row.firstName ? row.firstName.charAt(0) : "U").toUpperCase();
+            const isSuper = row.isSuper;
+
+            return (
+              <div className="flex items-center gap-3">
+                <div
+                  className={`w-9 h-9 rounded-full text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-xs ${
+                    isSuper
+                      ? "bg-gradient-to-tr from-purple-600 to-indigo-600 ring-2 ring-purple-400/40"
+                      : "bg-gradient-to-tr from-blue-600 to-indigo-600"
+                  }`}
+                >
+                  {initial}
+                </div>
+                <div className="min-w-0">
+                  <div className="flex items-center gap-1.5">
+                    <p className="font-bold text-slate-900 truncate">{fullName}</p>
+                    {isSuper && (
+                      <span className="text-[10px] font-bold bg-purple-100 text-purple-700 px-1.5 py-0.2 rounded">
+                        Super
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-[11px] text-slate-400 truncate">{row.email}</p>
+                </div>
+              </div>
+            );
+          },
+        };
+      }
+
+      if (headCell.id === "role") {
+        return {
+          ...headCell,
+          render: (_, row) => {
+            const isSuper = row.isSuper;
+            const currentUserId = row.userId || row.id;
+
+            return (
+              <div className="relative inline-flex items-center gap-1.5">
+                {getRoleBadge(row.role, row.email)}
+                {!isSuper && (
+                  <button
+                    type="button"
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setActiveRoleDropdown(
+                        activeRoleDropdown === currentUserId ? null : currentUserId
+                      );
+                    }}
+                    className="p-1 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors cursor-pointer"
+                    title="Change Role"
+                  >
+                    <FiEdit2 className="w-3 h-3" />
+                  </button>
+                )}
+
+                {/* Quick Role Dropdown */}
+                {activeRoleDropdown === currentUserId && (
+                  <div
+                    onClick={(e) => e.stopPropagation()}
+                    className="absolute left-0 top-8 z-50 w-52 bg-white rounded-xl shadow-xl border border-slate-100 py-1 text-xs animate-dropdown text-left"
+                  >
+                    <p className="px-3 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                      Assign Operational Role
+                    </p>
+                    {ROLE_DEFINITIONS.filter((r) => r.key !== "super_admin").map((r) => (
+                      <button
+                        key={r.key}
+                        type="button"
+                        onClick={() => handleQuickRoleChange(currentUserId, r.key)}
+                        className="w-full px-3 py-1.5 text-left text-slate-700 hover:bg-slate-50 hover:text-blue-600 flex items-center justify-between cursor-pointer"
+                      >
+                        <span>{r.name}</span>
+                        {row.role === r.key && <FiCheck className="w-3 h-3 text-blue-600" />}
+                      </button>
+                    ))}
+                  </div>
+                )}
+              </div>
+            );
+          },
+        };
+      }
+
+      if (headCell.id === "orgName") {
+        return {
+          ...headCell,
+          render: (_, row) => {
+            const isSuper = row.isSuper;
+            return row.orgName ? (
+              <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-slate-700 bg-slate-100 px-2.5 py-1 rounded-lg">
+                <FiBriefcase className="w-3 h-3 text-purple-600" />
+                <span className="truncate max-w-[140px]">{row.orgName}</span>
+              </span>
+            ) : (
+              <span className="text-[11px] text-slate-400 italic">
+                {isSuper ? "Global HQ" : "Unassigned"}
+              </span>
+            );
+          },
+        };
+      }
+
+      if (headCell.id === "phone") {
+        return {
+          ...headCell,
+          render: (rawValue) => (
+            <span className="text-slate-600 font-mono text-[11px]">
+              {rawValue || "—"}
+            </span>
+          ),
+        };
+      }
+
+      if (headCell.id === "status") {
+        return {
+          ...headCell,
+          render: (_, row) => {
+            const isActive = row.isActive;
+            const isSuper = row.isSuper;
+
+            return (
+              <button
+                type="button"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  if (!isSuper) handleToggleStatus(row);
+                }}
+                disabled={isSuper}
+                className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full border transition-all inline-flex items-center gap-1.5 ${
+                  isActive
+                    ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                    : "bg-rose-50 text-rose-700 border-rose-200"
+                } ${isSuper ? "cursor-default" : "cursor-pointer hover:opacity-80"}`}
+                title={isSuper ? "Super admin is permanently active" : "Click to toggle status"}
+              >
+                <span
+                  className={`w-1.5 h-1.5 rounded-full ${
+                    isActive ? "bg-emerald-500" : "bg-rose-500"
+                  }`}
+                />
+                {isActive ? "Active" : "Inactive"}
+              </button>
+            );
+          },
+        };
+      }
+
+      return headCell;
+    });
+  }, [activeRoleDropdown, users]);
 
   // Handle User Form Submit (Add or Edit)
   const handleFormSubmit = async (formData) => {
@@ -214,20 +405,23 @@ export default function UsersWrapper({ pageData = {} }) {
   };
 
   const handleOpenAdd = (presetRole = "office_staff", presetOrgId = "") => {
-    setSelectedUser({ role: presetRole, orgId: presetOrgId });
+    const targetOrgId = isSuperAdmin ? presetOrgId : (currentUser?.orgId || presetOrgId);
+    setSelectedUser({ role: presetRole, orgId: targetOrgId });
     setIsEditMode(false);
     setIsFormModalOpen(true);
   };
 
   const handleConfirmDelete = async () => {
-    if (!userToDelete) return;
+    if (!userToDelete && selected.length === 0) return;
     setIsDeleting(true);
     try {
-      const res = await postApiData("DELETE_SUB_USER", { userId: userToDelete.userId });
+      const payload = selected.length > 0 ? { ids: selected } : { userId: userToDelete?.userId || userToDelete?.id };
+      const res = await postApiData("DELETE_SUB_USER", payload);
       if (res?.status) {
         showToast({ message: res.message || "Sub-user deleted successfully", type: "success" });
         setIsDeleteModalOpen(false);
         setUserToDelete(null);
+        setSelected([]);
         loadUsers();
         loadOrganizations();
       } else {
@@ -237,6 +431,16 @@ export default function UsersWrapper({ pageData = {} }) {
       showToast({ message: "Error deleting sub-user", type: "error" });
     } finally {
       setIsDeleting(false);
+    }
+  };
+
+  // Handle Edit Action from DocumentTable
+  const onClickEdit = (id, row) => {
+    const targetUser =
+      (typeof row === "object" && row !== null && (row.userId || row.id) ? row : null) ||
+      users.find((u) => u.userId === id || u.id === id);
+    if (targetUser) {
+      handleOpenEdit(targetUser);
     }
   };
 
@@ -384,7 +588,7 @@ export default function UsersWrapper({ pageData = {} }) {
         </div>
 
         {/* Action Buttons */}
-        <div className="flex items-center gap-2.5 w-full sm:w-auto">
+        <div className="flex flex-wrap items-center gap-2.5 w-full sm:w-auto">
           {isSuperAdmin && (
             <button
               onClick={() => {
@@ -605,168 +809,31 @@ export default function UsersWrapper({ pageData = {} }) {
               </div>
             ) : (
               <>
-                {/* DESKTOP TABLE VIEW */}
-                <div className="hidden md:block overflow-x-auto rounded-xl border border-slate-200/80">
-                  <table className="w-full text-left border-collapse text-xs">
-                    <thead>
-                      <tr className="bg-slate-50 text-slate-500 font-bold uppercase tracking-wider text-[11px] border-b border-slate-200/80">
-                        <th className="py-3.5 px-4">Member</th>
-                        <th className="py-3.5 px-4">Role</th>
-                        <th className="py-3.5 px-4">Organization</th>
-                        <th className="py-3.5 px-4">Phone</th>
-                        <th className="py-3.5 px-4">Status</th>
-                        <th className="py-3.5 px-4 text-right">Actions</th>
-                      </tr>
-                    </thead>
-                    <tbody className="divide-y divide-slate-100 font-medium text-slate-700">
-                      {filteredUsers.map((u) => {
-                        const fullName = `${u.firstName || ""} ${u.lastName || ""}`.trim() || "User";
-                        const initial = (u.firstName ? u.firstName.charAt(0) : "U").toUpperCase();
-                        const isActive = (u.status || "").toLowerCase() === "active" || u.status === "1";
-                        const isSuper = u.email === "suraj@agnibyte.com" || u.role === "super_admin";
-
-                        return (
-                          <tr key={u.userId} className="hover:bg-slate-50/70 transition-colors">
-                            {/* User details */}
-                            <td className="py-3.5 px-4">
-                              <div className="flex items-center gap-3">
-                                <div
-                                  className={`w-9 h-9 rounded-full text-white font-bold text-xs flex items-center justify-center shrink-0 shadow-xs ${
-                                    isSuper
-                                      ? "bg-gradient-to-tr from-purple-600 to-indigo-600 ring-2 ring-purple-400/40"
-                                      : "bg-gradient-to-tr from-blue-600 to-indigo-600"
-                                  }`}
-                                >
-                                  {initial}
-                                </div>
-                                <div className="min-w-0">
-                                  <div className="flex items-center gap-1.5">
-                                    <p className="font-bold text-slate-900 truncate">{fullName}</p>
-                                    {isSuper && (
-                                      <span className="text-[10px] font-bold bg-purple-100 text-purple-700 px-1.5 py-0.2 rounded">
-                                        Super
-                                      </span>
-                                    )}
-                                  </div>
-                                  <p className="text-[11px] text-slate-400 truncate">{u.email}</p>
-                                </div>
-                              </div>
-                            </td>
-
-                            {/* Role Badge + quick role dropdown */}
-                            <td className="py-3.5 px-4 relative">
-                              <div className="flex items-center gap-1.5">
-                                {getRoleBadge(u.role, u.email)}
-                                {!isSuper && (
-                                  <button
-                                    onClick={(e) => {
-                                      e.stopPropagation();
-                                      setActiveRoleDropdown(
-                                        activeRoleDropdown === u.userId ? null : u.userId
-                                      );
-                                    }}
-                                    className="p-1 rounded-md text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors"
-                                    title="Change Role"
-                                  >
-                                    <FiEdit2 className="w-3 h-3" />
-                                  </button>
-                                )}
-                              </div>
-
-                              {/* Quick Role Dropdown */}
-                              {activeRoleDropdown === u.userId && (
-                                <div
-                                  onClick={(e) => e.stopPropagation()}
-                                  className="absolute left-4 top-12 z-30 w-52 bg-white rounded-xl shadow-xl border border-slate-100 py-1 text-xs animate-dropdown"
-                                >
-                                  <p className="px-3 py-1 text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-                                    Assign Operational Role
-                                  </p>
-                                  {ROLE_DEFINITIONS.filter((r) => r.key !== "super_admin").map((r) => (
-                                    <button
-                                      key={r.key}
-                                      onClick={() => handleQuickRoleChange(u.userId, r.key)}
-                                      className="w-full px-3 py-1.5 text-left text-slate-700 hover:bg-slate-50 hover:text-blue-600 flex items-center justify-between"
-                                    >
-                                      <span>{r.name}</span>
-                                      {u.role === r.key && <FiCheck className="w-3 h-3 text-blue-600" />}
-                                    </button>
-                                  ))}
-                                </div>
-                              )}
-                            </td>
-
-                            {/* Organization */}
-                            <td className="py-3.5 px-4">
-                              {u.orgName ? (
-                                <span className="inline-flex items-center gap-1.5 text-[11px] font-medium text-slate-700 bg-slate-100 px-2.5 py-1 rounded-lg">
-                                  <FiBriefcase className="w-3 h-3 text-purple-600" />
-                                  <span className="truncate max-w-[140px]">{u.orgName}</span>
-                                </span>
-                              ) : (
-                                <span className="text-[11px] text-slate-400 italic">
-                                  {isSuper ? "Global HQ" : "Unassigned"}
-                                </span>
-                              )}
-                            </td>
-
-                            {/* Phone */}
-                            <td className="py-3.5 px-4">
-                              <span className="text-slate-600 font-mono text-[11px]">
-                                {u.phone || "—"}
-                              </span>
-                            </td>
-
-                            {/* Status switch pill */}
-                            <td className="py-3.5 px-4">
-                              <button
-                                onClick={() => !isSuper && handleToggleStatus(u)}
-                                disabled={isSuper}
-                                className={`text-[11px] font-bold px-2.5 py-0.5 rounded-full border transition-all flex items-center gap-1.5 ${
-                                  isActive
-                                    ? "bg-emerald-50 text-emerald-700 border-emerald-200"
-                                    : "bg-rose-50 text-rose-700 border-rose-200"
-                                } ${isSuper ? "cursor-default" : "cursor-pointer hover:opacity-80"}`}
-                                title={isSuper ? "Super admin is permanently active" : "Click to toggle status"}
-                              >
-                                <span
-                                  className={`w-1.5 h-1.5 rounded-full ${
-                                    isActive ? "bg-emerald-500" : "bg-rose-500"
-                                  }`}
-                                />
-                                {isActive ? "Active" : "Inactive"}
-                              </button>
-                            </td>
-
-                            {/* Actions */}
-                            <td className="py-3.5 px-4 text-right">
-                              <div className="flex items-center justify-end gap-1.5">
-                                <button
-                                  onClick={() => handleOpenEdit(u)}
-                                  className="p-1.5 text-slate-500 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors"
-                                  title="Edit Member"
-                                >
-                                  <FiEdit2 className="w-4 h-4" />
-                                </button>
-                                {!isSuper && (
-                                  <button
-                                    onClick={() => {
-                                      setUserToDelete(u);
-                                      setIsDeleteModalOpen(true);
-                                    }}
-                                    className="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
-                                    title="Delete Member"
-                                  >
-                                    <FiTrash2 className="w-4 h-4" />
-                                  </button>
-                                )}
-                              </div>
-                            </td>
-                          </tr>
-                        );
-                      })}
-                    </tbody>
-                  </table>
+                {/* DESKTOP TABLE VIEW - Common DocumentTable */}
+                <div className="hidden md:block">
+                  <DocumentTable
+                    rows={finalDisplayData}
+                    headCells={userHeadCells}
+                    onClickEdit={onClickEdit}
+                    selected={selected}
+                    setSelected={setSelected}
+                    onClickDelete={(ids) => {
+                      const idList = Array.isArray(ids) ? ids : [ids];
+                      const targets = users.filter((u) => idList.includes(u.userId) || idList.includes(u.id));
+                      const hasSuperAdmin = targets.some((u) => u.role === "super_admin" || u.email === "suraj@agnibyte.com");
+                      if (hasSuperAdmin) {
+                        showToast({ message: "Cannot delete the Super Administrator account", type: "error" });
+                        return;
+                      }
+                      setSelected(idList);
+                      setUserToDelete(targets[0] || null);
+                      setIsDeleteModalOpen(true);
+                    }}
+                    searchTerm={searchTerm}
+                    rowsPerPageOptions={[5, 10, 25, 50]}
+                    isLoading={isLoading}
+                    tableName="users"
+                  />
                 </div>
 
                 {/* MOBILE CARD VIEW */}
@@ -939,14 +1006,17 @@ export default function UsersWrapper({ pageData = {} }) {
       >
         <ResetConfirmation
           title={
-            userToDelete
-              ? `Are you sure you want to delete ${userToDelete.firstName} ${userToDelete.lastName || ""} (${userToDelete.email})?`
-              : "Are you sure you want to delete this sub-user?"
+            selected?.length > 1
+              ? `Are you sure you want to delete ${selected.length} selected team members?`
+              : userToDelete
+                ? `Are you sure you want to delete ${userToDelete.firstName || ""} ${userToDelete.lastName || ""} (${userToDelete.email})?`
+                : "Are you sure you want to delete this sub-user?"
           }
           onConfirm={handleConfirmDelete}
           onCancel={() => {
             setIsDeleteModalOpen(false);
             setUserToDelete(null);
+            setSelected([]);
           }}
           isLoading={isDeleting}
         />

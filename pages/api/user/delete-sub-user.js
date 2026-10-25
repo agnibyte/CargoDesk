@@ -6,7 +6,7 @@ export default function handler(req, res) {
     deleteUserController(request)
       .then((result) => {
         res.status(200).json(result);
-        resolve(result);
+        resolve();
       })
       .catch((error) => {
         res.status(200).json({

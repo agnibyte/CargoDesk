@@ -9,8 +9,14 @@ import {
   FiX,
   FiCheck,
   FiUserCheck,
+  FiLayers,
+  FiSlash,
 } from "react-icons/fi";
 import { ImSpinner9 } from "react-icons/im";
+import {
+  ORGANIZATION_MODULES,
+  ALL_MODULE_IDS,
+} from "@/utilities/organizationModules";
 
 export default function OrganizationModal({
   isOpen,
@@ -26,6 +32,7 @@ export default function OrganizationModal({
   const [contactPhone, setContactPhone] = useState("");
   const [address, setAddress] = useState("");
   const [status, setStatus] = useState("Active");
+  const [selectedModules, setSelectedModules] = useState(ALL_MODULE_IDS);
   const [errors, setErrors] = useState({});
 
   useEffect(() => {
@@ -36,6 +43,21 @@ export default function OrganizationModal({
       setContactPhone(orgData.contactPhone || "");
       setAddress(orgData.address || "");
       setStatus(orgData.status || "Active");
+
+      let mods = ALL_MODULE_IDS;
+      if (orgData.allowedModules) {
+        try {
+          mods =
+            typeof orgData.allowedModules === "string"
+              ? JSON.parse(orgData.allowedModules)
+              : orgData.allowedModules;
+        } catch (_) {
+          mods = String(orgData.allowedModules)
+            .split(",")
+            .map((m) => m.trim());
+        }
+      }
+      setSelectedModules(Array.isArray(mods) && mods.length > 0 ? mods : ALL_MODULE_IDS);
     } else {
       setOrgName("");
       setOrgCode("");
@@ -43,6 +65,7 @@ export default function OrganizationModal({
       setContactPhone("");
       setAddress("");
       setStatus("Active");
+      setSelectedModules(ALL_MODULE_IDS);
     }
     setErrors({});
   }, [orgData, isEdit, isOpen]);
@@ -86,6 +109,7 @@ export default function OrganizationModal({
       contactPhone: contactPhone.trim(),
       address: address.trim(),
       status: status,
+      allowedModules: selectedModules,
     };
 
     if (isEdit && orgData?.orgId) {
@@ -95,12 +119,26 @@ export default function OrganizationModal({
     onSubmit(payload);
   };
 
+  const toggleModule = (modId) => {
+    setSelectedModules((prev) =>
+      prev.includes(modId) ? prev.filter((id) => id !== modId) : [...prev, modId]
+    );
+  };
+
+  const handleSelectAllModules = () => {
+    if (selectedModules.length === ALL_MODULE_IDS.length) {
+      setSelectedModules(["dashboard"]); // keep at least dashboard
+    } else {
+      setSelectedModules(ALL_MODULE_IDS);
+    }
+  };
+
   return (
     <CommonModal
       modalOpen={isOpen}
       setModalOpen={onClose}
       backDrop={false}
-      modalSize="w-11/12 sm:max-w-lg"
+      modalSize="w-11/12 sm:max-w-2xl"
       noScroll={true}
     >
       <div className="w-full flex flex-col h-full min-h-0 overflow-hidden">
@@ -310,6 +348,80 @@ export default function OrganizationModal({
                 <span className="w-2 h-2 rounded-full bg-rose-500" />
                 Inactive
               </button>
+            </div>
+          </div>
+
+          {/* Super Admin Module Provisioning & Feature Blocking */}
+          <div className="pt-3 border-t border-slate-200/80">
+            <div className="flex items-start justify-between gap-4 mb-3">
+              <div>
+                <h4 className="text-xs font-bold text-slate-800 uppercase tracking-wider flex items-center gap-2">
+                  <FiLayers className="w-3.5 h-3.5 text-purple-600" />
+                  Organization Module Access & Feature Provisioning
+                </h4>
+                <p className="text-[11px] text-slate-500 mt-0.5">
+                  Uncheck any module (e.g. <strong>Messenger</strong>) to completely block it for this organization. Blocked pages will be hidden from the sidebar for all roles in this organization and redirected to an access restricted support page.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={handleSelectAllModules}
+                className="text-xs font-semibold text-purple-600 hover:text-purple-700 hover:underline shrink-0"
+              >
+                {selectedModules.length === ALL_MODULE_IDS.length
+                  ? "Deselect All"
+                  : "Allow All"}
+              </button>
+            </div>
+
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+              {ORGANIZATION_MODULES.map((mod) => {
+                const isAllowed = selectedModules.includes(mod.id);
+                return (
+                  <label
+                    key={mod.id}
+                    onClick={() => toggleModule(mod.id)}
+                    className={`flex items-start gap-3 p-3 rounded-xl border text-left cursor-pointer transition-all select-none ${
+                      isAllowed
+                        ? "bg-purple-50/50 border-purple-200/80 hover:bg-purple-50"
+                        : "bg-rose-50/40 border-rose-200/70 hover:bg-rose-50"
+                    }`}
+                  >
+                    <div
+                      className={`w-4 h-4 mt-0.5 rounded flex items-center justify-center shrink-0 transition-colors ${
+                        isAllowed
+                          ? "bg-purple-600 text-white"
+                          : "border border-slate-300 bg-white"
+                      }`}
+                    >
+                      {isAllowed && <FiCheck className="w-3 h-3 stroke-[3]" />}
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center justify-between gap-2">
+                        <p className="text-xs font-bold text-slate-800 truncate">
+                          {mod.name}
+                        </p>
+                        <span
+                          className={`text-[9px] font-bold px-1.5 py-0.5 rounded uppercase tracking-wider shrink-0 ${
+                            isAllowed
+                              ? "bg-purple-100 text-purple-700"
+                              : "bg-rose-100 text-rose-700 flex items-center gap-0.5"
+                          }`}
+                        >
+                          {!isAllowed && <FiSlash className="w-2.5 h-2.5" />}
+                          {isAllowed ? "Active" : "Blocked"}
+                        </span>
+                      </div>
+                      <p className="text-[10px] text-purple-600 font-mono mt-0.5 font-medium">
+                        {mod.path}
+                      </p>
+                      <p className="text-[10px] text-slate-500 leading-tight mt-0.5 line-clamp-1">
+                        {mod.desc}
+                      </p>
+                    </div>
+                  </label>
+                );
+              })}
             </div>
           </div>
         </form>

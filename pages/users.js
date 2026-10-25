@@ -22,11 +22,14 @@ export default function UsersPage({ pageData }) {
 }
 
 export const getServerSideProps = withUserSsr(async (context, { user }) => {
+  const isSuperAdmin =
+    user?.role === "super_admin" || user?.email === "suraj@agnibyte.com";
+  const filterOrgId = isSuperAdmin ? null : user?.orgId || null;
   const pageData = { user, users: [], organizations: [] };
 
   try {
     const [usersRes, orgsRes] = await Promise.all([
-      getAllUsersController(),
+      getAllUsersController(filterOrgId),
       getAllOrganizationsController(),
     ]);
 

@@ -188,8 +188,11 @@ export default function UserFormModal({
       setLastName("");
       setEmail("");
       setPhone("");
-      setRole(userData?.role || "office_staff");
-      setOrgId(organizations?.[0]?.orgId || "");
+      // Super Admin can choose; other roles are strictly locked to their own organization
+      const defaultOrgId = isSuperAdmin
+        ? (userData?.orgId || organizations?.[0]?.orgId || "")
+        : (currentUser?.orgId || "");
+      setOrgId(defaultOrgId);
       setStatus("Active");
       setPassword("");
       const defaultRole = ROLE_DEFINITIONS.find(
@@ -198,7 +201,11 @@ export default function UserFormModal({
       setSelectedPermissions(defaultRole ? defaultRole.defaultPermissions : []);
     }
     setErrors({});
-  }, [userData, isEdit, isOpen, organizations]);
+  }, [userData, isEdit, isOpen, organizations, currentUser]);
+
+  const currentOrg = organizations.find(
+    (o) => Number(o.orgId) === Number(currentUser?.orgId)
+  );
 
   const handleRoleChange = (newRole) => {
     setRole(newRole);
@@ -256,13 +263,18 @@ export default function UserFormModal({
     e.preventDefault();
     if (!validate()) return;
 
+    // Strict org security: non-super-admins cannot set or change orgId to another organization
+    const effectiveOrgId = isSuperAdmin
+      ? (orgId ? Number(orgId) : null)
+      : (currentUser?.orgId ? Number(currentUser.orgId) : (orgId ? Number(orgId) : null));
+
     const payload = {
       firstName: firstName.trim(),
       lastName: lastName.trim(),
       email: email.trim().toLowerCase(),
       phone: phone.trim(),
       role: role.toLowerCase(),
-      orgId: orgId ? Number(orgId) : null,
+      orgId: effectiveOrgId,
       status: status === "Active" ? "1" : "0",
       permissions: selectedPermissions,
     };
@@ -422,7 +434,7 @@ export default function UserFormModal({
             </h4>
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               {/* Organization Selector */}
-              {isSuperAdmin && (
+              {isSuperAdmin ? (
                 <div>
                   <label className="block text-xs font-semibold text-slate-700 mb-1">
                     Assign Organization
@@ -443,8 +455,30 @@ export default function UserFormModal({
                     </select>
                   </div>
                   <p className="text-[11px] text-slate-500 mt-1">
-                    Assign this member to a specific company or logistics
-                    center.
+                    Super Admin: Choose which company or branch this user belongs to.
+                  </p>
+                </div>
+              ) : (
+                <div>
+                  <label className="block text-xs font-semibold text-slate-700 mb-1">
+                    Organization
+                  </label>
+                  <div className="flex items-center gap-2.5 px-3.5 py-2.5 bg-slate-50 border border-slate-200 rounded-xl">
+                    <div className="w-8 h-8 rounded-lg bg-blue-100 text-blue-700 flex items-center justify-center shrink-0">
+                      <FiBriefcase className="w-4 h-4" />
+                    </div>
+                    <div className="flex-1 min-w-0">
+                      <p className="text-xs font-bold text-slate-800 truncate">
+                        {currentOrg?.orgName || "Your Organization"}
+                      </p>
+                      <p className="text-[10px] text-slate-500 flex items-center gap-1 font-medium">
+                        <FiLock className="w-3 h-3 text-slate-400" />
+                        Locked to your organization
+                      </p>
+                    </div>
+                  </div>
+                  <p className="text-[11px] text-slate-500 mt-1">
+                    Users you create are strictly provisioned for your company organization.
                   </p>
                 </div>
               )}

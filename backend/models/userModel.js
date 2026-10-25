@@ -11,20 +11,28 @@ export async function ensureUsersTable() {
   try {
     await ensureOrganizationsTable();
 
+    // Check existing columns in users table before ALTER
+    const cols = await executeQuery("SHOW COLUMNS FROM users");
+    const existingColNames = (Array.isArray(cols) ? cols : []).map((c) => c.Field);
+
     // 1. Try expanding role column to VARCHAR(50)
     try {
       await executeQuery("ALTER TABLE users MODIFY COLUMN role VARCHAR(50) DEFAULT 'office_staff'");
     } catch (_) {}
 
-    // 2. Try adding permissions column if it doesn't already exist
-    try {
-      await executeQuery("ALTER TABLE users ADD COLUMN permissions TEXT NULL");
-    } catch (_) {}
+    // 2. Add permissions column if missing
+    if (!existingColNames.includes("permissions")) {
+      try {
+        await executeQuery("ALTER TABLE users ADD COLUMN permissions TEXT NULL");
+      } catch (_) {}
+    }
 
-    // 3. Try adding orgId column if not present
-    try {
-      await executeQuery("ALTER TABLE users ADD COLUMN orgId INT NULL");
-    } catch (_) {}
+    // 3. Add orgId column if missing
+    if (!existingColNames.includes("orgId")) {
+      try {
+        await executeQuery("ALTER TABLE users ADD COLUMN orgId INT NULL");
+      } catch (_) {}
+    }
 
     // 4. Ensure suraj@agnibyte.com has role = 'super_admin'
     try {
@@ -117,7 +125,7 @@ export function getAllUsersModel(filterOrgId = null) {
   });
 }
 
-export function addNewUserModel(data) {
+export function addNewUserModel(data, authUser = null) {
   return new Promise(async (resolve, reject) => {
     try {
       await ensureUsersTable();
@@ -153,8 +161,29 @@ export function addNewUserModel(data) {
         permsStr = typeof data.permissions === "string" ? data.permissions : JSON.stringify(data.permissions);
       }
 
-      const assignedRole = (data.role || "office_staff").toLowerCase();
-      const orgId = data.orgId ? Number(data.orgId) : null;
+      let assignedRole = (data.role || "office_staff").toLowerCase();
+      let orgId = data.orgId ? Number(data.orgId) : null;
+
+      // Organization boundary enforcement for non-superadmins
+      const isSuperAdmin = authUser?.role === "super_admin" || authUser?.email === "suraj@agnibyte.com";
+      if (authUser && !isSuperAdmin) {
+        let authOrgId = authUser.orgId ? Number(authUser.orgId) : null;
+        if (!authOrgId && authUser.userId) {
+          try {
+            const uRows = await executeQuery("SELECT orgId FROM users WHERE userId = ?", [authUser.userId]);
+            if (uRows && uRows.length > 0 && uRows[0].orgId) {
+              authOrgId = Number(uRows[0].orgId);
+            }
+          } catch (e) {
+            console.error("Failed to query authUser orgId:", e);
+          }
+        }
+        // Enforce requesting user's own organization, or fallback to data.orgId
+        orgId = authOrgId || (data.orgId ? Number(data.orgId) : null);
+        if (assignedRole === "super_admin") {
+          assignedRole = "office_staff";
+        }
+      }
 
       const newUser = {
         firstName: data.firstName.trim(),
@@ -192,7 +221,7 @@ export function addNewUserModel(data) {
   });
 }
 
-export function updateUserModel(data) {
+export function updateUserModel(data, authUser = null) {
   return new Promise(async (resolve, reject) => {
     try {
       await ensureUsersTable();
@@ -203,6 +232,32 @@ export function updateUserModel(data) {
           status: false,
           message: "Valid user ID is required",
         });
+      }
+
+      // Organization boundary enforcement on edit for non-superadmins
+      const isSuperAdmin = authUser?.role === "super_admin" || authUser?.email === "suraj@agnibyte.com";
+      if (authUser && !isSuperAdmin) {
+        let authOrgId = authUser.orgId ? Number(authUser.orgId) : null;
+        if (!authOrgId && authUser.userId) {
+          try {
+            const uRows = await executeQuery("SELECT orgId FROM users WHERE userId = ?", [authUser.userId]);
+            if (uRows && uRows.length > 0 && uRows[0].orgId) {
+              authOrgId = Number(uRows[0].orgId);
+            }
+          } catch (e) {
+            console.error("Failed to query authUser orgId in updateUserModel:", e);
+          }
+        }
+        const targetUsers = await executeQuery("SELECT orgId, role FROM users WHERE userId = ?", [userId]);
+        if (targetUsers && targetUsers.length > 0) {
+          const targetUser = targetUsers[0];
+          if (authOrgId && Number(targetUser.orgId) !== authOrgId) {
+            return resolve({
+              status: false,
+              message: "You can only edit users within your own organization.",
+            });
+          }
+        }
       }
 
       // Check duplicate email for another user
@@ -222,8 +277,14 @@ export function updateUserModel(data) {
       if (data.lastName !== undefined) updateFields.lastName = data.lastName.trim();
       if (data.email !== undefined) updateFields.email = data.email.trim().toLowerCase();
       if (data.phone !== undefined) updateFields.phone = data.phone.trim();
-      if (data.role !== undefined) updateFields.role = data.role.trim().toLowerCase();
-      if (data.orgId !== undefined) {
+      if (data.role !== undefined) {
+        let newRole = data.role.trim().toLowerCase();
+        if (!isSuperAdmin && newRole === "super_admin") {
+          newRole = "office_staff";
+        }
+        updateFields.role = newRole;
+      }
+      if (data.orgId !== undefined && isSuperAdmin) {
         updateFields.orgId = data.orgId ? Number(data.orgId) : null;
       }
       if (data.status !== undefined) {
@@ -269,34 +330,36 @@ export function updateUserModel(data) {
   });
 }
 
-export function deleteUserModel(userId) {
+export function deleteUserModel(userIds) {
   return new Promise(async (resolve, reject) => {
     try {
-      const id = Number(userId);
-      if (!id || isNaN(id)) {
+      const rawIds = Array.isArray(userIds) ? userIds : [userIds];
+      const validIds = rawIds.map((id) => Number(id)).filter((id) => id && !isNaN(id));
+      if (validIds.length === 0) {
         return resolve({ status: false, message: "Valid user ID is required" });
       }
 
       // Check if user is Super Admin
-      const checkSql = `SELECT role, email FROM users WHERE userId = ?`;
-      const rows = await executeQuery(checkSql, [id]);
-      if (rows && rows.length > 0) {
-        const u = rows[0];
-        if (u.role === "super_admin" || u.email === "suraj@agnibyte.com") {
-          return resolve({
-            status: false,
-            message: "Cannot delete the Super Administrator account",
-          });
-        }
+      const checkSql = `SELECT userId, role, email FROM users WHERE userId IN (?)`;
+      const rows = await executeQuery(checkSql, [validIds]);
+      const safeIds = (rows || [])
+        .filter((u) => u.role !== "super_admin" && u.email !== "suraj@agnibyte.com")
+        .map((u) => u.userId);
+
+      if (safeIds.length === 0) {
+        return resolve({
+          status: false,
+          message: "Cannot delete the Super Administrator account",
+        });
       }
 
-      const delSql = `DELETE FROM users WHERE userId = ?`;
-      const result = await executeQuery(delSql, [id]);
+      const delSql = `DELETE FROM users WHERE userId IN (?)`;
+      const result = await executeQuery(delSql, [safeIds]);
 
       if (result && result.affectedRows > 0) {
         resolve({
           status: true,
-          message: "Sub-user deleted successfully",
+          message: `${result.affectedRows} sub-user${result.affectedRows > 1 ? "s" : ""} deleted successfully`,
         });
       } else {
         resolve({

@@ -21,9 +21,9 @@ export function getAllUsersController() {
   });
 }
 
-export function addNeUserController(request) {
+export function addNeUserController(request, authUser = null) {
   return new Promise((resolve, reject) => {
-    addNewUserModel(request)
+    addNewUserModel(request, authUser)
       .then((result) => {
         resolve(result);
       })
@@ -36,9 +36,9 @@ export function addNeUserController(request) {
   });
 }
 
-export function updateUserController(request) {
+export function updateUserController(request, authUser = null) {
   return new Promise((resolve, reject) => {
-    updateUserModel(request)
+    updateUserModel(request, authUser)
       .then((result) => {
         resolve(result);
       })
@@ -53,8 +53,8 @@ export function updateUserController(request) {
 
 export function deleteUserController(request) {
   return new Promise((resolve, reject) => {
-    const userId = request?.userId || request?.id;
-    deleteUserModel(userId)
+    const userIds = request?.ids || (request?.userId ? [request.userId] : request?.id ? [request.id] : []);
+    deleteUserModel(userIds)
       .then((result) => {
         resolve(result);
       })
