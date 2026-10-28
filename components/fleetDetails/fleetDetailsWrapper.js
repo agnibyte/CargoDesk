@@ -297,7 +297,9 @@ export default function FleetDetailsWrapper({
             />
           )}
 
-          {activeTab === "maintenance" && <MaintenancePanel fleet={fleet} />}
+          {activeTab === "maintenance" && (
+            <MaintenancePanel fleet={fleet} onRefreshFleet={fetchFleetDetails} />
+          )}
 
           {activeTab === "insurance" && (
             <DocumentsPanel

@@ -74,5 +74,16 @@ export const internalList = {
   // fleet activity history
   GET_FLEET_HISTORY: "/api/fleet/history",
   LOG_FLEET_ACTIVITY: "/api/fleet/history",
+
+  // fleet maintenance
+  GET_VEHICLES_LIST: "/api/vehicles",
+  PRESIGN_MAINTENANCE_UPLOADS: "/api/maintenance/uploads/presign",
+  CREATE_MAINTENANCE_RECORD: "/api/maintenance",
+  GET_VEHICLE_MAINTENANCE: "/api/vehicles/[vehicleId]/maintenance",
+  GET_MAINTENANCE_RECORD: "/api/maintenance/[id]",
+  UPDATE_MAINTENANCE_RECORD: "/api/maintenance/[id]",
+  DELETE_MAINTENANCE_RECORD: "/api/maintenance/[id]",
+  GET_MAINTENANCE_MEDIA_URL: "/api/maintenance/[id]/media/[mediaId]/url",
+  DELETE_MAINTENANCE_MEDIA: "/api/maintenance/[id]/media/[mediaId]",
 };
 
