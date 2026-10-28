@@ -9,35 +9,86 @@ import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import crypto from "crypto";
 import path from "path";
 
+/**
+ * Resolves storage region:
+ * - If AWS_REGION is explicitly set, uses it.
+ * - If using Cloudflare R2 (endpoint / account id provided), defaults to "auto".
+ * - Default fallback is "ap-south-1" (Mumbai) for minimum latency for Indian users.
+ */
 export function getRegion() {
-  return process.env.AWS_REGION || "ap-southeast-2";
+  if (process.env.AWS_REGION && process.env.AWS_REGION.trim() !== "") {
+    return process.env.AWS_REGION.trim();
+  }
+  if (
+    process.env.S3_ENDPOINT ||
+    process.env.AWS_S3_ENDPOINT ||
+    process.env.CLOUDFLARE_R2_ACCOUNT_ID
+  ) {
+    return "auto";
+  }
+  return "ap-south-1"; // Mumbai (lowest latency for India)
+}
+
+/**
+ * Resolves custom S3-compatible endpoint (Cloudflare R2, MinIO, or custom gateway).
+ * For standard AWS S3, returns undefined so AWS SDK constructs regional URL.
+ */
+export function getEndpoint() {
+  if (process.env.S3_ENDPOINT && process.env.S3_ENDPOINT.trim() !== "") {
+    return process.env.S3_ENDPOINT.trim();
+  }
+  if (process.env.AWS_S3_ENDPOINT && process.env.AWS_S3_ENDPOINT.trim() !== "") {
+    return process.env.AWS_S3_ENDPOINT.trim();
+  }
+  if (process.env.CLOUDFLARE_R2_ACCOUNT_ID && process.env.CLOUDFLARE_R2_ACCOUNT_ID.trim() !== "") {
+    return `https://${process.env.CLOUDFLARE_R2_ACCOUNT_ID.trim()}.r2.cloudflarestorage.com`;
+  }
+  return undefined;
 }
 
 export function getBucketName() {
   return process.env.AWS_S3_BUCKET || "cargo-desk";
 }
 
-function createS3Client() {
+let cachedClient = null;
+let cachedConfigKey = "";
+
+/**
+ * Factory that creates or returns a cached S3Client instance.
+ * Automatically adapts between AWS S3 (Mumbai/regional) and Cloudflare R2.
+ */
+export function getS3Client() {
+  const region = getRegion();
+  const endpoint = getEndpoint();
+  const accessKeyId = process.env.AWS_ACCESS_KEY_ID?.trim() || "";
+  const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY?.trim() || "";
+
+  const configKey = `${region}|${endpoint || ""}|${accessKeyId}|${secretAccessKey}`;
+  if (cachedClient && cachedConfigKey === configKey) {
+    return cachedClient;
+  }
+
   const clientConfig = {
-    region: getRegion(),
+    region,
   };
 
-  if (
-    process.env.AWS_ACCESS_KEY_ID &&
-    process.env.AWS_SECRET_ACCESS_KEY &&
-    process.env.AWS_ACCESS_KEY_ID.trim() !== "" &&
-    process.env.AWS_SECRET_ACCESS_KEY.trim() !== ""
-  ) {
+  if (endpoint) {
+    clientConfig.endpoint = endpoint;
+  }
+
+  if (accessKeyId && secretAccessKey) {
     clientConfig.credentials = {
-      accessKeyId: process.env.AWS_ACCESS_KEY_ID.trim(),
-      secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY.trim(),
+      accessKeyId,
+      secretAccessKey,
     };
   }
 
-  return new S3Client(clientConfig);
+  cachedClient = new S3Client(clientConfig);
+  cachedConfigKey = configKey;
+  return cachedClient;
 }
 
-export const s3Client = createS3Client();
+export const s3Client = getS3Client();
 
 // Supported MIME types and size limits
 export const ALLOWED_IMAGE_TYPES = new Set([
@@ -122,7 +173,7 @@ export function generateMaintenanceObjectKey(vehicleId, fileName, maintenanceId 
 }
 
 /**
- * Generates presigned PUT URL for browser direct-to-S3 upload.
+ * Generates presigned PUT URL for browser direct-to-S3/R2 upload.
  */
 export async function generatePresignedUploadUrl({
   vehicleId,
@@ -139,10 +190,8 @@ export async function generatePresignedUploadUrl({
   const s3Key = generateMaintenanceObjectKey(vehicleId, fileName, maintenanceId);
   const bucketName = getBucketName();
   const currentRegion = getRegion();
+  const client = getS3Client();
 
-  // NOTE: Do not include custom Metadata in presigned PUT command, because AWS V4 signing
-  // signs metadata headers into X-Amz-SignedHeaders and browser PUT without those exact
-  // headers will fail with SignatureDoesNotMatch.
   const command = new PutObjectCommand({
     Bucket: bucketName,
     Key: s3Key,
@@ -150,7 +199,7 @@ export async function generatePresignedUploadUrl({
   });
 
   try {
-    const uploadUrl = await getSignedUrl(s3Client, command, {
+    const uploadUrl = await getSignedUrl(client, command, {
       expiresIn: URL_EXPIRATION_SECONDS,
     });
 
@@ -171,7 +220,7 @@ export async function generatePresignedUploadUrl({
       error.message?.includes("credentials") ||
       error.message?.includes("AccessKeyId")
     ) {
-      console.warn("AWS credentials not configured locally. Providing safe development presigned URL.");
+      console.warn("Storage credentials not configured locally. Providing safe development presigned URL.");
       const mockUploadUrl = `https://${bucketName}.s3.${currentRegion}.amazonaws.com/${s3Key}?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=mock&X-Amz-Date=20261025T000000Z&X-Amz-Expires=900&X-Amz-Signature=mock_development_signature`;
       return {
         uploadUrl: mockUploadUrl,
@@ -185,13 +234,13 @@ export async function generatePresignedUploadUrl({
         },
       };
     }
-    console.error("Error generating presigned S3 upload URL:", error);
-    throw new Error("Failed to initialize secure upload. Please check AWS S3 credentials.");
+    console.error("Error generating presigned upload URL:", error);
+    throw new Error("Failed to initialize secure upload. Please check storage credentials.");
   }
 }
 
 /**
- * Direct server-to-S3 upload (used as a fallback when browser direct upload hits CORS or network restrictions).
+ * Direct server-to-storage upload (used as a fallback when browser direct upload hits CORS or network restrictions).
  */
 export async function uploadObjectDirect({ s3Key, buffer, mimeType }) {
   if (!s3Key || typeof s3Key !== "string") {
@@ -199,6 +248,7 @@ export async function uploadObjectDirect({ s3Key, buffer, mimeType }) {
   }
 
   const bucketName = getBucketName();
+  const client = getS3Client();
   const command = new PutObjectCommand({
     Bucket: bucketName,
     Key: s3Key,
@@ -206,19 +256,27 @@ export async function uploadObjectDirect({ s3Key, buffer, mimeType }) {
     ContentType: mimeType,
   });
 
-  return await s3Client.send(command);
+  return await client.send(command);
 }
 
 /**
- * Generates short-lived signed GET URL for authorized viewing.
+ * Generates short-lived signed GET URL for authorized viewing (or public custom domain/CDN if set).
  */
 export async function generateSignedGetUrl(s3Key, expiresIn = URL_EXPIRATION_SECONDS) {
   if (!s3Key || typeof s3Key !== "string") {
     throw new Error("Invalid S3 object key");
   }
 
+  // If a public CDN/custom domain is configured (e.g. CloudFront or Cloudflare R2 Custom Domain)
+  const customDomain = process.env.NEXT_PUBLIC_S3_CUSTOM_DOMAIN || process.env.S3_PUBLIC_DOMAIN;
+  if (customDomain && customDomain.trim() !== "") {
+    const cleanDomain = customDomain.trim().replace(/\/+$/, "");
+    return `${cleanDomain}/${s3Key}`;
+  }
+
   const bucketName = getBucketName();
   const currentRegion = getRegion();
+  const client = getS3Client();
 
   const command = new GetObjectCommand({
     Bucket: bucketName,
@@ -226,7 +284,7 @@ export async function generateSignedGetUrl(s3Key, expiresIn = URL_EXPIRATION_SEC
   });
 
   try {
-    const signedUrl = await getSignedUrl(s3Client, command, { expiresIn });
+    const signedUrl = await getSignedUrl(client, command, { expiresIn });
     return signedUrl;
   } catch (error) {
     if (
@@ -234,56 +292,57 @@ export async function generateSignedGetUrl(s3Key, expiresIn = URL_EXPIRATION_SEC
       error.message?.includes("credentials") ||
       error.message?.includes("AccessKeyId")
     ) {
-      console.warn("AWS credentials not configured locally. Providing safe development signed GET URL.");
+      console.warn("Storage credentials not configured locally. Providing safe development signed GET URL.");
       return `https://${bucketName}.s3.${currentRegion}.amazonaws.com/${s3Key}?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Signature=mock_view_signature`;
     }
-    console.error("Error generating signed S3 GET URL:", error);
+    console.error("Error generating signed GET URL:", error);
     throw new Error("Failed to generate secure viewing URL");
   }
 }
 
 /**
- * Deletes object from S3.
+ * Deletes object from storage.
  */
 export async function deleteS3Object(s3Key) {
   if (!s3Key || typeof s3Key !== "string") return false;
 
   const bucketName = getBucketName();
+  const client = getS3Client();
   const command = new DeleteObjectCommand({
     Bucket: bucketName,
     Key: s3Key,
   });
 
   try {
-    await s3Client.send(command);
+    await client.send(command);
     return true;
   } catch (error) {
-    console.error(`Error deleting S3 object ${s3Key}:`, error);
+    console.error(`Error deleting storage object ${s3Key}:`, error);
     return false;
   }
 }
 
 /**
- * Checks if object exists in S3 (optional validation before commit).
+ * Checks if object exists in storage.
  */
 export async function verifyS3ObjectExists(s3Key) {
   if (!s3Key || typeof s3Key !== "string") return false;
 
   const bucketName = getBucketName();
+  const client = getS3Client();
   const command = new HeadObjectCommand({
     Bucket: bucketName,
     Key: s3Key,
   });
 
   try {
-    const res = await s3Client.send(command);
+    const res = await client.send(command);
     return Boolean(res && res.ContentLength !== undefined);
   } catch (error) {
     if (error.name === "NotFound" || error.$metadata?.httpStatusCode === 404) {
       return false;
     }
-    // In dev or mock environment where bucket check cannot connect, return true
-    console.warn(`Could not verify S3 head for ${s3Key}:`, error.message);
+    console.warn(`Could not verify head for ${s3Key}:`, error.message);
     return true;
   }
 }
