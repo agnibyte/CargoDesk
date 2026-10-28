@@ -169,7 +169,10 @@ export default function MaintenanceForm({
             prev.map((f) => (f.id === item.id ? { ...f, uploadStatus: "uploading", progress: 20 } : f))
           );
 
+          let uploadSuccess = false;
+
           try {
+            // First attempt: direct PUT to presigned S3 URL
             const uploadResponse = await fetch(presignedInfo.uploadUrl, {
               method: "PUT",
               headers: {
@@ -178,32 +181,57 @@ export default function MaintenanceForm({
               body: item.file,
             });
 
-            if (!uploadResponse.ok) {
-              throw new Error(`S3 upload returned HTTP ${uploadResponse.status}`);
+            if (uploadResponse.ok) {
+              uploadSuccess = true;
+            } else {
+              console.warn(`Direct S3 upload returned HTTP ${uploadResponse.status}, trying server proxy...`);
             }
-
-            setAttachedFiles((prev) =>
-              prev.map((f) => (f.id === item.id ? { ...f, uploadStatus: "completed", progress: 100 } : f))
-            );
-
-            uploadedMediaItems.push({
-              s3_key: presignedInfo.s3Key,
-              file_name: item.fileName,
-              mime_type: item.mimeType,
-              file_size: item.fileSize,
-              media_type: item.mediaType,
-            });
-          } catch (uploadErr) {
-            console.error(`Error uploading file ${item.fileName} to S3:`, uploadErr);
-            setAttachedFiles((prev) =>
-              prev.map((f) =>
-                f.id === item.id
-                  ? { ...f, uploadStatus: "error", error: "S3 upload failed. Check network or credentials." }
-                  : f
-              )
-            );
-            throw new Error(`Failed to upload file "${item.fileName}" to Amazon S3. Please retry.`);
+          } catch (directErr) {
+            console.warn(`Direct S3 upload failed for ${item.fileName} (typically S3 CORS). Falling back to server upload...`, directErr);
           }
+
+          // Fallback: Upload via server proxy if direct upload was blocked by browser CORS
+          if (!uploadSuccess) {
+            try {
+              const proxyUrl = `/api/maintenance/uploads/proxy?s3Key=${encodeURIComponent(presignedInfo.s3Key)}&mimeType=${encodeURIComponent(item.mimeType)}`;
+              const proxyRes = await fetch(proxyUrl, {
+                method: "POST",
+                headers: {
+                  "Content-Type": item.mimeType,
+                },
+                body: item.file,
+              });
+
+              const proxyJson = await proxyRes.json();
+              if (proxyRes.ok && proxyJson?.status) {
+                uploadSuccess = true;
+              } else {
+                throw new Error(proxyJson?.message || `Proxy upload returned HTTP ${proxyRes.status}`);
+              }
+            } catch (fallbackErr) {
+              console.error(`Error uploading file ${item.fileName}:`, fallbackErr);
+              setAttachedFiles((prev) =>
+                prev.map((f) =>
+                  f.id === item.id
+                    ? { ...f, uploadStatus: "error", error: "Upload failed. Check network or credentials." }
+                    : f
+                )
+              );
+              throw new Error(`Failed to upload file "${item.fileName}". Please retry.`);
+            }
+          }
+
+          setAttachedFiles((prev) =>
+            prev.map((f) => (f.id === item.id ? { ...f, uploadStatus: "completed", progress: 100 } : f))
+          );
+
+          uploadedMediaItems.push({
+            s3_key: presignedInfo.s3Key,
+            file_name: item.fileName,
+            mime_type: item.mimeType,
+            file_size: item.fileSize,
+            media_type: item.mediaType,
+          });
         }
       }
 

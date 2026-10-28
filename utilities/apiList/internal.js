@@ -78,6 +78,7 @@ export const internalList = {
   // fleet maintenance
   GET_VEHICLES_LIST: "/api/vehicles",
   PRESIGN_MAINTENANCE_UPLOADS: "/api/maintenance/uploads/presign",
+  PROXY_MAINTENANCE_UPLOAD: "/api/maintenance/uploads/proxy",
   CREATE_MAINTENANCE_RECORD: "/api/maintenance",
   GET_VEHICLE_MAINTENANCE: "/api/vehicles/[vehicleId]/maintenance",
   GET_MAINTENANCE_RECORD: "/api/maintenance/[id]",
