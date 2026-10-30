@@ -15,6 +15,7 @@ import {
   FLEET_MAINTENANCE_STATUSES,
 } from "@/utilities/masterData";
 import { showToast } from "@/utilities/toastService";
+import { postApiData, uploadMediaFile } from "@/utilities/services/apiService";
 import {
   FiTool,
   FiTruck,
@@ -71,8 +72,7 @@ export default function MaintenanceForm({
     async function loadVehicles() {
       setLoadingVehicles(true);
       try {
-        const res = await fetch("/api/vehicles");
-        const json = await res.json();
+        const json = await postApiData("GET_VEHICLES_LIST");
         if (isMounted && json?.status && Array.isArray(json.data)) {
           setVehicles(json.data);
         }
@@ -137,14 +137,8 @@ export default function MaintenanceForm({
           })),
         };
 
-        const presignRes = await fetch("/api/maintenance/uploads/presign", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify(presignPayload),
-        });
-
-        const presignJson = await presignRes.json();
-        if (!presignRes.ok || !presignJson?.status || !Array.isArray(presignJson.data)) {
+        const presignJson = await postApiData("PRESIGN_MAINTENANCE_UPLOADS", presignPayload);
+        if (!presignJson?.status || !Array.isArray(presignJson.data)) {
           throw new Error(presignJson?.message || "Failed to generate upload authorizations.");
         }
 
@@ -169,69 +163,36 @@ export default function MaintenanceForm({
             prev.map((f) => (f.id === item.id ? { ...f, uploadStatus: "uploading", progress: 20 } : f))
           );
 
-          let uploadSuccess = false;
-
           try {
-            // First attempt: direct PUT to presigned S3 URL
-            const uploadResponse = await fetch(presignedInfo.uploadUrl, {
-              method: "PUT",
-              headers: {
-                "Content-Type": item.mimeType,
-              },
-              body: item.file,
+            await uploadMediaFile({
+              uploadUrl: presignedInfo.uploadUrl,
+              file: item.file,
+              mimeType: item.mimeType,
+              s3Key: presignedInfo.s3Key,
             });
 
-            if (uploadResponse.ok) {
-              uploadSuccess = true;
-            } else {
-              console.warn(`Direct S3 upload returned HTTP ${uploadResponse.status}, trying server proxy...`);
-            }
-          } catch (directErr) {
-            console.warn(`Direct S3 upload failed for ${item.fileName} (typically S3 CORS). Falling back to server upload...`, directErr);
+            setAttachedFiles((prev) =>
+              prev.map((f) => (f.id === item.id ? { ...f, uploadStatus: "completed", progress: 100 } : f))
+            );
+
+            uploadedMediaItems.push({
+              s3_key: presignedInfo.s3Key,
+              file_name: item.fileName,
+              mime_type: item.mimeType,
+              file_size: item.fileSize,
+              media_type: item.mediaType,
+            });
+          } catch (uploadErr) {
+            console.error(`Error uploading file ${item.fileName}:`, uploadErr);
+            setAttachedFiles((prev) =>
+              prev.map((f) =>
+                f.id === item.id
+                  ? { ...f, uploadStatus: "error", error: uploadErr.message || "Upload failed." }
+                  : f
+              )
+            );
+            throw new Error(`Failed to upload file "${item.fileName}". Please retry.`);
           }
-
-          // Fallback: Upload via server proxy if direct upload was blocked by browser CORS
-          if (!uploadSuccess) {
-            try {
-              const proxyUrl = `/api/maintenance/uploads/proxy?s3Key=${encodeURIComponent(presignedInfo.s3Key)}&mimeType=${encodeURIComponent(item.mimeType)}`;
-              const proxyRes = await fetch(proxyUrl, {
-                method: "POST",
-                headers: {
-                  "Content-Type": item.mimeType,
-                },
-                body: item.file,
-              });
-
-              const proxyJson = await proxyRes.json();
-              if (proxyRes.ok && proxyJson?.status) {
-                uploadSuccess = true;
-              } else {
-                throw new Error(proxyJson?.message || `Proxy upload returned HTTP ${proxyRes.status}`);
-              }
-            } catch (fallbackErr) {
-              console.error(`Error uploading file ${item.fileName}:`, fallbackErr);
-              setAttachedFiles((prev) =>
-                prev.map((f) =>
-                  f.id === item.id
-                    ? { ...f, uploadStatus: "error", error: "Upload failed. Check network or credentials." }
-                    : f
-                )
-              );
-              throw new Error(`Failed to upload file "${item.fileName}". Please retry.`);
-            }
-          }
-
-          setAttachedFiles((prev) =>
-            prev.map((f) => (f.id === item.id ? { ...f, uploadStatus: "completed", progress: 100 } : f))
-          );
-
-          uploadedMediaItems.push({
-            s3_key: presignedInfo.s3Key,
-            file_name: item.fileName,
-            mime_type: item.mimeType,
-            file_size: item.fileSize,
-            media_type: item.mediaType,
-          });
         }
       }
 
@@ -251,25 +212,18 @@ export default function MaintenanceForm({
         additional_notes: formData.additional_notes || null,
       };
 
-      let endpoint = "/api/maintenance";
-      let method = "POST";
+      let saveJson;
 
       if (isEdit && initialData?.id) {
-        endpoint = `/api/maintenance/${initialData.id}`;
-        method = "PATCH";
+        payload.id = initialData.id;
         payload.newMedia = uploadedMediaItems;
+        saveJson = await postApiData("UPDATE_MAINTENANCE_RECORD", payload);
       } else {
         payload.media = uploadedMediaItems;
+        saveJson = await postApiData("ADD_NEW_MAINTENANCE", payload);
       }
 
-      const saveRes = await fetch(endpoint, {
-        method,
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(payload),
-      });
-
-      const saveJson = await saveRes.json();
-      if (!saveRes.ok || !saveJson?.status) {
+      if (!saveJson?.status) {
         throw new Error(saveJson?.message || "Failed to save maintenance record.");
       }
 
@@ -566,3 +520,7 @@ export default function MaintenanceForm({
     </form>
   );
 }
+
+// Export MaintenanceFormV2 alongside existing MaintenanceForm for backward compatibility & convenience
+export { default as MaintenanceFormV2 } from "./maintenanceFormV2";
+

@@ -197,6 +197,20 @@ export async function getMaintenanceByIdController(id) {
     if (!record) {
       return { status: false, code: 404, message: "Maintenance record not found." };
     }
+
+    // Attach signed viewing URLs to media items so client components can preview immediately
+    if (Array.isArray(record.media) && record.media.length > 0) {
+      await Promise.all(
+        record.media.map(async (m) => {
+          try {
+            m.signedUrl = await generateSignedGetUrl(m.s3_key);
+          } catch (urlErr) {
+            console.warn(`Could not sign url for ${m.s3_key}:`, urlErr?.message);
+          }
+        })
+      );
+    }
+
     return {
       status: true,
       code: 200,

@@ -51,8 +51,7 @@ export default function FleetDetailsWrapper({
     setLoading(true);
     setError(null);
     try {
-      const res = await fetch(`/api/fleet/get-by-id?id=${id}`);
-      const result = await res.json();
+      const result = await postApiData("GET_FLEET_BY_ID", { id });
       if (result?.status && result?.data) {
         setFleet(result.data);
       } else {

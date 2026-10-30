@@ -22,17 +22,19 @@ import {
   FiVideo,
   FiFilter,
   FiClock,
+  FiCamera,
 } from "react-icons/fi";
 import { HiOutlineTruck, HiOutlineDocumentText } from "react-icons/hi";
 import { ImSpinner9 } from "react-icons/im";
 import CommonModal from "../../common/commonModal";
-import MaintenanceForm from "../../fleetMaintenance/maintenanceForm";
+import MaintenanceForm, { MaintenanceFormV2 } from "../../fleetMaintenance/maintenanceForm";
 import MaintenanceDetailsModal from "../../fleetMaintenance/maintenanceDetailsModal";
 import {
   FLEET_MAINTENANCE_TYPES,
   FLEET_MAINTENANCE_STATUSES,
 } from "@/utilities/masterData";
 import { showToast } from "@/utilities/toastService";
+import { postApiData } from "@/utilities/services/apiService";
 
 /**
  * Overview Tab Panel
@@ -117,6 +119,17 @@ export function OverviewPanel({ fleet, onNavigateTab, onAddDocument }) {
             View EMI schedule <FiArrowRight className="w-3 h-3" />
           </button>
         </div>
+        {fleet?.gps_tracking_id && <div className="bg-white p-4 rounded-2xl border border-slate-200/80 shadow-2xs">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+              GPS Tracking ID
+            </span>
+            <FiCreditCard className="w-4 h-4 text-indigo-500" />
+          </div>
+          <div className="mt-2 text-xl font-bold text-slate-900">
+            {fleet?.gps_tracking_id}
+          </div>
+        </div>}
       </div>
 
       {/* Vehicle Operational Notes */}
@@ -463,6 +476,7 @@ export function MaintenancePanel({ fleet, onRefreshFleet }) {
 
   // Modals state
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isQuickReportOpen, setIsQuickReportOpen] = useState(false);
   const [selectedRecordForDetails, setSelectedRecordForDetails] = useState(null);
   const [selectedRecordForEdit, setSelectedRecordForEdit] = useState(null);
 
@@ -472,17 +486,18 @@ export function MaintenancePanel({ fleet, onRefreshFleet }) {
       if (!fleet?.id) return;
       setLoading(true);
 
-      const params = new URLSearchParams();
-      params.set("page", String(currentPage));
-      params.set("limit", "10");
-      if (status && status !== "all") params.set("status", status);
-      if (type && type !== "all") params.set("maintenance_type", type);
-      if (search && search.trim() !== "") params.set("search", search.trim());
-
       try {
-        const res = await fetch(`/api/vehicles/${fleet.id}/maintenance?${params.toString()}`);
-        const json = await res.json();
-        if (res.ok && json?.status) {
+        const payload = {
+          vehicleId: fleet.id,
+          page: currentPage,
+          limit: 10,
+        };
+        if (status && status !== "all") payload.status = status;
+        if (type && type !== "all") payload.maintenance_type = type;
+        if (search && search.trim() !== "") payload.search = search.trim();
+
+        const json = await postApiData("GET_VEHICLE_MAINTENANCE", payload);
+        if (json?.status) {
           setRecords(Array.isArray(json.data) ? json.data : []);
           if (json.summary) {
             setSummary(json.summary);
@@ -518,11 +533,8 @@ export function MaintenancePanel({ fleet, onRefreshFleet }) {
     }
 
     try {
-      const res = await fetch(`/api/maintenance/${recordToDelete.id}`, {
-        method: "DELETE",
-      });
-      const json = await res.json();
-      if (res.ok && json?.status) {
+      const json = await postApiData("DELETE_MAINTENANCE_RECORD", { id: recordToDelete.id });
+      if (json?.status) {
         showToast({ message: "Maintenance record deleted successfully", type: "success" });
         if (selectedRecordForDetails?.id === recordToDelete.id) {
           setSelectedRecordForDetails(null);
@@ -675,15 +687,27 @@ export function MaintenancePanel({ fleet, onRefreshFleet }) {
           </div>
         </div>
 
-        {/* Log Maintenance Button */}
-        <button
-          type="button"
-          onClick={() => setIsAddModalOpen(true)}
-          className="inline-flex items-center justify-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-xl shadow-xs transition-colors cursor-pointer shrink-0"
-        >
-          <FiPlus className="w-4 h-4" />
-          <span>Log Maintenance</span>
-        </button>
+        {/* Action Buttons: Quick Report V2 & Full Log Form */}
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={() => setIsQuickReportOpen(true)}
+            className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white text-xs font-bold rounded-xl shadow-xs transition-all cursor-pointer shrink-0"
+            title="Ultra-simple mobile report with camera & voice"
+          >
+            <FiCamera className="w-3.5 h-3.5" />
+            <span>Quick Report (V2)</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setIsAddModalOpen(true)}
+            className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-xl shadow-xs transition-colors cursor-pointer shrink-0"
+          >
+            <FiPlus className="w-4 h-4" />
+            <span>Log Maintenance</span>
+          </button>
+        </div>
       </div>
 
       {/* 3. Maintenance Records List */}
@@ -861,15 +885,45 @@ export function MaintenancePanel({ fleet, onRefreshFleet }) {
               ? "No maintenance records match your current filter criteria."
               : `Keep vehicle ${fleet?.vehicle_number} in peak operational shape by logging regular services, repairs, and inspections.`}
           </p>
-          <button
-            type="button"
-            onClick={() => setIsAddModalOpen(true)}
-            className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-xl shadow-xs transition-colors cursor-pointer"
-          >
-            <FiPlus className="w-4 h-4" />
-            <span>Log First Maintenance Record</span>
-          </button>
+          <div className="flex items-center gap-3 flex-wrap justify-center">
+            <button
+              type="button"
+              onClick={() => setIsQuickReportOpen(true)}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white text-xs font-bold rounded-xl shadow-xs transition-all cursor-pointer"
+            >
+              <FiCamera className="w-4 h-4" />
+              <span>Quick Report (V2)</span>
+            </button>
+            <button
+              type="button"
+              onClick={() => setIsAddModalOpen(true)}
+              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-xl shadow-xs transition-colors cursor-pointer"
+            >
+              <FiPlus className="w-4 h-4" />
+              <span>Log Standard Maintenance</span>
+            </button>
+          </div>
         </div>
+      )}
+
+      {/* Quick Report V2 Modal */}
+      {isQuickReportOpen && (
+        <CommonModal
+          modalOpen={isQuickReportOpen}
+          setModalOpen={setIsQuickReportOpen}
+          modalTitle="Quick Report — Maintenance V2"
+          modalSize="w-11/12 md:w-[600px]"
+        >
+          <MaintenanceFormV2
+            preselectedVehicle={fleet}
+            onClose={() => setIsQuickReportOpen(false)}
+            onSuccess={() => {
+              setIsQuickReportOpen(false);
+              fetchMaintenance(1);
+              if (onRefreshFleet && fleet?.id) onRefreshFleet(fleet.id);
+            }}
+          />
+        </CommonModal>
       )}
 
       {/* Add Maintenance Modal */}
@@ -936,9 +990,8 @@ export function MaintenancePanel({ fleet, onRefreshFleet }) {
             }}
             onRefresh={async () => {
               try {
-                const res = await fetch(`/api/maintenance/${selectedRecordForDetails.id}`);
-                const json = await res.json();
-                if (res.ok && json?.status && json?.data) {
+                const json = await postApiData("GET_MAINTENANCE_RECORD", { id: selectedRecordForDetails.id });
+                if (json?.status && json?.data) {
                   setSelectedRecordForDetails(json.data);
                 }
               } catch (_) {}

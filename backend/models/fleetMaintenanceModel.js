@@ -164,6 +164,7 @@ export async function createMaintenanceRecordModel(data, authUser = null) {
         cost: parsedCost,
         status: cleanStatus,
         date: cleanDate,
+        media: savedMedia,
       },
       changedFields: ["maintenance_type", "cost", "status", "maintenance_date"],
       performedByName: userName,
@@ -172,6 +173,8 @@ export async function createMaintenanceRecordModel(data, authUser = null) {
         vehicle_number: vehicle.vehicle_number,
         cost: parsedCost,
         garage: garage_name || null,
+        maintenance_id: result.id,
+        media: savedMedia,
       },
     });
   } catch (actErr) {

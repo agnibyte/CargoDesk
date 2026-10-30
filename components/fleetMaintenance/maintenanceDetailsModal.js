@@ -21,6 +21,7 @@ import {
 } from "react-icons/fi";
 import { ImSpinner9 } from "react-icons/im";
 import { showToast } from "@/utilities/toastService";
+import { postApiData } from "@/utilities/services/apiService";
 
 export default function MaintenanceDetailsModal({
   record,
@@ -50,9 +51,11 @@ export default function MaintenanceDetailsModal({
 
     setLoadingMediaId(mediaItem.id);
     try {
-      const res = await fetch(`/api/maintenance/${record.id}/media/${mediaItem.id}/url`);
-      const json = await res.json();
-      if (res.ok && json?.status && json?.data?.signedUrl) {
+      const json = await postApiData("GET_MAINTENANCE_MEDIA_URL", {
+        maintenanceId: record.id,
+        mediaId: mediaItem.id,
+      });
+      if (json?.status && json?.data?.signedUrl) {
         setMediaSignedUrls((prev) => ({
           ...prev,
           [mediaItem.id]: json.data.signedUrl,
@@ -81,11 +84,11 @@ export default function MaintenanceDetailsModal({
 
     setIsDeletingMedia(true);
     try {
-      const res = await fetch(`/api/maintenance/${record.id}/media/${mediaItem.id}`, {
-        method: "DELETE",
+      const json = await postApiData("DELETE_MAINTENANCE_MEDIA", {
+        maintenanceId: record.id,
+        mediaId: mediaItem.id,
       });
-      const json = await res.json();
-      if (res.ok && json?.status) {
+      if (json?.status) {
         showToast({ message: "Attachment deleted successfully", type: "success" });
         if (selectedMedia?.id === mediaItem.id) {
           setSelectedMedia(null);
@@ -107,13 +110,11 @@ export default function MaintenanceDetailsModal({
     if (newStatus === record.status) return;
     setIsUpdatingStatus(true);
     try {
-      const res = await fetch(`/api/maintenance/${record.id}`, {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ status: newStatus }),
+      const json = await postApiData("UPDATE_MAINTENANCE_RECORD", {
+        id: record.id,
+        status: newStatus,
       });
-      const json = await res.json();
-      if (res.ok && json?.status) {
+      if (json?.status) {
         showToast({ message: `Maintenance status updated to ${newStatus}`, type: "success" });
         if (onStatusChange) onStatusChange(newStatus);
         if (onRefresh) onRefresh();
