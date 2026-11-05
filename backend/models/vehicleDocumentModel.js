@@ -106,34 +106,78 @@ export function addNewVehicleDocument(request, authUser = null) {
   });
 }
 
-export function getAllVehicleDocuments(authUser = null) {
+export function getAllVehicleDocuments(request = {}, user = null) {
   return new Promise(async (resolve, reject) => {
     try {
-      let orgId = authUser?.orgId ? Number(authUser.orgId) : null;
-      const isSuperAdmin =
-        authUser?.role === "super_admin" || authUser?.email === "suraj@agnibyte.com";
 
-      // Build dynamic WHERE clause based on role and organization
+      let orgId = user?.orgId ? Number(user.orgId) : null;
+      const isSuperAdmin =
+        user?.role === "super_admin" || user?.email === "suraj@agnibyte.com";
+
+      // 2. Parse pagination parameters
+      // Paginate if page/limit/rowsPerPage is provided, or paginate: true is requested
+      const requestedPagination =
+        request?.page !== undefined ||
+        request?.limit !== undefined ||
+        request?.rowsPerPage !== undefined ||
+        request?.paginate === true;
+
+      const isPaginated =
+        requestedPagination &&
+        request?.paginate !== false &&
+        request?.limit !== -1 &&
+        request?.limit !== "all";
+
+      const page = Math.max(1, parseInt(request?.page, 10) || 1);
+      const limit = Math.max(
+        1,
+        Math.min(100, parseInt(request?.limit || request?.rowsPerPage, 10) || 10)
+      );
+      const offset = (page - 1) * limit;
+
+      // 3. Build dynamic WHERE conditions
       const whereClauses = [];
       const params = [];
 
+      // Organization boundary check
       if (!isSuperAdmin) {
         if (orgId) {
-          // Regular user: strictly limit to their organization (plus legacy null records if desired)
           whereClauses.push("(vd.orgId = ? OR vd.orgId IS NULL)");
           params.push(orgId);
         } else {
           whereClauses.push("vd.orgId IS NULL");
         }
-      // } else if (request?.orgId) {
-      //   // Super admin explicitly filtering by a specific organization
-      //   whereClauses.push("vd.orgId = ?");
-      //   params.push(Number(request.orgId));
+      } else if (request?.orgId) {
+        whereClauses.push("vd.orgId = ?");
+        params.push(Number(request.orgId));
       }
 
-      const whereSQL = whereClauses.length > 0 ? `WHERE ${whereClauses.join(" AND ")}` : "";
+      // Optional filters: fleetId / vehicleNo
+      if (request?.fleet_id || request?.fleetId) {
+        whereClauses.push("vd.fleet_id = ?");
+        params.push(Number(request.fleet_id || request.fleetId));
+      }
 
-      const selectQuery = `
+      // Optional filters: documentType
+      if (request?.documentType && request.documentType !== "all") {
+        whereClauses.push("vd.documentType = ?");
+        params.push(request.documentType);
+      }
+
+      // Optional search keyword across vehicle number, document type, or notes
+      if (request?.search && String(request.search).trim()) {
+        const searchVal = `%${String(request.search).trim()}%`;
+        whereClauses.push(
+          "(vd.vehicleNo LIKE ? OR vd.documentType LIKE ? OR vd.note LIKE ? OR f.vehicle_number LIKE ? OR f.vehicle_model LIKE ?)"
+        );
+        params.push(searchVal, searchVal, searchVal, searchVal, searchVal);
+      }
+
+      const whereSQL =
+        whereClauses.length > 0 ? `WHERE ${whereClauses.join(" AND ")}` : "";
+
+      // 4. Data query with LIMIT & OFFSET
+      const dataQuery = `
         SELECT 
           vd.*,
           COALESCE(vd.fleet_id, f.id) AS fleet_id,
@@ -152,14 +196,47 @@ export function getAllVehicleDocuments(authUser = null) {
         )
         ${whereSQL}
         ORDER BY vd.id DESC
+        ${isPaginated ? "LIMIT ? OFFSET ?" : ""}
       `;
 
-      const result = await executeQuery(selectQuery, params);
+      // 5. Total count query for pagination metadata
+      const countQuery = `
+        SELECT COUNT(*) AS total
+        FROM vehicle_documents vd
+        LEFT JOIN fleets f ON (
+          (vd.fleet_id IS NOT NULL AND vd.fleet_id = f.id)
+          OR (
+            vd.fleet_id IS NULL 
+            AND REPLACE(REPLACE(vd.vehicleNo, ' ', ''), '-', '') COLLATE utf8mb4_general_ci = 
+                REPLACE(REPLACE(f.vehicle_number, ' ', ''), '-', '') COLLATE utf8mb4_general_ci
+          )
+        )
+        ${whereSQL}
+      `;
+
+      const dataParams = isPaginated ? [...params, limit, offset] : params;
+
+      const [result, countResult] = await Promise.all([
+        executeQuery(dataQuery, dataParams),
+        executeQuery(countQuery, params),
+      ]);
+
+      const total = countResult?.[0]?.total || 0;
+      const totalPages = isPaginated ? Math.ceil(total / limit) || 1 : 1;
 
       resolve({
         success: true,
         status: true,
         data: Array.isArray(result) ? result : [],
+        pagination: {
+          page: isPaginated ? page : 1,
+          limit: isPaginated ? limit : total,
+          totalRecords: total,
+          totalPages,
+          hasNextPage: isPaginated ? page < totalPages : false,
+          hasPrevPage: isPaginated ? page > 1 : false,
+        },
+        total,
       });
     } catch (error) {
       console.error("Error fetching vehicle documents:", error);
