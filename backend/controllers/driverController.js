@@ -31,10 +31,10 @@ export function addNewDriverController(request, authUser = null) {
   });
 }
 
-export function updateDriverController(request) {
+export function updateDriverController(request, authUser = null) {
   return new Promise((resolve, reject) => {
     const id = request.id;
-    updateDriverModel(id, request)
+    updateDriverModel(id, request, authUser)
       .then((result) => {
         resolve(result);
       })
@@ -44,9 +44,9 @@ export function updateDriverController(request) {
   });
 }
 
-export function deleteDriverController(ids) {
+export function deleteDriverController(ids, authUser = null) {
   return new Promise((resolve, reject) => {
-    deleteDriverModel(ids)
+    deleteDriverModel(ids, authUser)
       .then((result) => {
         resolve(result);
       })

@@ -321,10 +321,35 @@ export function addNewFleetModel(data, authUser = null) {
         authUser?.role === "super_admin" ||
         authUser?.email === "suraj@agnibyte.com";
 
-      if (isSuperAdmin && data?.orgId) {
-        orgId = Number(data.orgId);
-      } else if (!orgId && data?.orgId) {
-        orgId = Number(data.orgId);
+      // 2. Organization Validation:
+      // Super Admin can assign fleet to an organization via orgId / organization_id
+      // Non-Super Admin MUST belong to an organization and cannot spoof/override it
+      const targetOrg = data?.orgId || data?.organization_id || data?.org_id;
+      if (isSuperAdmin) {
+        if (targetOrg && Number(targetOrg) > 0) {
+          orgId = Number(targetOrg);
+        }
+      } else {
+        if (!orgId) {
+          return resolve({
+            status: false,
+            message: "Organization ID is required. Your user account is not associated with an organization.",
+          });
+        }
+      }
+
+      // If orgId is resolved, verify the organization exists
+      if (orgId) {
+        const orgRows = await executeQuery(
+          "SELECT orgId, status FROM organizations WHERE orgId = ? LIMIT 1",
+          [orgId]
+        );
+        if (!orgRows || orgRows.length === 0) {
+          return resolve({
+            status: false,
+            message: "The specified organization does not exist.",
+          });
+        }
       }
 
       const {
@@ -350,6 +375,27 @@ export function addNewFleetModel(data, authUser = null) {
         Number(driver_id) > 0
           ? Number(driver_id)
           : null;
+
+      // 3. Cross-tenant driver assignment validation
+      if (parsedDriverId) {
+        const driverRows = await executeQuery(
+          "SELECT id, orgId, driver_name FROM drivers WHERE id = ? LIMIT 1",
+          [parsedDriverId]
+        );
+        if (!driverRows || driverRows.length === 0) {
+          return resolve({
+            status: false,
+            message: "Selected driver does not exist.",
+          });
+        }
+        const driverRecord = driverRows[0];
+        if (orgId && driverRecord.orgId && Number(driverRecord.orgId) !== Number(orgId)) {
+          return resolve({
+            status: false,
+            message: "Cannot assign a driver belonging to a different organization.",
+          });
+        }
+      }
 
       const payload = {
         orgId: orgId || null,
@@ -459,10 +505,53 @@ export function addNewFleetModel(data, authUser = null) {
   });
 }
 
-export function updateFleetModel(id, data) {
+export function updateFleetModel(id, data, authUser = null) {
   return new Promise(async (resolve, reject) => {
     try {
-      // await ensureFleetTable();
+      // 1. Resolve Organization ID securely from server session
+      let orgId = authUser?.orgId ? Number(authUser.orgId) : null;
+      if (!orgId && authUser?.userId) {
+        const uRows = await executeQuery(
+          "SELECT orgId FROM users WHERE userId = ? LIMIT 1",
+          [authUser.userId],
+        );
+        if (uRows?.[0]?.orgId) {
+          orgId = Number(uRows[0].orgId);
+        }
+      }
+
+      const isSuperAdmin =
+        authUser?.role === "super_admin" ||
+        authUser?.email === "suraj@agnibyte.com";
+
+      // Fetch old record and old driver for diffing and audit trail
+      const oldRows = await executeQuery(`SELECT * FROM fleets WHERE id = ?`, [
+        id,
+      ]);
+      const oldFleet =
+        Array.isArray(oldRows) && oldRows.length > 0 ? oldRows[0] : null;
+
+      if (!oldFleet) {
+        return resolve({
+          status: false,
+          message: "Fleet vehicle not found.",
+        });
+      }
+
+      // Organization boundary check for non-superadmin
+      if (authUser && !isSuperAdmin && orgId && oldFleet.orgId && Number(oldFleet.orgId) !== Number(orgId)) {
+        return resolve({
+          status: false,
+          message: "Unauthorized: You cannot modify a fleet vehicle belonging to another organization.",
+        });
+      }
+
+      // Super Admin can update fleet's orgId
+      const targetOrg = data?.orgId || data?.organization_id || data?.org_id;
+      let newOrgId = undefined;
+      if (isSuperAdmin && targetOrg !== undefined) {
+        newOrgId = targetOrg ? Number(targetOrg) : null;
+      }
 
       const parsedDriverId =
         data.driver_id !== undefined
@@ -473,7 +562,27 @@ export function updateFleetModel(id, data) {
             : null
           : undefined;
 
+      // Validate driver assignment cross-tenant
+      if (parsedDriverId) {
+        const effectiveOrgId = newOrgId !== undefined ? newOrgId : (oldFleet.orgId || orgId);
+        if (effectiveOrgId) {
+          const driverRows = await executeQuery(
+            "SELECT id, orgId, driver_name FROM drivers WHERE id = ? LIMIT 1",
+            [parsedDriverId]
+          );
+          if (driverRows && driverRows.length > 0 && driverRows[0].orgId) {
+            if (Number(driverRows[0].orgId) !== Number(effectiveOrgId)) {
+              return resolve({
+                status: false,
+                message: "Cannot assign a driver belonging to a different organization.",
+              });
+            }
+          }
+        }
+      }
+
       const updateData = {
+        orgId: newOrgId,
         vehicle_number: data.vehicle_number
           ? data.vehicle_number.toUpperCase().trim()
           : undefined,
@@ -657,7 +766,7 @@ export function updateFleetModel(id, data) {
   });
 }
 
-export function deleteFleetModel(ids) {
+export function deleteFleetModel(ids, authUser = null) {
   return new Promise(async (resolve, reject) => {
     try {
       if (!Array.isArray(ids) || ids.length === 0) {
@@ -665,6 +774,34 @@ export function deleteFleetModel(ids) {
           status: false,
           message: "No vehicle IDs provided for deletion",
         });
+      }
+
+      let orgId = authUser?.orgId ? Number(authUser.orgId) : null;
+      if (!orgId && authUser?.userId) {
+        const uRows = await executeQuery(
+          "SELECT orgId FROM users WHERE userId = ? LIMIT 1",
+          [authUser.userId],
+        );
+        if (uRows?.[0]?.orgId) {
+          orgId = Number(uRows[0].orgId);
+        }
+      }
+
+      const isSuperAdmin =
+        authUser?.role === "super_admin" ||
+        authUser?.email === "suraj@agnibyte.com";
+
+      if (authUser && !isSuperAdmin && orgId) {
+        const forbiddenFleets = await executeQuery(
+          `SELECT id FROM fleets WHERE id IN (?) AND (orgId IS NOT NULL AND orgId != ?)`,
+          [ids, orgId]
+        );
+        if (forbiddenFleets && forbiddenFleets.length > 0) {
+          return resolve({
+            status: false,
+            message: "Unauthorized: Cannot delete vehicles belonging to another organization.",
+          });
+        }
       }
 
       // Fetch fleet info before deletion for permanent audit logging

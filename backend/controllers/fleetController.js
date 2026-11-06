@@ -42,10 +42,10 @@ export function addNewFleetController(request, authUser = null) {
   });
 }
 
-export function updateFleetController(request) {
+export function updateFleetController(request, authUser = null) {
   return new Promise((resolve, reject) => {
     const id = request.id;
-    updateFleetModel(id, request)
+    updateFleetModel(id, request, authUser)
       .then((result) => {
         resolve(result);
       })
@@ -55,9 +55,9 @@ export function updateFleetController(request) {
   });
 }
 
-export function deleteFleetController(ids) {
+export function deleteFleetController(ids, authUser = null) {
   return new Promise((resolve, reject) => {
-    deleteFleetModel(ids)
+    deleteFleetModel(ids, authUser)
       .then((result) => {
         resolve(result);
       })
