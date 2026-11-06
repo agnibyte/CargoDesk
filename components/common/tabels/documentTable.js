@@ -19,6 +19,7 @@ import {
   FiCheck,
 } from "react-icons/fi";
 import StatusBadge from "../statusBadge";
+import { resolveMediaUrl } from "@/utilities/services/apiService";
 import {
   convertToUpperCase,
   formatDate,
@@ -122,21 +123,36 @@ const renderAvatarCell = (value, row) => {
   const name = row?.driver_name || row?.name || row?.title || "U";
   const initials = name
     .split(" ")
+    .filter(Boolean)
     .map((n) => n[0])
     .join("")
     .substring(0, 2)
-    .toUpperCase();
+    .toUpperCase() || "DR";
 
-  const photoUrl = value || row?.profile_photo || row?.photo || row?.avatar;
+  const rawPhoto = value || row?.profile_photo || row?.photo || row?.avatar;
+  const photoUrl = resolveMediaUrl(rawPhoto);
 
   return (
     <div className="relative shrink-0 w-9 h-9">
       {photoUrl ? (
-        <img
-          src={photoUrl}
-          alt={name}
-          className="w-9 h-9 rounded-xl object-cover border border-slate-200 shadow-2xs"
-        />
+        <>
+          <img
+            src={photoUrl}
+            alt={name}
+            onError={(e) => {
+              e.currentTarget.style.display = "none";
+              const fb = e.currentTarget.nextElementSibling;
+              if (fb) fb.style.display = "flex";
+            }}
+            className="w-9 h-9 rounded-xl object-cover border border-slate-200 shadow-2xs"
+          />
+          <div
+            style={{ display: "none" }}
+            className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-bold text-xs items-center justify-center shadow-2xs"
+          >
+            {initials}
+          </div>
+        </>
       ) : (
         <div className="w-9 h-9 rounded-xl bg-gradient-to-tr from-blue-600 to-indigo-600 text-white font-bold text-xs flex items-center justify-center shadow-2xs">
           {initials}

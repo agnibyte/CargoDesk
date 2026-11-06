@@ -1,5 +1,6 @@
 import executeQuery, { executeTransaction } from "@/helpers/dbConnection";
 import { logFleetActivity } from "./fleetActivityModel";
+import { getMediaProxyUrl, extractS3Key } from "../services/s3Service";
 
 let isTableInitialized = false;
 
@@ -240,9 +241,48 @@ export function getAllDriversModel(requestOrUser = {}, authUser = null) {
         ORDER BY d.id DESC
       `;
       const rows = await executeQuery(selectQuery, params);
+
+      const processedRows = (Array.isArray(rows) ? rows : []).map((row) => {
+        let photo = row.profile_photo;
+        if (photo && typeof photo === "string") {
+          const s3Key = extractS3Key(photo);
+          if (s3Key) {
+            photo = getMediaProxyUrl(s3Key);
+          }
+        }
+
+        let docs = row.supporting_documents;
+        if (docs && typeof docs === "string" && docs.trim().startsWith("[")) {
+          try {
+            const parsedDocs = JSON.parse(docs);
+            if (Array.isArray(parsedDocs)) {
+              docs = parsedDocs.map((d) => {
+                const s3Key = d.s3Key || extractS3Key(d.dataUrl || d.url);
+                if (s3Key) {
+                  const mediaUrl = getMediaProxyUrl(s3Key);
+                  return {
+                    ...d,
+                    s3Key,
+                    dataUrl: mediaUrl,
+                    url: mediaUrl,
+                  };
+                }
+                return d;
+              });
+            }
+          } catch (_) {}
+        }
+
+        return {
+          ...row,
+          profile_photo: photo,
+          supporting_documents: docs,
+        };
+      });
+
       resolve({
         status: true,
-        data: Array.isArray(rows) ? rows : [],
+        data: processedRows,
         message: "Drivers fetched successfully",
       });
     } catch (error) {

@@ -269,10 +269,10 @@ export async function compressImageFile(file, options = {}) {
  * @param {string} params.s3Key - Safe storage key for proxy fallback
  * @returns {Promise<{ status: boolean, mode: string }>}
  */
-export async function uploadMediaFile({ uploadUrl, file, mimeType, s3Key }) {
+export async function uploadMediaFile({ uploadUrl, file, mimeType, s3Key, proxyEndpoint = null }) {
   // If image is larger than 500 KB, compress it before network transmission
   let uploadFile = file;
-  let uploadMime = mimeType;
+  let uploadMime = mimeType || file?.type || "application/octet-stream";
   if (file && file.type && file.type.startsWith("image/") && file.size > 500 * 1024) {
     try {
       uploadFile = await compressImageFile(file);
@@ -302,8 +302,11 @@ export async function uploadMediaFile({ uploadUrl, file, mimeType, s3Key }) {
 
   // 2. Fallback: Upload via server proxy if direct upload was blocked
   if (s3Key) {
-    const proxyEndpoint = apiList.PROXY_MAINTENANCE_UPLOAD || "/api/maintenance/uploads/proxy";
-    const proxyUrl = `${proxyEndpoint}?s3Key=${encodeURIComponent(s3Key)}&mimeType=${encodeURIComponent(uploadMime)}`;
+    const defaultProxy = s3Key.startsWith("drivers/")
+      ? (apiList.PROXY_DRIVER_UPLOAD || "/api/driver/uploads/proxy")
+      : (apiList.PROXY_MAINTENANCE_UPLOAD || "/api/maintenance/uploads/proxy");
+    const targetProxy = proxyEndpoint || defaultProxy;
+    const proxyUrl = `${targetProxy}?s3Key=${encodeURIComponent(s3Key)}&mimeType=${encodeURIComponent(uploadMime)}`;
     const proxyRes = await fetch(proxyUrl, {
       method: "POST",
       headers: {
@@ -340,4 +343,36 @@ export async function uploadMediaFile({ uploadUrl, file, mimeType, s3Key }) {
   }
 
   throw new Error("Missing upload configuration for media file.");
+}
+
+/**
+ * Universal client/server URL resolver for stored media.
+ * Automatically wraps private S3 keys and direct AWS S3 URLs into
+ * the secure authorized /api/media/view endpoint so they never return 403 Forbidden.
+ * Leaves blob:, data:, and relative URLs intact.
+ */
+export function resolveMediaUrl(urlOrKey) {
+  if (!urlOrKey || typeof urlOrKey !== "string") return "";
+  const trimmed = urlOrKey.trim();
+  if (trimmed.startsWith("data:") || trimmed.startsWith("blob:")) return trimmed;
+  if (trimmed.startsWith("/api/media/view")) return trimmed;
+
+  // If already a key: drivers/... or fleet/...
+  if (/^(drivers|fleet|documents|uploads)\//.test(trimmed)) {
+    return `/api/media/view?key=${encodeURIComponent(trimmed)}`;
+  }
+
+  // If contains amazonaws.com or r2.cloudflarestorage.com
+  const match = trimmed.match(/(?:amazonaws\.com\/[^\/]+\/|amazonaws\.com\/|r2\.cloudflarestorage\.com\/[^\/]+\/)(.+)$/i);
+  if (match && match[1]) {
+    const key = match[1].split("?")[0];
+    return `/api/media/view?key=${encodeURIComponent(key)}`;
+  }
+
+  const prefixMatch = trimmed.match(/(drivers\/[^\s?#]+|fleet\/[^\s?#]+)/i);
+  if (prefixMatch && prefixMatch[1]) {
+    return `/api/media/view?key=${encodeURIComponent(prefixMatch[1])}`;
+  }
+
+  return trimmed;
 }

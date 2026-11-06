@@ -69,6 +69,8 @@ export const internalList = {
   ADD_NEW_DRIVER: "/api/driver/add-new",
   UPDATE_DRIVER: "/api/driver/update",
   DELETE_DRIVERS: "/api/driver/delete",
+  PRESIGN_DRIVER_UPLOADS: "/api/driver/uploads/presign",
+  PROXY_DRIVER_UPLOAD: "/api/driver/uploads/proxy",
 
   // fleet-driver assignment
   ASSIGN_FLEET_DRIVER: "/api/fleet-driver/assign",
@@ -91,4 +93,7 @@ export const internalList = {
   GET_MAINTENANCE_MEDIA_URL: "/api/maintenance/get-media-url",
   DELETE_MAINTENANCE_MEDIA: "/api/maintenance/delete-media",
   GET_RECENT_MAINTENANCE: "/api/maintenance/recent",
+
+  // media streaming & viewer
+  VIEW_MEDIA: "/api/media/view",
 };
