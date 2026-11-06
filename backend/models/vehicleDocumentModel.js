@@ -180,12 +180,16 @@ export function getAllVehicleDocuments(request = {}, user = null) {
       const dataQuery = `
         SELECT 
           vd.*,
+          o.orgName AS organization_name,
+          o.orgName AS orgName,
+          o.orgCode AS orgCode,
           COALESCE(vd.fleet_id, f.id) AS fleet_id,
           COALESCE(f.vehicle_number, vd.vehicleNo) AS vehicleNo,
           f.vehicle_model,
           f.vehicle_type,
           f.status AS vehicle_status
         FROM vehicle_documents vd
+        LEFT JOIN organizations o ON o.orgId = vd.orgId
         LEFT JOIN fleets f ON (
           (vd.fleet_id IS NOT NULL AND vd.fleet_id = f.id)
           OR (

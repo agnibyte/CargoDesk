@@ -5,9 +5,9 @@ import {
   updateDriverModel,
 } from "../models/driverModel";
 
-export function getAllDriversController() {
+export function getAllDriversController(requestOrUser = {}, authUser = null) {
   return new Promise((resolve, reject) => {
-    getAllDriversModel()
+    getAllDriversModel(requestOrUser, authUser)
       .then((result) => {
         resolve(result);
       })
@@ -17,9 +17,9 @@ export function getAllDriversController() {
   });
 }
 
-export function addNewDriverController(request) {
+export function addNewDriverController(request, authUser = null) {
   return new Promise((resolve, reject) => {
-    addNewDriverModel(request)
+    addNewDriverModel(request, authUser)
       .then((result) => {
         resolve(result);
       })

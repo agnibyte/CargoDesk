@@ -1,12 +1,70 @@
 import executeQuery, { executeTransaction } from "@/helpers/dbConnection";
 import { logFleetActivity } from "./fleetActivityModel";
 
-export function getAllFleetsModel() {
+export function getAllFleetsModel(requestOrUser = {}, authUser = null) {
   return new Promise(async (resolve, reject) => {
     try {
+      // 1. Resolve request payload and authUser whether passed as:
+      //    - getAllFleetsModel(request, authUser) -> API route
+      //    - getAllFleetsModel({}, user)          -> SSR with user as 2nd arg
+      //    - getAllFleetsModel(user)              -> SSR with user as sole arg
+      let request = {};
+      let user = null;
+
+      if (authUser) {
+        request = requestOrUser || {};
+        user = authUser;
+      } else if (requestOrUser?.user) {
+        user = requestOrUser.user;
+        request = requestOrUser;
+      } else if (requestOrUser?.userId || requestOrUser?.role) {
+        user = requestOrUser;
+        request = {};
+      } else {
+        request = requestOrUser || {};
+      }
+
+      let orgId = user?.orgId ? Number(user.orgId) : null;
+      console.log("🚀 ~ user:", user)
+      if (!orgId && user?.userId) {
+        const uRows = await executeQuery(
+          "SELECT orgId FROM users WHERE userId = ? LIMIT 1",
+          [user.userId],
+        );
+        if (uRows?.[0]?.orgId) {
+          orgId = Number(uRows[0].orgId);
+        }
+      }
+
+      const isSuperAdmin =
+        user?.role === "super_admin" || user?.email === "suraj@agnibyte.com";
+
+      const whereClauses = [];
+      const params = [];
+
+      // Multi-tenant organization scoping
+      if (!isSuperAdmin) {
+        if (orgId) {
+          whereClauses.push("f.orgId = ? ");
+          // whereClauses.push("(f.orgId = ? OR f.orgId IS NULL)");
+          params.push(orgId);
+        } else {
+          whereClauses.push("f.orgId IS NULL");
+        }
+      } else if (request?.orgId) {
+        whereClauses.push("f.orgId = ?");
+        params.push(Number(request.orgId));
+      }
+
+      const whereSQL =
+        whereClauses.length > 0 ? `WHERE ${whereClauses.join(" AND ")}` : "";
+
       const selectQuery = `
         SELECT 
           f.*,
+          o.orgName AS organization_name,
+          o.orgName AS orgName,
+          o.orgCode AS orgCode,
           d.id AS driver_id,
           d.driver_name AS driver_name,
           d.contact_number AS driver_contact,
@@ -15,10 +73,13 @@ export function getAllFleetsModel() {
           d.status AS driver_status,
           d.profile_photo AS driver_profile_photo
         FROM fleets f
+        LEFT JOIN organizations o ON o.orgId = f.orgId
         LEFT JOIN drivers d ON d.fleet_id = f.id
+        ${whereSQL}
         ORDER BY f.id DESC
       `;
-      const rows = await executeQuery(selectQuery);
+      const rows = await executeQuery(selectQuery, params);
+      console.log("🚀 ~ rows:", rows)
       resolve({
         status: true,
         data: Array.isArray(rows) ? rows : [],
@@ -47,6 +108,9 @@ export function getFleetByIdModel(id) {
       const selectQuery = `
         SELECT 
           f.*,
+          o.orgName AS organization_name,
+          o.orgName AS orgName,
+          o.orgCode AS orgCode,
           d.id AS driver_id,
           d.driver_name AS driver_name,
           d.contact_number AS driver_contact,
@@ -55,6 +119,7 @@ export function getFleetByIdModel(id) {
           d.status AS driver_status,
           d.profile_photo AS driver_profile_photo
         FROM fleets f
+        LEFT JOIN organizations o ON o.orgId = f.orgId
         LEFT JOIN drivers d ON d.fleet_id = f.id
         WHERE f.id = ?
         LIMIT 1
@@ -236,9 +301,32 @@ export function getFleetByIdModel(id) {
   });
 }
 
-export function addNewFleetModel(data) {
+export function addNewFleetModel(data, authUser = null) {
   return new Promise(async (resolve, reject) => {
     try {
+      // 1. Resolve Organization ID securely from server session
+      let orgId = authUser?.orgId ? Number(authUser.orgId) : null;
+
+      if (!orgId && authUser?.userId) {
+        const uRows = await executeQuery(
+          "SELECT orgId FROM users WHERE userId = ? LIMIT 1",
+          [authUser.userId],
+        );
+        if (uRows?.[0]?.orgId) {
+          orgId = Number(uRows[0].orgId);
+        }
+      }
+
+      const isSuperAdmin =
+        authUser?.role === "super_admin" ||
+        authUser?.email === "suraj@agnibyte.com";
+
+      if (isSuperAdmin && data?.orgId) {
+        orgId = Number(data.orgId);
+      } else if (!orgId && data?.orgId) {
+        orgId = Number(data.orgId);
+      }
+
       const {
         vehicle_number,
         vehicle_model,
@@ -264,6 +352,7 @@ export function addNewFleetModel(data) {
           : null;
 
       const payload = {
+        orgId: orgId || null,
         vehicle_number: vehicle_number
           ? vehicle_number.toUpperCase().trim()
           : null,

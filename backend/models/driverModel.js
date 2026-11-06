@@ -164,13 +164,68 @@ export async function ensureDriverTable() {
   }
 }
 
-export function getAllDriversModel() {
+export function getAllDriversModel(requestOrUser = {}, authUser = null) {
   return new Promise(async (resolve) => {
     try {
-      // await ensureDriverTable();
+      // 1. Resolve request payload and authUser whether passed as:
+      //    - getAllDriversModel(request, authUser) -> API route
+      //    - getAllDriversModel({}, user)          -> SSR with user as 2nd arg
+      //    - getAllDriversModel(user)              -> SSR with user as sole arg
+      let request = {};
+      let user = null;
+
+      if (authUser) {
+        request = requestOrUser || {};
+        user = authUser;
+      } else if (requestOrUser?.user) {
+        user = requestOrUser.user;
+        request = requestOrUser;
+      } else if (requestOrUser?.userId || requestOrUser?.role) {
+        user = requestOrUser;
+        request = {};
+      } else {
+        request = requestOrUser || {};
+      }
+
+      let orgId = user?.orgId ? Number(user.orgId) : null;
+      if (!orgId && user?.userId) {
+        const uRows = await executeQuery(
+          "SELECT orgId FROM users WHERE userId = ? LIMIT 1",
+          [user.userId],
+        );
+        if (uRows?.[0]?.orgId) {
+          orgId = Number(uRows[0].orgId);
+        }
+      }
+
+      const isSuperAdmin =
+        user?.role === "super_admin" || user?.email === "suraj@agnibyte.com";
+
+      const whereClauses = [];
+      const params = [];
+
+      // Multi-tenant organization scoping
+      if (!isSuperAdmin) {
+        if (orgId) {
+          whereClauses.push("(d.orgId = ? OR d.orgId IS NULL)");
+          params.push(orgId);
+        } else {
+          whereClauses.push("d.orgId IS NULL");
+        }
+      } else if (request?.orgId) {
+        whereClauses.push("d.orgId = ?");
+        params.push(Number(request.orgId));
+      }
+
+      const whereSQL =
+        whereClauses.length > 0 ? `WHERE ${whereClauses.join(" AND ")}` : "";
+
       const selectQuery = `
         SELECT 
           d.*,
+          o.orgName AS organization_name,
+          o.orgName AS orgName,
+          o.orgCode AS orgCode,
           d.fleet_id AS fleet_id,
           f.id AS assigned_fleet_id,
           f.vehicle_number AS assigned_vehicle,
@@ -179,10 +234,12 @@ export function getAllDriversModel() {
           f.capacity AS assigned_vehicle_capacity,
           f.status AS assigned_vehicle_status
         FROM drivers d
+        LEFT JOIN organizations o ON o.orgId = d.orgId
         LEFT JOIN fleets f ON d.fleet_id = f.id
+        ${whereSQL}
         ORDER BY d.id DESC
       `;
-      const rows = await executeQuery(selectQuery);
+      const rows = await executeQuery(selectQuery, params);
       resolve({
         status: true,
         data: Array.isArray(rows) ? rows : [],
@@ -199,10 +256,31 @@ export function getAllDriversModel() {
   });
 }
 
-export function addNewDriverModel(data) {
+export function addNewDriverModel(data, authUser = null) {
   return new Promise(async (resolve) => {
     try {
-      // await ensureDriverTable();
+      // 1. Resolve Organization ID securely from server session
+      let orgId = authUser?.orgId ? Number(authUser.orgId) : null;
+
+      if (!orgId && authUser?.userId) {
+        const uRows = await executeQuery(
+          "SELECT orgId FROM users WHERE userId = ? LIMIT 1",
+          [authUser.userId],
+        );
+        if (uRows?.[0]?.orgId) {
+          orgId = Number(uRows[0].orgId);
+        }
+      }
+
+      const isSuperAdmin =
+        authUser?.role === "super_admin" ||
+        authUser?.email === "suraj@agnibyte.com";
+
+      if (isSuperAdmin && data?.orgId) {
+        orgId = Number(data.orgId);
+      } else if (!orgId && data?.orgId) {
+        orgId = Number(data.orgId);
+      }
 
       const {
         driver_name,
@@ -228,6 +306,7 @@ export function addNewDriverModel(data) {
           : null;
 
       const payload = {
+        orgId: orgId || null,
         driver_name: driver_name ? driver_name.trim() : null,
         contact_number: contact_number ? contact_number.trim() : null,
         alt_contact_number: alt_contact_number ? alt_contact_number.trim() : null,

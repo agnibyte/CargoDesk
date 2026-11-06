@@ -6,9 +6,9 @@ import {
   updateFleetModel,
 } from "../models/fleetModel";
 
-export function getAllFleetsController() {
+export function getAllFleetsController(requestOrUser = {}, authUser = null) {
   return new Promise((resolve, reject) => {
-    getAllFleetsModel()
+    getAllFleetsModel(requestOrUser, authUser)
       .then((result) => {
         resolve(result);
       })
@@ -18,7 +18,7 @@ export function getAllFleetsController() {
   });
 }
 
-export function getFleetByIdController(id) {
+export function getFleetByIdController(id, authUser = null) {
   return new Promise((resolve, reject) => {
     getFleetByIdModel(id)
       .then((result) => {
@@ -30,9 +30,9 @@ export function getFleetByIdController(id) {
   });
 }
 
-export function addNewFleetController(request) {
+export function addNewFleetController(request, authUser = null) {
   return new Promise((resolve, reject) => {
-    addNewFleetModel(request)
+    addNewFleetModel(request, authUser)
       .then((result) => {
         resolve(result);
       })
