@@ -1,4 +1,4 @@
-import { generateSignedGetUrl } from "@/backend/services/s3Service";
+import { generateSignedGetUrl, extractS3Key } from "@/backend/services/s3Service";
 
 /**
  * Universal media viewer/streamer for S3 objects.
@@ -16,28 +16,14 @@ export default async function handler(req, res) {
     return res.status(405).json({ status: false, message: `Method ${req.method} Not Allowed` });
   }
 
-  const { key, url, download } = req.query || {};
+  const { key, url } = req.query || {};
+  const rawInput = key || url;
 
-  let s3Key = "";
-  if (key && typeof key === "string") {
-    s3Key = decodeURIComponent(key).trim();
-  } else if (url && typeof url === "string") {
-    const rawUrl = decodeURIComponent(url).trim();
-    // Extract key after amazonaws.com/ or r2.cloudflarestorage.com/ or domain/
-    const match = rawUrl.match(/(?:amazonaws\.com\/[^\/]+\/|amazonaws\.com\/|r2\.cloudflarestorage\.com\/[^\/]+\/)(.+)$/i);
-    if (match && match[1]) {
-      s3Key = match[1].split("?")[0];
-    } else {
-      // Try finding drivers/ or fleet/ in path
-      const prefixMatch = rawUrl.match(/(drivers\/[^\s?#]+|fleet\/[^\s?#]+)/i);
-      if (prefixMatch && prefixMatch[1]) {
-        s3Key = prefixMatch[1];
-      }
-    }
+  if (!rawInput || typeof rawInput !== "string") {
+    return res.status(400).json({ status: false, message: "Invalid or missing storage key." });
   }
 
-  // Remove leading slashes
-  s3Key = s3Key.replace(/^\/+/, "");
+  const s3Key = extractS3Key(rawInput);
 
   if (!s3Key || s3Key.includes("..")) {
     return res.status(400).json({ status: false, message: "Invalid or missing storage key." });
@@ -51,6 +37,7 @@ export default async function handler(req, res) {
     s3Key.startsWith("uploads/");
 
   if (!isAllowedPrefix) {
+    console.warn("Unauthorized storage path requested:", s3Key, "Raw input was:", rawInput);
     return res.status(403).json({ status: false, message: "Unauthorized storage path." });
   }
 
@@ -71,4 +58,3 @@ export default async function handler(req, res) {
     });
   }
 }
-

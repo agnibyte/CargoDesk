@@ -121,36 +121,34 @@ export const URL_EXPIRATION_SECONDS = 900; // 15 minutes
  */
 export function extractS3Key(urlOrKey) {
   if (!urlOrKey || typeof urlOrKey !== "string") return "";
-  const trimmed = urlOrKey.trim();
-  if (trimmed.startsWith("data:")) return "";
+  let raw = decodeURIComponent(urlOrKey).trim();
+  if (raw.startsWith("data:") || raw.startsWith("blob:")) return "";
 
-  // If already a key (e.g. drivers/... or fleet/...)
-  if (/^(drivers|fleet|documents|uploads)\//.test(trimmed)) {
-    return trimmed;
-  }
-
-  // If already a proxy view URL: /api/media/view?key=...
-  if (trimmed.includes("/api/media/view") && trimmed.includes("key=")) {
+  // 1. If it's a proxy view URL: e.g. /api/media/view?key=drivers/...
+  if (raw.includes("/api/media/view") && raw.includes("key=")) {
     try {
-      const parsed = new URL(trimmed, "http://localhost");
+      const parsed = new URL(raw, "http://localhost");
       const k = parsed.searchParams.get("key");
-      if (k) return decodeURIComponent(k);
+      if (k) raw = decodeURIComponent(k).trim();
     } catch (_) {}
   }
 
-  // Extract from full AWS S3 / R2 URL
-  const match = trimmed.match(/(?:amazonaws\.com\/[^\/]+\/|amazonaws\.com\/|r2\.cloudflarestorage\.com\/[^\/]+\/)(.+)$/i);
-  if (match && match[1]) {
-    return match[1].split("?")[0];
-  }
-
-  // Try finding known prefix
-  const prefixMatch = trimmed.match(/(drivers\/[^\s?#]+|fleet\/[^\s?#]+)/i);
+  // 2. If key contains a known prefix anywhere in path, match from that prefix
+  const prefixMatch = raw.match(/(drivers\/[^\s?#]+|fleet\/[^\s?#]+|documents\/[^\s?#]+|uploads\/[^\s?#]+)/i);
   if (prefixMatch && prefixMatch[1]) {
-    return prefixMatch[1];
+    return prefixMatch[1].replace(/^\/+/, "");
   }
 
-  return "";
+  // 3. If it's a full URL, parse path
+  if (raw.startsWith("http://") || raw.startsWith("https://")) {
+    try {
+      const urlObj = new URL(raw);
+      const cleanPath = urlObj.pathname.replace(/^\/+/, "");
+      return cleanPath.split("?")[0];
+    } catch (_) {}
+  }
+
+  return raw.split("?")[0].replace(/^\/+/, "");
 }
 
 /**

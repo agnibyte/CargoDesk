@@ -353,26 +353,35 @@ export async function uploadMediaFile({ uploadUrl, file, mimeType, s3Key, proxyE
  */
 export function resolveMediaUrl(urlOrKey) {
   if (!urlOrKey || typeof urlOrKey !== "string") return "";
-  const trimmed = urlOrKey.trim();
-  if (trimmed.startsWith("data:") || trimmed.startsWith("blob:")) return trimmed;
-  if (trimmed.startsWith("/api/media/view")) return trimmed;
+  let raw = decodeURIComponent(urlOrKey).trim();
+  if (raw.startsWith("data:") || raw.startsWith("blob:")) return raw;
 
-  // If already a key: drivers/... or fleet/...
-  if (/^(drivers|fleet|documents|uploads)\//.test(trimmed)) {
-    return `/api/media/view?key=${encodeURIComponent(trimmed)}`;
+  // 1. If it's already a proxy view URL: e.g. /api/media/view?key=drivers/...
+  if (raw.includes("/api/media/view") && raw.includes("key=")) {
+    try {
+      const parsed = new URL(raw, "http://localhost");
+      const k = parsed.searchParams.get("key");
+      if (k) return `/api/media/view?key=${encodeURIComponent(decodeURIComponent(k).trim())}`;
+    } catch (_) {}
+    return raw;
   }
 
-  // If contains amazonaws.com or r2.cloudflarestorage.com
-  const match = trimmed.match(/(?:amazonaws\.com\/[^\/]+\/|amazonaws\.com\/|r2\.cloudflarestorage\.com\/[^\/]+\/)(.+)$/i);
-  if (match && match[1]) {
-    const key = match[1].split("?")[0];
-    return `/api/media/view?key=${encodeURIComponent(key)}`;
-  }
-
-  const prefixMatch = trimmed.match(/(drivers\/[^\s?#]+|fleet\/[^\s?#]+)/i);
+  // 2. If key contains a known prefix anywhere in path, match from that prefix
+  const prefixMatch = raw.match(/(drivers\/[^\s?#]+|fleet\/[^\s?#]+|documents\/[^\s?#]+|uploads\/[^\s?#]+)/i);
   if (prefixMatch && prefixMatch[1]) {
-    return `/api/media/view?key=${encodeURIComponent(prefixMatch[1])}`;
+    return `/api/media/view?key=${encodeURIComponent(prefixMatch[1].replace(/^\/+/, ""))}`;
   }
 
-  return trimmed;
+  // 3. If it's a full URL, parse path
+  if (raw.startsWith("http://") || raw.startsWith("https://")) {
+    try {
+      const urlObj = new URL(raw);
+      const cleanPath = urlObj.pathname.replace(/^\/+/, "").split("?")[0];
+      if (cleanPath) {
+        return `/api/media/view?key=${encodeURIComponent(cleanPath)}`;
+      }
+    } catch (_) {}
+  }
+
+  return raw;
 }

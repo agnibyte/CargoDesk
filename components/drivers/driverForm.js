@@ -92,22 +92,35 @@ export default function DriverForm({
   // Populate data when editing
   useEffect(() => {
     if (isEdit && modalData) {
+      const licType =
+        modalData.license_type ||
+        modalData.licenseType ||
+        modalData.license_category ||
+        modalData.licenseCategory ||
+        DRIVER_LICENSE_TYPES[0];
+      const bloodGrp = modalData.blood_group || modalData.bloodGroup || "B+";
+      const driverStatus = modalData.status || "Active";
+
       reset({
         driver_name: modalData.driver_name || modalData.name || "",
         contact_number: modalData.contact_number || modalData.contactNo || "",
         alt_contact_number: modalData.alt_contact_number || "",
         license_number: modalData.license_number || "",
-        license_type: modalData.license_type || DRIVER_LICENSE_TYPES[0],
+        license_type: licType,
         license_expiry: modalData.license_expiry
           ? moment(modalData.license_expiry).format("YYYY-MM-DD")
           : "",
         experience_years: modalData.experience_years || "5 Years",
-        blood_group: modalData.blood_group || "B+",
+        blood_group: bloodGrp,
         emergency_contact: modalData.emergency_contact || "",
-        status: modalData.status || "Active",
+        status: driverStatus,
         address: modalData.address || "",
         notes: modalData.notes || modalData.note || "",
       });
+
+      setValue("license_type", licType);
+      setValue("blood_group", bloodGrp);
+      setValue("status", driverStatus);
 
       // Find initial fleet id
       let initialFleetId = "";
@@ -735,12 +748,30 @@ export default function DriverForm({
 
             {/* Blood Group */}
             <div data-field-container data-field="blood_group">
-              <FloatingSelect
-                id="driver_blood_group"
-                label="Blood Group"
-                options={DRIVER_BLOOD_GROUPS}
-                error={errors.blood_group}
-                {...register("blood_group")}
+              <Controller
+                name="blood_group"
+                control={control}
+                render={({ field }) => (
+                  <FloatingSelect
+                    id="driver_blood_group"
+                    name="blood_group"
+                    label="Blood Group"
+                    options={DRIVER_BLOOD_GROUPS}
+                    value={field.value || "B+"}
+                    selectedValue={field.value || "B+"}
+                    onChange={(val) => {
+                      const actualVal =
+                        val && typeof val === "object"
+                          ? val.value !== undefined
+                            ? val.value
+                            : val.target?.value
+                          : val;
+                      field.onChange(actualVal || "B+");
+                    }}
+                    onBlur={field.onBlur}
+                    error={errors.blood_group}
+                  />
+                )}
               />
             </div>
           </div>
@@ -782,15 +813,32 @@ export default function DriverForm({
 
             {/* License Type */}
             <div data-field-container data-field="license_type">
-              <FloatingSelect
-                id="driver_license_type"
-                label="License Category"
-                required
-                options={DRIVER_LICENSE_TYPES}
-                error={errors.license_type}
-                {...register("license_type", {
-                  required: "License Category is required",
-                })}
+              <Controller
+                name="license_type"
+                control={control}
+                rules={{ required: "License Category is required" }}
+                render={({ field }) => (
+                  <FloatingSelect
+                    id="driver_license_type"
+                    name="license_type"
+                    label="License Category"
+                    required
+                    options={DRIVER_LICENSE_TYPES}
+                    value={field.value || DRIVER_LICENSE_TYPES[0]}
+                    selectedValue={field.value || DRIVER_LICENSE_TYPES[0]}
+                    onChange={(val) => {
+                      const actualVal =
+                        val && typeof val === "object"
+                          ? val.value !== undefined
+                            ? val.value
+                            : val.target?.value
+                          : val;
+                      field.onChange(actualVal || DRIVER_LICENSE_TYPES[0]);
+                    }}
+                    onBlur={field.onBlur}
+                    error={errors.license_type}
+                  />
+                )}
               />
             </div>
 
@@ -1114,12 +1162,30 @@ export default function DriverForm({
 
             {/* Operational Status */}
             <div data-field-container data-field="status">
-              <FloatingSelect
-                id="driver_status"
-                label="Operational Status"
-                options={DRIVER_STATUS_OPTIONS}
-                error={errors.status}
-                {...register("status")}
+              <Controller
+                name="status"
+                control={control}
+                render={({ field }) => (
+                  <FloatingSelect
+                    id="driver_status"
+                    name="status"
+                    label="Operational Status"
+                    options={DRIVER_STATUS_OPTIONS}
+                    value={field.value || "Active"}
+                    selectedValue={field.value || "Active"}
+                    onChange={(val) => {
+                      const actualVal =
+                        val && typeof val === "object"
+                          ? val.value !== undefined
+                            ? val.value
+                            : val.target?.value
+                          : val;
+                      field.onChange(actualVal || "Active");
+                    }}
+                    onBlur={field.onBlur}
+                    error={errors.status}
+                  />
+                )}
               />
             </div>
 
