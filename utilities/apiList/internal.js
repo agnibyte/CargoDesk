@@ -1,5 +1,5 @@
 export const internalList = {
-  GET_ALL_VEHICALE_DOCUMENTS: "/api/vehicale-document/get-all",
+  GET_ALL_VEHICALE_DOCUMENTS: "/api/vehicale-document/vehicale-document-get-all",
   ADD_NEW_VEHICALE_DOCUMENTS: "/api/vehicale-document/add-new",
   DELETE_VEHICALE_DOCUMENTS: "/api/vehicale-document/delete",
   UPDATE_VEHICALE_DOCUMENTS: "/api/vehicale-document/update",
@@ -32,7 +32,7 @@ export const internalList = {
   DELETE_SUB_USER: "/api/user/delete-sub-user",
 
   // organizations
-  GET_ALL_ORGANIZATIONS: "/api/organization/get-all",
+  GET_ALL_ORGANIZATIONS: "/api/organization/organization-get-all",
   CREATE_ORGANIZATION: "/api/organization/create",
   UPDATE_ORGANIZATION: "/api/organization/update",
   DELETE_ORGANIZATION: "/api/organization/delete",
@@ -53,19 +53,19 @@ export const internalList = {
 
   // emi
   ADD_NEW_EMI: "/api/emi/add-new",
-  GET_ALL_EMI: "/api/emi/get-all",
+  GET_ALL_EMI: "/api/emi/emi-get-all",
   UPDATE_EMI_DETAILS: "/api/emi/update-emi-details",
   DELETE_EMI_RECORD: "/api/emi/delete",
 
   // fleets
-  GET_ALL_FLEETS: "/api/fleet/get-all",
+  GET_ALL_FLEETS: "/api/fleet/fleet-get-all",
   GET_FLEET_BY_ID: "/api/fleet/get-by-id",
   ADD_NEW_FLEET: "/api/fleet/add-new",
   UPDATE_FLEET: "/api/fleet/update",
   DELETE_FLEETS: "/api/fleet/delete",
 
   // drivers
-  GET_ALL_DRIVERS: "/api/driver/get-all",
+  GET_ALL_DRIVERS: "/api/driver/driver-get-all",
   ADD_NEW_DRIVER: "/api/driver/add-new",
   UPDATE_DRIVER: "/api/driver/update",
   DELETE_DRIVERS: "/api/driver/delete",
@@ -86,7 +86,7 @@ export const internalList = {
   PROXY_MAINTENANCE_UPLOAD: "/api/maintenance/uploads/proxy",
   ADD_NEW_MAINTENANCE: "/api/maintenance/add-new",
   CREATE_MAINTENANCE_RECORD: "/api/maintenance/add-new",
-  GET_VEHICLE_MAINTENANCE: "/api/maintenance/get-all",
+  GET_VEHICLE_MAINTENANCE: "/api/maintenance/maintenance-get-all",
   GET_MAINTENANCE_RECORD: "/api/maintenance/get-by-id",
   UPDATE_MAINTENANCE_RECORD: "/api/maintenance/update",
   DELETE_MAINTENANCE_RECORD: "/api/maintenance/delete",
