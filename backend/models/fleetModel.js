@@ -25,7 +25,6 @@ export function getAllFleetsModel(requestOrUser = {}, authUser = null) {
       }
 
       let orgId = user?.orgId ? Number(user.orgId) : null;
-      console.log("🚀 ~ user:", user)
       if (!orgId && user?.userId) {
         const uRows = await executeQuery(
           "SELECT orgId FROM users WHERE userId = ? LIMIT 1",
