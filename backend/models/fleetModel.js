@@ -79,10 +79,13 @@ export function getAllFleetsModel(requestOrUser = {}, authUser = null) {
         ORDER BY f.id DESC
       `;
       const rows = await executeQuery(selectQuery, params);
-      console.log("🚀 ~ rows:", rows)
+      const processedRows = (Array.isArray(rows) ? rows : []).map((row, idx) => ({
+        ...row,
+        sr_no: idx + 1,
+      }));
       resolve({
         status: true,
-        data: Array.isArray(rows) ? rows : [],
+        data: processedRows,
         message: "Fleets fetched successfully",
       });
     } catch (error) {

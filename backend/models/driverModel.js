@@ -259,7 +259,7 @@ export function getAllDriversModel(requestOrUser = {}, authUser = null) {
       `;
       const rows = await executeQuery(selectQuery, params);
 
-      const processedRows = (Array.isArray(rows) ? rows : []).map((row) => {
+      const processedRows = (Array.isArray(rows) ? rows : []).map((row, idx) => {
         let photo = row.profile_photo;
         if (photo && typeof photo === "string") {
           const s3Key = extractS3Key(photo);
@@ -292,6 +292,7 @@ export function getAllDriversModel(requestOrUser = {}, authUser = null) {
 
         return {
           ...row,
+          sr_no: idx + 1,
           profile_photo: photo,
           supporting_documents: docs,
         };
