@@ -1,5 +1,5 @@
 import executeQuery, { executeTransaction } from "@/helpers/dbConnection";
-import { logFleetActivity } from "./fleetActivityModel";
+import { logFleetActivity, syncFleetMaintenanceActivities } from "./fleetActivityModel";
 
 export function getAllFleetsModel(requestOrUser = {}, authUser = null) {
   return new Promise(async (resolve, reject) => {
@@ -279,6 +279,13 @@ export function getFleetByIdModel(id) {
         } catch (emiSyncErr) {
           console.warn("Could not sync emi activity:", emiSyncErr?.message);
         }
+      }
+
+      // Auto-ensure maintenance records are recorded in activity history if not already present
+      try {
+        await syncFleetMaintenanceActivities(fleet.id);
+      } catch (maintSyncErr) {
+        console.warn("Could not sync maintenance activity:", maintSyncErr?.message);
       }
 
       resolve({
