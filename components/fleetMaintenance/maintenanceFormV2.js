@@ -7,6 +7,7 @@ import React, {
   useRef,
   useCallback,
 } from "react";
+import { useRouter } from "next/router";
 import { showToast } from "@/utilities/toastService";
 import {
   postApiData,
@@ -40,6 +41,7 @@ import {
   FiRefreshCcw,
   FiSlash,
   FiDollarSign,
+  FiClock,
 } from "react-icons/fi";
 import { ImSpinner9 } from "react-icons/im";
 import EnableLocationPopup from "./enableLocationPopup";
@@ -51,9 +53,9 @@ const MAX_IMAGE_SIZE_BYTES = 10 * 1024 * 1024; // 10 MB
 const MAX_VIDEO_SIZE_BYTES = 100 * 1024 * 1024; // 100 MB
 
 const SUPPORTED_LANGUAGES = [
-  { code: "en-IN", label: "English" },
-  { code: "hi-IN", label: "हिन्दी (Hindi)" },
   { code: "mr-IN", label: "मराठी (Marathi)" },
+  { code: "hi-IN", label: "हिन्दी (Hindi)" },
+  { code: "en-IN", label: "English" },
 ];
 
 /**
@@ -72,6 +74,8 @@ export default function MaintenanceFormV2({
   submitButtonText = "Save Maintenance Record",
   userOrgId = null,
 }) {
+  const router = useRouter();
+
   // 1. Vehicles Selection State
   const [vehicles, setVehicles] = useState([]);
   const [loadingVehicles, setLoadingVehicles] = useState(false);
@@ -105,7 +109,7 @@ export default function MaintenanceFormV2({
     initialData?.description || "",
   );
   const [isListening, setIsListening] = useState(false);
-  const [selectedLang, setSelectedLang] = useState("en-IN");
+  const [selectedLang, setSelectedLang] = useState("mr-IN");
   const [speechSupported, setSpeechSupported] = useState(true);
   const [speechError, setSpeechError] = useState(null);
 
@@ -1098,7 +1102,7 @@ const stopListening = () => {
       {/* Form Body */}
       <form
         onSubmit={handleSubmit}
-        className="w-full p-4 sm:p-6 md:p-8 space-y-4 sm:space-y-6"
+        className="w-full space-y-4 sm:space-y-6"
       >
         {/* Error Alert */}
         {formError && (
@@ -1129,7 +1133,7 @@ const stopListening = () => {
             isVehicleDropdownOpen && !preselectedVehicle ? "z-50" : "z-10"
           }`}
         >
-          <div className="flex items-center justify-between">
+          <div className="flex flex-wrap items-center justify-between gap-2">
             <label
               htmlFor="vehicle_number_input"
               className="flex items-center gap-1.5 text-xs sm:text-sm font-bold text-slate-800"
@@ -1138,11 +1142,23 @@ const stopListening = () => {
               <span>Select Vehicle Number</span>
               <span className="text-rose-500">*</span>
             </label>
-            {preselectedVehicle && (
+            {selectedVehicle?.id ? (
+              <button
+                type="button"
+                onClick={() => {
+                  router.push(`/maintenance/vehicle-history/${selectedVehicle.id}`);
+                }}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-50 hover:bg-blue-100 active:scale-95 text-blue-700 text-xs font-bold border border-blue-200/90 shadow-2xs hover:shadow-xs transition-all cursor-pointer"
+                title={`View Maintenance History for ${selectedVehicle.vehicle_number}`}
+              >
+                <FiClock className="w-3.5 h-3.5 text-blue-600" />
+                <span>View Maintenance History</span>
+              </button>
+            ) : preselectedVehicle ? (
               <span className="text-[11px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md">
                 Locked to Current Fleet
               </span>
-            )}
+            ) : null}
           </div>
 
           <div className="relative w-full">
@@ -1326,22 +1342,30 @@ const stopListening = () => {
             )}
           </div>
 
-        {/* Selected vehicle preview pill or guidance text */}
-          {/* {selectedVehicle && (
-            <div className="flex items-center justify-between bg-blue-50/70 border border-blue-200/80 rounded-xl px-3 py-2 text-xs animate-fadeIn">
+          {/* Selected vehicle preview with View Maintenance History shortcut */}
+          {selectedVehicle?.id && (
+            <div className="flex flex-wrap items-center justify-between gap-2 bg-gradient-to-r from-blue-50/80 via-indigo-50/40 to-blue-50/80 border border-blue-200/90 rounded-2xl p-2.5 sm:px-3 sm:py-2 text-xs animate-fadeIn shadow-2xs">
               <div className="flex items-center gap-2 min-w-0">
-                <span className="font-mono font-bold text-blue-950 truncate">
+                <span className="font-mono font-bold text-xs sm:text-sm text-blue-950 truncate">
                   {selectedVehicle.vehicle_number}
                 </span>
-                <span className="text-slate-600 truncate">
+                <span className="text-slate-600 truncate text-[11px] hidden sm:inline">
                   • {selectedVehicle.vehicle_model || selectedVehicle.vehicle_type || "Vehicle"}
                 </span>
               </div>
-              <span className="text-[10px] font-bold text-blue-700 bg-blue-100/90 px-2 py-0.5 rounded-full shrink-0">
-                Vehicle Selected
-              </span>
+              <button
+                type="button"
+                onClick={() => {
+                  router.push(`/maintenance/vehicle-history/${selectedVehicle.id}`);
+                }}
+                className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-95 text-white text-xs font-bold shadow-xs transition-all cursor-pointer shrink-0 ml-auto"
+                title={`View Maintenance History for ${selectedVehicle.vehicle_number}`}
+              >
+                <FiClock className="w-3.5 h-3.5" />
+                <span>View Maintenance History</span>
+              </button>
             </div>
-          )} */}
+          )}
         </div>
 
         {/* 3. Capture Photo & Upload File - Two Large Side-by-Side Buttons (Compulsory) */}
@@ -1446,7 +1470,7 @@ const stopListening = () => {
                 <button
                   type="button"
                   onClick={() => setShowEnableLocationPopup(true)}
-                  className="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-95 text-white text-xs font-bold transition-all cursor-pointer shadow-xs"
+                  className="px-3.5 py-1.5 rounded-xl bg-violet-500 hover:bg-blue-700 active:scale-95 text-white text-xs font-bold transition-all cursor-pointer shadow-xs"
                 >
                   Enable Location
                 </button>
@@ -1510,7 +1534,7 @@ const stopListening = () => {
                 isProcessingMedia ||
                 attachedFiles.length >= MAX_ATTACHMENTS
               }
-              className="group p-4 sm:p-5 rounded-2xl border-2 border-dashed border-blue-300 hover:border-blue-500 bg-blue-50/50 hover:bg-blue-50 text-blue-700 flex flex-col items-center justify-center gap-2 transition-all cursor-pointer shadow-xs active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="group p-4 sm:p-5 rounded-2xl border-2 border-dashed border-blue-300 hover:border-blue-500 bg-white hover:bg-blue-50 text-blue-700 flex flex-col items-center justify-center gap-2 transition-all cursor-pointer shadow-xs active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <div className="w-12 h-12 rounded-xl bg-blue-600 text-white flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
                 {isProcessingMedia ? (
@@ -1545,7 +1569,7 @@ const stopListening = () => {
                 isProcessingMedia ||
                 attachedFiles.length >= MAX_ATTACHMENTS
               }
-              className="group p-4 sm:p-5 rounded-2xl border-2 border-dashed border-amber-300 hover:border-amber-400 bg-amber-50/100 hover:bg-amber-50/40 text-amber-700 flex flex-col items-center justify-center gap-2 transition-all cursor-pointer shadow-xs active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed"
+              className="group p-4 sm:p-5 rounded-2xl border-2 border-dashed border-amber-300 hover:border-amber-400 bg-amber-50/100 hover:bg-amber-100/80 text-amber-700 flex flex-col items-center justify-center gap-2 transition-all cursor-pointer shadow-xs active:scale-98 disabled:opacity-50 disabled:cursor-not-allowed"
             >
               <div className="w-12 h-12 rounded-xl bg-amber-600 text-white flex items-center justify-center shadow-md group-hover:scale-105 transition-transform">
                 <FiUploadCloud className="w-6 h-6" />
@@ -1651,7 +1675,7 @@ const stopListening = () => {
 
             {/* Language Switcher Pill for Speech */}
             {speechSupported && (
-              <div className="flex items-center gap-1 bg-slate-100 rounded-xl px-2.5 py-1 border border-slate-200">
+              <div className="flex items-center gap-1 bg-white rounded-xl px-2.5 py-1 border border-slate-200">
                 <FiGlobe className="w-3.5 h-3.5 text-slate-500" />
                 <select
                   value={selectedLang}
@@ -1680,10 +1704,10 @@ const stopListening = () => {
                   type="button"
                   onClick={() => handleChipClick(chip)}
                   disabled={isSubmitting}
-                  className={`shrink-0 px-2.5 py-1 rounded-lg text-[11px] font-semibold transition-all cursor-pointer border ${
+                  className={`shrink-0 px-2.5 py-1 rounded-lg text-[15px] font-semibold transition-all cursor-pointer border ${
                     isSelected
                       ? "bg-blue-600 text-white border-blue-600 shadow-xs"
-                      : "bg-slate-100 hover:bg-blue-50 text-slate-700 hover:text-blue-700 border-slate-200 hover:border-blue-200"
+                      : "bg-white hover:bg-blue-50 text-slate-700 hover:text-blue-700 border-slate-200 hover:border-blue-200"
                   }`}
                 >
                   {chip.label}
