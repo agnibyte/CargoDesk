@@ -1,6 +1,10 @@
 import executeQuery from "@/helpers/dbConnection";
 import { hashWithSHA256 } from "@/utilities/utils";
 import { ALL_MODULE_IDS } from "@/utilities/organizationModules";
+import {
+  resolveOrganizationSettings,
+  validateOrganizationSettingsPatch,
+} from "@/utilities/organizationSettings";
 import { invalidateCachePattern } from "@/helpers/cacheService";
 
 let isOrgTableInitialized = false;
@@ -31,6 +35,10 @@ export async function ensureOrganizationsTable() {
       const orgColNames = (Array.isArray(orgCols) ? orgCols : []).map((c) => c.Field);
       if (!orgColNames.includes("allowedModules")) {
         await executeQuery("ALTER TABLE organizations ADD COLUMN allowedModules TEXT NULL");
+      }
+      // Per-organization rules (JSON), defined in utilities/organizationSettings.js
+      if (!orgColNames.includes("settings")) {
+        await executeQuery("ALTER TABLE organizations ADD COLUMN settings TEXT NULL");
       }
     } catch (_) {}
 
@@ -372,6 +380,7 @@ export function getOrganizationDetailsModel(orgId, authUser = null) {
         modules = ALL_MODULE_IDS;
       }
       org.allowedModules = Array.isArray(modules) && modules.length > 0 ? modules : ALL_MODULE_IDS;
+      org.settings = resolveOrganizationSettings(org.settings);
 
       // 3. Fetch all associated fleets, users, drivers, and recent maintenance in parallel
       const [fleetsRows, usersRows, driversRows, maintenanceRows] = await Promise.all([
@@ -485,6 +494,78 @@ export function getOrganizationDetailsModel(orgId, authUser = null) {
         status: false,
         message: error?.message || "Failed to fetch organization details",
       });
+    }
+  });
+}
+
+const isSuperAdminUser = (authUser) =>
+  authUser?.role === "super_admin" || authUser?.email === "suraj@agnibyte.com";
+
+/**
+ * Settings of one organization (every registered key, defaults filled in).
+ * Super Admin: any organization. Everyone else: only their own organization (maintenance supervisors read it to
+ * know whether a service log needs GPS).
+ */
+export function getOrganizationSettingsModel(orgId, authUser) {
+  return new Promise(async (resolve) => {
+    try {
+      await ensureOrganizationsTable();
+      const id = Number(orgId);
+      if (!id || isNaN(id)) {
+        return resolve({ status: false, code: 400, message: "Valid organization ID required" });
+      }
+      if (!isSuperAdminUser(authUser) && Number(authUser?.orgId) !== id) {
+        return resolve({ status: false, code: 403, message: "Access denied to this organization's settings." });
+      }
+
+      const rows = await executeQuery("SELECT settings FROM organizations WHERE orgId = ? LIMIT 1", [id]);
+      if (!Array.isArray(rows) || rows.length === 0) {
+        return resolve({ status: false, code: 404, message: "Organization not found" });
+      }
+      resolve({ status: true, data: { orgId: id, settings: resolveOrganizationSettings(rows[0].settings) } });
+    } catch (err) {
+      console.error("getOrganizationSettingsModel error:", err);
+      resolve({ status: false, code: 500, message: "Failed to load organization settings." });
+    }
+  });
+}
+
+/**
+ * Changes some settings of one organization, keeping the rest.
+ * Super Admin: any organization. Organization Admin: their own organization. Anyone else: denied.
+ */
+export function updateOrganizationSettingsModel(orgId, patch, authUser) {
+  return new Promise(async (resolve) => {
+    try {
+      await ensureOrganizationsTable();
+      const id = Number(orgId);
+      if (!id || isNaN(id)) {
+        return resolve({ status: false, code: 400, message: "Valid organization ID required" });
+      }
+      const isOwnOrgAdmin = authUser?.role === "admin" && Number(authUser?.orgId) === id;
+      if (!isSuperAdminUser(authUser) && !isOwnOrgAdmin) {
+        return resolve({
+          status: false,
+          code: 403,
+          message: "Only Super Admin or this organization's Admin can change its settings.",
+        });
+      }
+
+      const { values, error } = validateOrganizationSettingsPatch(patch);
+      if (error) return resolve({ status: false, code: 400, message: error });
+
+      const rows = await executeQuery("SELECT settings FROM organizations WHERE orgId = ? LIMIT 1", [id]);
+      if (!Array.isArray(rows) || rows.length === 0) {
+        return resolve({ status: false, code: 404, message: "Organization not found" });
+      }
+
+      const next = { ...resolveOrganizationSettings(rows[0].settings), ...values };
+      await executeQuery("UPDATE organizations SET settings = ? WHERE orgId = ?", [JSON.stringify(next), id]);
+
+      resolve({ status: true, message: "Organization settings saved.", data: { orgId: id, settings: next } });
+    } catch (err) {
+      console.error("updateOrganizationSettingsModel error:", err);
+      resolve({ status: false, code: 500, message: "Failed to save organization settings." });
     }
   });
 }

@@ -4,6 +4,8 @@ import {
   updateOrganizationModel,
   deleteOrganizationModel,
   getOrganizationDetailsModel,
+  getOrganizationSettingsModel,
+  updateOrganizationSettingsModel,
 } from "../models/organizationModel";
 
 export function getAllOrganizationsController() {
@@ -44,4 +46,12 @@ export function getOrganizationDetailsController(orgId, authUser = null) {
       .then((res) => resolve(res))
       .catch((err) => resolve({ status: false, message: err?.message }));
   });
+}
+
+export function getOrganizationSettingsController(orgId, authUser) {
+  return getOrganizationSettingsModel(orgId, authUser);
+}
+
+export function updateOrganizationSettingsController(orgId, settings, authUser) {
+  return updateOrganizationSettingsModel(orgId, settings, authUser);
 }

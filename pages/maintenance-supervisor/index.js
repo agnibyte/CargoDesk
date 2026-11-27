@@ -26,11 +26,13 @@ import { ImSpinner9 } from "react-icons/im";
 import Image from "next/image";
 import { useFleetDriver } from "@/context/fleetDriverContext";
 import executeQuery from "@/helpers/dbConnection";
+import { resolveOrganizationSettings } from "@/utilities/organizationSettings";
 
 export default function MaintenanceSupervisorPage({ pageData }) {
   const router = useRouter();
   const user = pageData?.user || null;
   const organization = pageData?.organization || null;
+  const orgSettings = pageData?.orgSettings || resolveOrganizationSettings(null);
   const [recentRecords, setRecentRecords] = useState([]);
   const [loadingRecent, setLoadingRecent] = useState(false);
   const [showRecent, setShowRecent] = useState(false);
@@ -215,6 +217,7 @@ export default function MaintenanceSupervisorPage({ pageData }) {
               resetOnSuccess={true}
               submitButtonText="Save Maintenance Record"
               userOrgId={user?.orgId}
+              requireLocationCoordinates={orgSettings["maintenance.requireLocation"]}
             />
           </div>
 
@@ -377,6 +380,7 @@ MaintenanceSupervisorPage.layoutName = "maintenance-supervisor";
 export const getServerSideProps = withUserSsr(
   async (context, { user }) => {
     let organization = null;
+    let orgSettings = resolveOrganizationSettings(null);
     let userOrgId = user?.orgId ? Number(user.orgId) : null;
     if (!userOrgId && user?.userId) {
       try {
@@ -391,10 +395,14 @@ export const getServerSideProps = withUserSsr(
     if (userOrgId) {
       try {
         const orgRows = await executeQuery(
-          "SELECT orgId, orgName, orgCode FROM organizations WHERE orgId = ? LIMIT 1",
+          "SELECT orgId, orgName, orgCode, settings FROM organizations WHERE orgId = ? LIMIT 1",
           [userOrgId]
         );
-        if (orgRows?.[0]) organization = orgRows[0];
+        if (orgRows?.[0]) {
+          const { settings, ...org } = orgRows[0];
+          organization = org;
+          orgSettings = resolveOrganizationSettings(settings);
+        }
       } catch (_) {}
     }
 
@@ -403,6 +411,7 @@ export const getServerSideProps = withUserSsr(
         pageData: {
           user: { ...user, orgId: userOrgId },
           organization,
+          orgSettings,
         },
       },
     };

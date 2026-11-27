@@ -59,9 +59,10 @@ const SUPPORTED_LANGUAGES = [
 ];
 
 // ============================================================================
-// CONFIGURATION: GPS Location Coordinates Requirement
-// Set to true to make GPS location coordinates compulsory before submitting.
-// To allow upload / submission without coordinates, change this one line to: false
+// GPS Location Coordinates Requirement
+// Set per organization by Super Admin / the organization's Admin (Organization Details > Settings >
+// "Require GPS location on service logs", key "maintenance.requireLocation" in utilities/organizationSettings.js).
+// Callers pass that value as `requireLocationCoordinates`; this is only the fallback when they don't.
 // ============================================================================
 export const REQUIRE_LOCATION_COORDINATES = true;
 

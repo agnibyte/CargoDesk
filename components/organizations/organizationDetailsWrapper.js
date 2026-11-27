@@ -33,6 +33,7 @@ import {
   FiChevronRight,
   FiMaximize2,
   FiPlay,
+  FiSettings,
 } from "react-icons/fi";
 import { ImSpinner9 } from "react-icons/im";
 import { postApiData, resolveMediaUrl } from "@/utilities/services/apiService";
@@ -41,6 +42,7 @@ import CommonModal from "@/components/common/commonModal";
 import FleetForm from "@/components/fleets/fleetForm";
 import DriverForm from "@/components/drivers/driverForm";
 import OrganizationModal from "@/components/users/organizationModal";
+import OrganizationSettingsPanel from "@/components/organizations/organizationSettingsPanel";
 import UserFormModal from "@/components/users/userFormModal";
 import { formatIndiaDateTime, formatIndiaDate } from "@/utilities/timeUtils";
 import {
@@ -628,10 +630,26 @@ export default function OrganizationDetailsWrapper({ initialData, currentUser })
               <FiTool className="w-4 h-4" />
               <span>Service Logs ({recentMaintenance.length})</span>
             </button>
+
+            <button
+              type="button"
+              onClick={() => {
+                setActiveTab("settings");
+                setSearchQuery("");
+              }}
+              className={`px-4 py-3 text-xs font-bold transition-all border-b-2 cursor-pointer flex items-center gap-2 ${
+                activeTab === "settings"
+                  ? "border-slate-800 text-slate-900 bg-white rounded-t-xl"
+                  : "border-transparent text-slate-600 hover:text-slate-900"
+              }`}
+            >
+              <FiSettings className="w-4 h-4" />
+              <span>Settings</span>
+            </button>
           </div>
 
-          {/* Quick Search */}
-          <div className="relative pb-2 sm:pb-0">
+          {/* Quick Search (not on the Settings tab) */}
+          <div className={`relative pb-2 sm:pb-0 ${activeTab === "settings" ? "hidden" : ""}`}>
             <FiSearch className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2" />
             <input
               type="text"
@@ -1101,6 +1119,19 @@ export default function OrganizationDetailsWrapper({ initialData, currentUser })
               </div>
             )}
           </div>
+        )}
+
+        {/* Tab 5: Organization Settings (Super Admin: any organization; Admin: their own) */}
+        {activeTab === "settings" && (
+          <OrganizationSettingsPanel
+            orgId={organization?.orgId}
+            initialSettings={organization?.settings}
+            canEdit={
+              currentUser?.role === "super_admin" ||
+              currentUser?.email === "suraj@agnibyte.com" ||
+              (currentUser?.role === "admin" && Number(currentUser?.orgId) === Number(organization?.orgId))
+            }
+          />
         )}
       </div>
 

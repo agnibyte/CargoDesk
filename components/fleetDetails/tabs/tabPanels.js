@@ -43,6 +43,7 @@ import {
   FLEET_MAINTENANCE_STATUSES,
 } from "@/utilities/masterData";
 import { showToast } from "@/utilities/toastService";
+import { useOrganizationSettings } from "@/hooks/useOrganizationSettings";
 import { postApiData, swrPostApiData, invalidateApiCache } from "@/utilities/services/apiService";
 
 /**
@@ -545,6 +546,8 @@ export const MaintenancePanel = React.memo(function MaintenancePanel({ fleet, on
   // Modals state
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isQuickReportOpen, setIsQuickReportOpen] = useState(false);
+  // The fleet's organization decides whether a service log needs GPS coordinates.
+  const { settings: orgSettings } = useOrganizationSettings(fleet?.orgId);
   const [selectedRecordForDetails, setSelectedRecordForDetails] = useState(null);
   const [selectedRecordForEdit, setSelectedRecordForEdit] = useState(null);
   const [recordToDelete, setRecordToDelete] = useState(null);
@@ -1233,6 +1236,7 @@ export const MaintenancePanel = React.memo(function MaintenancePanel({ fleet, on
             preselectedVehicle={fleet}
             onClose={() => setIsQuickReportOpen(false)}
             onSuccess={handleAddSuccess}
+            requireLocationCoordinates={orgSettings["maintenance.requireLocation"]}
           />
         </CommonModal>
       )}

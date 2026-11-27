@@ -37,6 +37,8 @@ export const internalList = {
   CREATE_ORGANIZATION: "/api/organization/create",
   UPDATE_ORGANIZATION: "/api/organization/update",
   DELETE_ORGANIZATION: "/api/organization/delete",
+  GET_ORGANIZATION_SETTINGS: "/api/organization/settings/get",
+  UPDATE_ORGANIZATION_SETTINGS: "/api/organization/settings/update",
 
   // contacts
   ADD_NEW_CONTACT: "/api/contact/add-new",
