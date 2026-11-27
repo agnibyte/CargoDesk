@@ -2,6 +2,7 @@
 
 import React, { useState, useEffect, useCallback } from "react";
 import Head from "next/head";
+import { useRouter } from "next/router";
 import moment from "moment";
 import { formatIndiaDateTime, getIndiaISOString } from "@/utilities/timeUtils";
 import MaintenanceFormV2 from "@/components/fleetMaintenance/maintenanceFormV2";
@@ -27,6 +28,7 @@ import { useFleetDriver } from "@/context/fleetDriverContext";
 import executeQuery from "@/helpers/dbConnection";
 
 export default function MaintenanceSupervisorPage({ pageData }) {
+  const router = useRouter();
   const user = pageData?.user || null;
   const organization = pageData?.organization || null;
   const [recentRecords, setRecentRecords] = useState([]);
@@ -67,6 +69,7 @@ export default function MaintenanceSupervisorPage({ pageData }) {
 
     const newItem = {
       ...record,
+      vehicle_id: record.vehicle_id ?? ctx.vehicle?.id ?? record.vehicleId,
       vehicle_number: record.vehicle_number ?? ctx.vehicle?.vehicle_number,
       vehicle_model:
         record.vehicle_model ??
@@ -114,7 +117,7 @@ export default function MaintenanceSupervisorPage({ pageData }) {
         <link rel="icon" href="/favicon.ico" />
       </Head>
 
-      <div className="min-h-screen flex flex-col selection:bg-blue-500 selection:text-white -mx-2">
+      <div className="min-h-screen flex flex-col selection:bg-blue-500 selection:text-white pb-6">
         {/* ============================================================
             1. Clean Mobile-First Header
             ============================================================ */}
@@ -218,7 +221,7 @@ export default function MaintenanceSupervisorPage({ pageData }) {
           {/* ============================================================
               3. Recent Maintenance Records Section (Collapsed by default on mobile)
               ============================================================ */}
-          <div className="bg-white rounded-t-2xl border border-slate-200/90 shadow-2xs overflow-hidden -mx-4">
+          <div className="bg-white rounded-2xl border border-slate-200/90 shadow-2xs overflow-hidden">
             <button
               type="button"
               onClick={() => setShowRecent((prev) => !prev)}
@@ -278,60 +281,74 @@ export default function MaintenanceSupervisorPage({ pageData }) {
                   </div>
                 ) : recentRecords.length > 0 ? (
                   <div className="space-y-2.5">
-                    {recentRecords.map((item) => (
-                      <div
-                        key={item.id}
-                        className="p-3.5 rounded-xl border border-slate-200/80 bg-slate-50/70 hover:bg-white hover:border-slate-300 transition-all space-y-2"
-                      >
-                        <div className="flex items-center justify-between gap-2">
-                          <div className="flex items-center gap-2 min-w-0">
-                            <span className="font-bold text-xs sm:text-sm text-slate-900 font-mono truncate">
-                              {item.vehicle_number || "Vehicle"}
-                            </span>
-                            <span className="text-[10px] text-slate-500 truncate">
-                              {item.vehicle_model || ""}
+                    {recentRecords.map((item) => {
+                      const vId = item.vehicle_id;
+                      return (
+                        <div
+                          key={item.id}
+                          onClick={() => {
+                            if (vId) {
+                              router.push(`/maintenance/vehicle-history/${vId}?recordId=${item.id}`);
+                            } else {
+                              showToast({
+                                message: "Vehicle details not available for this record",
+                                type: "warning",
+                              });
+                            }
+                          }}
+                          className="p-3.5 rounded-xl border border-slate-200/80 bg-slate-50/70 hover:bg-white hover:border-blue-400 hover:shadow-xs transition-all space-y-2 cursor-pointer group"
+                          title={`Click to view vehicle history & open record #${item.id} popup`}
+                        >
+                          <div className="flex items-center justify-between gap-2">
+                            <div className="flex items-center gap-2 min-w-0">
+                              <span className="font-bold text-xs sm:text-sm text-slate-900 font-mono truncate group-hover:text-blue-600 transition-colors">
+                                {item.vehicle_number || "Vehicle"}
+                              </span>
+                              <span className="text-[10px] text-slate-500 truncate">
+                                {item.vehicle_model || ""}
+                              </span>
+                            </div>
+
+                            <span
+                              className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${getStatusBadge(
+                                item.status,
+                              )}`}
+                            >
+                              {item.status || "Reported"}
                             </span>
                           </div>
 
-                          <span
-                            className={`px-2 py-0.5 rounded-full text-[10px] font-bold border ${getStatusBadge(
-                              item.status,
-                            )}`}
-                          >
-                            {item.status || "Reported"}
-                          </span>
-                        </div>
+                          {item.description && (
+                            <p className="text-xs text-slate-700 line-clamp-2 leading-relaxed font-medium">
+                              {item.description}
+                            </p>
+                          )}
 
-                        {item.description && (
-                          <p className="text-xs text-slate-700 line-clamp-2 leading-relaxed font-medium">
-                            {item.description}
-                          </p>
-                        )}
-
-                        <div className="flex items-center justify-between text-[11px] text-slate-500 pt-1 border-t border-slate-200/50">
-                          <span className="flex items-center gap-1">
-                            <FiClock className="w-3 h-3 text-slate-400" />
-                            {formatIndiaDateTime(item.created_at || item.maintenance_date)}
-                          </span>
-
-                          <div className="flex items-center gap-2">
-                            {Number(item.media_count || 0) > 0 ? (
-                              <span className="inline-flex items-center gap-1 text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md">
-                                <FiCamera className="w-3 h-3" />
-                                <span>{item.media_count} Media</span>
-                              </span>
-                            ) : (
-                              <span className="text-[10px] text-slate-400 font-medium">
-                                No media
-                              </span>
-                            )}
-                            <span className="text-[10px] font-semibold text-slate-500">
-                              #{item.id}
+                          <div className="flex items-center justify-between text-[11px] text-slate-500 pt-1 border-t border-slate-200/50">
+                            <span className="flex items-center gap-1">
+                              <FiClock className="w-3 h-3 text-slate-400" />
+                              {formatIndiaDateTime(item.created_at || item.maintenance_date)}
                             </span>
+
+                            <div className="flex items-center gap-2">
+                              {Number(item.media_count || 0) > 0 ? (
+                                <span className="inline-flex items-center gap-1 text-[10px] font-bold text-blue-600 bg-blue-50 px-2 py-0.5 rounded-md">
+                                  <FiCamera className="w-3 h-3" />
+                                  <span>{item.media_count} Media</span>
+                                </span>
+                              ) : (
+                                <span className="text-[10px] text-slate-400 font-medium">
+                                  No media
+                                </span>
+                              )}
+                              <span className="text-[10px] font-semibold text-slate-500 group-hover:text-blue-600 transition-colors">
+                                #{item.id} &rarr;
+                              </span>
+                            </div>
                           </div>
                         </div>
-                      </div>
-                    ))}
+                      );
+                    })}
                   </div>
                 ) : (
                   <div className="py-6 text-center text-xs text-slate-400 bg-slate-50 rounded-xl border border-dashed border-slate-200">
@@ -346,11 +363,8 @@ export default function MaintenanceSupervisorPage({ pageData }) {
         {/* ============================================================
             4. Minimal Footer
             ============================================================ */}
-        <footer className="py-2 text-center text-xs text-slate-400 border-t border-slate-200/60 bg-white -mx-4 md:-mx-20">
+        <footer className="py-3 text-center text-xs text-slate-400 border-t border-slate-200/60 bg-white/70 rounded-2xl mt-6">
           <p className="font-semibold text-slate-500">Powered by CargoDesk</p>
-          {/* <p className="text-[10px] text-slate-400 mt-0.5">
-            Transport & Fleet Management System
-          </p> */}
         </footer>
       </div>
     </>
