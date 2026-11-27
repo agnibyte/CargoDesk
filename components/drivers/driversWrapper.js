@@ -528,6 +528,7 @@ export default function DriversWrapper({ pageData }) {
           modalData={modalData}
           isEdit={isEdit}
           focusField={focusField}
+          currentUser={pageData?.user}
           toggleModal={() => setDriverModal(false)}
           onClose={() => setDriverModal(false)}
         />

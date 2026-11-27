@@ -84,6 +84,29 @@ export default function DriverForm({
   const [uploadProgress, setUploadProgress] = useState("");
   const [isDragging, setIsDragging] = useState(false);
 
+  // Resolve effective user and determine super_admin privileges
+  const effectiveUser = useMemo(() => {
+    if (currentUser) return currentUser;
+    if (typeof window !== "undefined") {
+      return (
+        window.__NEXT_DATA__?.props?.pageProps?.pageData?.user ||
+        window.__NEXT_DATA__?.props?.pageData?.user ||
+        null
+      );
+    }
+    return null;
+  }, [currentUser]);
+
+  const isSuperAdmin = useMemo(() => {
+    const role = (effectiveUser?.role || "").toLowerCase().trim();
+    return (
+      role === "super_admin" ||
+      role === "superadmin" ||
+      effectiveUser?.isSuperAdmin === true ||
+      effectiveUser?.email === "suraj@agnibyte.com"
+    );
+  }, [effectiveUser]);
+
   const profileInputRef = useRef(null);
   const docInputRef = useRef(null);
 
@@ -206,8 +229,9 @@ export default function DriverForm({
     }
   }, [preselectedOrgId, modalData]);
 
-  // Load organizations if not provided
+  // Load organizations for Super Admin if not provided
   useEffect(() => {
+    if (!isSuperAdmin) return;
     let isMounted = true;
     async function loadOrgs() {
       if (initialOrgs && initialOrgs.length > 0) {
@@ -227,7 +251,7 @@ export default function DriverForm({
     return () => {
       isMounted = false;
     };
-  }, [initialOrgs]);
+  }, [initialOrgs, isSuperAdmin]);
 
   // Reusable platform-wide auto-scroll and highlight target field
   useAutoFocusField(focusField, Boolean(focusField), [modalData, isEdit]);
@@ -557,7 +581,7 @@ export default function DriverForm({
         fleet_id: parsedFleetId,
       };
 
-      if (selectedOrgId && Number(selectedOrgId) > 0) {
+      if (isSuperAdmin && selectedOrgId && Number(selectedOrgId) > 0) {
         payload.orgId = Number(selectedOrgId);
         payload.organization_id = Number(selectedOrgId);
       }
@@ -645,8 +669,8 @@ export default function DriverForm({
         onSubmit={handleSubmit(onSubmit)}
         className="px-4 sm:px-6 py-4 space-y-4 bg-slate-50"
       >
-        {/* Organization Assignment for Super Admin */}
-        {organizationsList.length > 0 && (
+        {/* Organization Assignment for Super Admin ONLY */}
+        {isSuperAdmin && organizationsList.length > 0 && (
           <div className="bg-purple-50/70 border border-purple-200/80 rounded-2xl p-4 sm:p-5 space-y-3 shadow-2xs">
             <div className="flex items-center justify-between pb-2 border-b border-purple-200/60">
               <div className="flex items-center gap-2.5">

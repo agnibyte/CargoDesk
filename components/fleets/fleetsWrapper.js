@@ -486,6 +486,7 @@ export default function FleetsWrapper({ pageData }) {
           modalData={modalData}
           isEdit={isEdit}
           focusField={focusField}
+          currentUser={pageData?.user}
           toggleModal={() => setFleetModal(false)}
           onClose={() => setFleetModal(false)}
         />
