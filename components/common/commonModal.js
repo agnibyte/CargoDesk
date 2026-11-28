@@ -77,7 +77,9 @@ export default function CommonModal({
     <div
       id="backdrop"
       className={`fixed inset-0 z-[101] flex items-end sm:items-center justify-center p-0 sm:p-4 overflow-hidden ${
-        isClosing ? "animate-backdrop-out pointer-events-none" : "animate-backdrop-in"
+        isClosing
+          ? "animate-backdrop-out pointer-events-none"
+          : "animate-backdrop-in"
       }`}
       onClick={handleBackdropClick}
       aria-modal="true"
@@ -86,60 +88,77 @@ export default function CommonModal({
       {/* Dark Blur Overlay Background */}
       <div className="fixed inset-0 bg-slate-950/50 backdrop-blur-xs pointer-events-none" />
 
-      {/* Modal / Bottom Sheet Card */}
-      <div
-        className={`relative bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl border-t sm:border border-slate-200/80 w-full sm:w-auto ${modalSize} mx-0 sm:mx-auto overflow-hidden flex flex-col max-h-[92vh] sm:max-h-[88vh] z-10 will-change-transform ${
-          isClosing ? "animate-modal-out" : "animate-modal-in"
-        }`}
-        onClick={(e) => e.stopPropagation()}
-      >
-        {/* Mobile Drag Indicator Handle */}
-        <div className="sm:hidden pt-2.5 pb-0.5 flex justify-center shrink-0 bg-slate-50">
-          <div className="w-10 h-1 rounded-full bg-slate-300" />
-        </div>
+      {/* Modal Wrapper */}
+      <div className="relative w-full sm:w-auto flex justify-center overflow-visible z-10">
+        {/* External Close Button */}
+        {!backDrop && (
+          <button
+            type="button"
+            onClick={(e) => {
+              e.stopPropagation();
+              closeModal();
+            }}
+            className="absolute -top-12 right-4 sm:-right-4 sm:-top-4 z-[110]
+            flex items-center justify-center
+            w-10 h-10 rounded-full
+            bg-white text-slate-600
+            shadow-xl border border-slate-200
+            hover:bg-red-50 hover:text-red-600
+            hover:scale-105 active:scale-95
+            transition-all duration-200 cursor-pointer"
+            aria-label="Close"
+          >
+            <FiX className="w-5 h-5" />
+          </button>
+        )}
 
-        {/* Modal Header */}
-        {modalTitle && (
-          <div className="flex justify-between items-center px-5 sm:px-6 pt-3 sm:pt-4 pb-2 shrink-0 bg-slate-50">
-            <div className="text-base sm:text-lg font-bold text-slate-900 tracking-tight truncate pr-2">
-              {modalTitle}
-            </div>
-            <div className="flex items-center gap-1.5 shrink-0">
+        {/* Modal / Bottom Sheet Card */}
+        <div
+          className={`relative bg-white rounded-t-3xl sm:rounded-2xl shadow-2xl border-t sm:border border-slate-200/80 w-full sm:w-auto ${modalSize} mx-0 sm:mx-auto overflow-hidden flex flex-col max-h-[92vh] sm:max-h-[88vh] will-change-transform ${
+            isClosing ? "animate-modal-out" : "animate-modal-in"
+          }`}
+          onClick={(e) => e.stopPropagation()}
+        >
+          {/* Mobile Drag Indicator Handle */}
+          <div className="sm:hidden pt-2.5 pb-0.5 flex justify-center shrink-0 bg-slate-50">
+            <div className="w-10 h-1 rounded-full bg-slate-300" />
+          </div>
+
+          {/* Modal Header */}
+          {modalTitle && (
+            <div className="flex justify-between items-center px-5 sm:px-6 pt-3 sm:pt-4 pb-2 shrink-0 bg-slate-50">
+              <div className="text-base sm:text-lg font-bold text-slate-900 tracking-tight truncate pr-2">
+                {modalTitle}
+              </div>
+
               {showBackButton && handleBackButtonClick && (
                 <button
                   type="button"
                   onClick={handleBackButtonClick}
-                  className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
+                  className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer shrink-0"
                   aria-label="Back"
                 >
                   <FiArrowLeft className="w-5 h-5" />
                 </button>
               )}
-              {!backDrop && (
-                <button
-                  type="button"
-                  onClick={closeModal}
-                  className="p-1.5 text-slate-400 hover:text-slate-700 hover:bg-slate-100 rounded-xl transition-colors cursor-pointer"
-                  aria-label="Close"
-                >
-                  <FiX className="w-5 h-5" />
-                </button>
-              )}
             </div>
-          </div>
-        )}
+          )}
 
-        {/* Modal Body: Single sleek scrollbar for all modals */}
-        <div
-          className={`flex-1 min-h-0 ${
-            noScroll
-              ? "overflow-hidden flex flex-col"
-              : "overflow-y-auto overflow-x-hidden custom-scrollbar overscroll-contain"
-          }`}
-        >
-          {React.isValidElement(children)
-            ? React.cloneElement(children, { toggleModal, onClose: closeModal })
-            : children}
+          {/* Modal Body */}
+          <div
+            className={`flex-1 min-h-0 bg-slate-50 ${
+              noScroll
+                ? "overflow-hidden flex flex-col"
+                : "overflow-y-auto overflow-x-hidden custom-scrollbar overscroll-contain"
+            }`}
+          >
+            {React.isValidElement(children)
+              ? React.cloneElement(children, {
+                  toggleModal,
+                  onClose: closeModal,
+                })
+              : children}
+          </div>
         </div>
       </div>
     </div>
