@@ -308,27 +308,27 @@ export default function UserFormModal({
         {/* Modal Header */}
         <div className="px-6 py-5 bg-gradient-to-r from-slate-900 via-blue-950 to-slate-900 text-white flex items-center justify-between shrink-0">
           <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-blue-500/20 border border-blue-400/30 flex items-center justify-center text-blue-300">
+            <div className=" desktopOnly w-10 h-10 rounded-xl bg-blue-500/20 border border-blue-400/30 flex items-center justify-center text-blue-300">
               <FiUser className="w-5 h-5" />
             </div>
             <div>
               <h3 className="text-lg font-bold tracking-tight">
                 {isEdit ? "Edit Sub-User & Role" : "Add New Sub-User"}
               </h3>
-              <p className="text-xs text-slate-300">
+              <p className="desktopOnly text-xs text-slate-300">
                 {isEdit
                   ? "Update credentials, assign company organization, and modify permissions."
                   : "Invite a team member, select their organization, and assign their operational role."}
               </p>
             </div>
           </div>
-          <button
+          {/* <button
             onClick={onClose}
             className="p-1.5 rounded-lg text-slate-400 hover:text-white hover:bg-slate-800 transition-colors"
             aria-label="Close modal"
           >
             <FiX className="w-5 h-5" />
-          </button>
+          </button> */}
         </div>
 
         {/* Modal Body */}

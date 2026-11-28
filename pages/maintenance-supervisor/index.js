@@ -27,12 +27,19 @@ import Image from "next/image";
 import { useFleetDriver } from "@/context/fleetDriverContext";
 import executeQuery from "@/helpers/dbConnection";
 import { resolveOrganizationSettings } from "@/utilities/organizationSettings";
+import { useOrganizationSettings } from "@/hooks/useOrganizationSettings";
 
 export default function MaintenanceSupervisorPage({ pageData }) {
   const router = useRouter();
   const user = pageData?.user || null;
   const organization = pageData?.organization || null;
-  const orgSettings = pageData?.orgSettings || resolveOrganizationSettings(null);
+
+  // Reactively sync organization settings via SWR (with SSR preloaded initial settings)
+  const { settings: orgSettings } = useOrganizationSettings(
+    user?.orgId,
+    pageData?.orgSettings
+  );
+
   const [recentRecords, setRecentRecords] = useState([]);
   const [loadingRecent, setLoadingRecent] = useState(false);
   const [showRecent, setShowRecent] = useState(false);

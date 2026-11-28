@@ -331,9 +331,9 @@ export default function OrganizationDetailsWrapper({ initialData, currentUser })
           </Link>
 
           <div className="flex items-center gap-3 flex-wrap">
-            <div className="w-12 h-12 rounded-2xl bg-purple-600 text-white flex items-center justify-center font-black text-lg shadow-md shadow-purple-600/25">
+            {/* <div className="w-12 h-12 rounded-2xl bg-purple-600 text-white flex items-center justify-center font-black text-lg shadow-md shadow-purple-600/25">
               {organization.orgCode ? organization.orgCode.substring(0, 2) : "CD"}
-            </div>
+            </div> */}
             <div>
               <div className="flex items-center gap-2.5 flex-wrap">
                 <h1 className="text-xl sm:text-2xl font-black text-slate-900 tracking-tight">
