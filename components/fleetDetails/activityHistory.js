@@ -321,9 +321,9 @@ export default function ActivityHistory({
   };
 
   return (
-    <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-5 sm:p-6 flex flex-col">
+    <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-3 sm:p-6 flex flex-col">
       {/* Top Section: Title & Subtitle + Date Range Dropdown */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
+      <div className="flex sm:items-center justify-between gap-4 pb-4 border-b border-slate-100">
         <div className="flex items-start gap-3">
           {/* <div className="w-10 h-10 rounded-xl bg-blue-50 text-blue-600 flex items-center justify-center shrink-0 mt-0.5">
             <HiOutlineTruck className="w-6 h-6" />
@@ -333,13 +333,13 @@ export default function ActivityHistory({
               Activity History
             </h2>
             <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
-              Complete history of all operations and changes for this fleet.
+              Complete history of all operations the fleet.
             </p>
           </div>
         </div>
 
         {/* Date Filter Dropdown */}
-        <div className="relative" ref={dateMenuRef}>
+        <div className="relative flex justify-end" ref={dateMenuRef}>
           <button
             type="button"
             onClick={() => setDateDropdownOpen((prev) => !prev)}
@@ -355,7 +355,7 @@ export default function ActivityHistory({
           </button>
 
           {dateDropdownOpen && (
-            <div className="absolute right-0 mt-2 w-64 bg-white rounded-2xl shadow-xl border border-slate-200/90 p-2 z-30 animate-in fade-in zoom-in-95 duration-100">
+            <div className="absolute right-0 top-6 mt-3 w-64 bg-white rounded-2xl shadow-2xl border border-slate-200/90 p-2 z-30 animate-in fade-in zoom-in-95 duration-100">
               <div className="text-[11px] font-bold text-slate-400 px-3 py-1.5 uppercase tracking-wider">
                 Filter by Date
               </div>
@@ -538,7 +538,7 @@ export default function ActivityHistory({
                 {/* Date Group Header */}
                 <div className="flex items-center gap-2 mb-3.5 pl-6 sm:pl-7">
                   <div className="absolute left-[11px] sm:left-[13px] w-2.5 h-2.5 rounded-full bg-blue-600 ring-4 ring-blue-100" />
-                  <span className="text-xs sm:text-sm font-bold text-slate-900">
+                  <span className="ml-2 text-xs sm:text-sm font-bold text-slate-900">
                     {group.formattedDate}
                   </span>
                   {group.isToday && (
@@ -576,7 +576,7 @@ export default function ActivityHistory({
                       >
                         {/* Timeline Node Dot */}
                         <div
-                          className={`absolute -left-[19px] sm:-left-[15px] top-6 w-2 h-2 rounded-full ${style.dotColor} ring-4`}
+                          className={`absolute -left-[13px] sm:-left-[15px] top-6 w-2 h-2 rounded-full ${style.dotColor} ring-4`}
                         />
 
                         {/* Left Side: Category Icon + Content */}
@@ -590,9 +590,11 @@ export default function ActivityHistory({
                           </div>
 
                           <div className="min-w-0">
-                            {description && <h4 className="text-sm font-bold text-slate-900 group-hover:text-blue-600 transition-colors truncate">
-                              {description}
-                            </h4>}
+                            {description && (
+                              <h4 className="text-sm font-bold text-slate-900 group-hover:text-blue-600 transition-colors truncate">
+                                {description}
+                              </h4>
+                            )}
 
                             {title && (
                               <p className="text-xs text-slate-600 mt-0.5 line-clamp-2">

@@ -962,14 +962,14 @@ export const MaintenancePanel = React.memo(function MaintenancePanel({
 
   const summaryCards = [
     {
-      label: "Total Services",
+      label: "Services",
       value: summary.total_records,
       description: "", // "Logged Entries",
       icon: FiTool,
       iconStyle: "bg-blue-50 text-blue-600",
     },
     {
-      label: "Total Expense",
+      label: "Expense",
       value: `₹${Number(summary.total_expenditure || 0).toLocaleString("en-IN")}`,
       description: "", //"Maintenance Cost",
       icon: FiDollarSign,
@@ -984,7 +984,7 @@ export const MaintenancePanel = React.memo(function MaintenancePanel({
       iconStyle: "bg-indigo-50 text-indigo-600",
     },
     {
-      label: "Latest Status",
+      label: "Latest S",
       value: summary.latest_status || "N/A",
       icon: FiCheckCircle,
       iconStyle: "bg-purple-50 text-purple-600",
@@ -1042,7 +1042,7 @@ export const MaintenancePanel = React.memo(function MaintenancePanel({
 
       {/* 2. Controls & Actions Row */}
 
-      <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-3 sm:p-4 lg:p-5 flex flex-col gap-4">
+      <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-3 sm:p-4 lg:p-5 flex flex-col gap-2">
         {/* Search & Filters */}
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[minmax(220px,1.5fr)_minmax(150px,1fr)_minmax(150px,1fr)] gap-2.5 min-w-0">
           {/* Search */}
@@ -1061,7 +1061,7 @@ export const MaintenancePanel = React.memo(function MaintenancePanel({
           </form>
 
           {/* Status Filter */}
-          <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 min-w-0">
+          <div className="hidden md:flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 min-w-0">
             <FiFilter className="w-3.5 h-3.5 text-slate-400 shrink-0" />
             <select
               value={statusFilter}
@@ -1078,7 +1078,7 @@ export const MaintenancePanel = React.memo(function MaintenancePanel({
           </div>
 
           {/* Type Filter */}
-          <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 min-w-0">
+          <div className="hidden md:flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 min-w-0">
             <select
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value)}
@@ -1141,26 +1141,97 @@ export const MaintenancePanel = React.memo(function MaintenancePanel({
             )}
           </div>
 
-          {/* Quick Report */}
-          <button
+          <div className="flex gap-2">
+            {/* Quick Report */}
+            <button
+              type="button"
+              onClick={() => setIsQuickReportOpen(true)}
+              className="inline-flex items-center justify-center gap-1.5 w-full sm:w-auto px-3.5 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white text-xs font-bold rounded-xl shadow-xs transition-all cursor-pointer"
+              title="Ultra-simple mobile report with camera & voice"
+            >
+              <FiCamera className="w-3.5 h-3.5 shrink-0" />
+              <span>Quick Report (V2)</span>
+            </button>
+
+            {/* Log Maintenance */}
+            <button
+              type="button"
+              onClick={() => setIsAddModalOpen(true)}
+              className="inline-flex items-center justify-center gap-1.5 w-full sm:w-auto px-3.5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-xl shadow-xs transition-colors cursor-pointer"
+            >
+              <FiPlus className="w-4 h-4 shrink-0" />
+              <span>Log Maintenance</span>
+            </button>
+          </div> 
+        </div>
+      </div>
+
+      {/* Mobile Floating Action Buttons (Sticky Bottom Bar) */}
+      <div className="sm:hidden fixed bottom-0 left-0 right-0 z-40 p-3">
+        <div className="flex items-center gap-2 max-w-lg mx-auto">
+          {/* Quick Report Floating Action */}
+          {/* <button
             type="button"
             onClick={() => setIsQuickReportOpen(true)}
-            className="inline-flex items-center justify-center gap-1.5 w-full sm:w-auto px-3.5 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white text-xs font-bold rounded-xl shadow-xs transition-all cursor-pointer"
-            title="Ultra-simple mobile report with camera & voice"
+            className="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 px-3 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 active:scale-98 text-white text-xs font-bold rounded-xl shadow-xs transition-all cursor-pointer truncate"
           >
-            <FiCamera className="w-3.5 h-3.5 shrink-0" />
-            <span>Quick Report (V2)</span>
-          </button>
+            <FiCamera className="w-4 h-4 shrink-0" />
+            <span className="truncate">Quick Report</span>
+          </button> */}
 
-          {/* Log Maintenance */}
-          <button
+          {/* Log Maintenance Floating Action */}
+          {/* <button
             type="button"
             onClick={() => setIsAddModalOpen(true)}
-            className="inline-flex items-center justify-center gap-1.5 w-full sm:w-auto px-3.5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-xl shadow-xs transition-colors cursor-pointer"
+            className="flex-1 inline-flex items-center justify-center gap-1.5 py-2.5 px-3 bg-blue-600 hover:bg-blue-700 active:scale-98 text-white text-xs font-bold rounded-xl shadow-xs transition-all cursor-pointer truncate"
           >
-            <FiPlus className="w-4 h-4 shrink-0" />
-            <span>Log Maintenance</span>
-          </button>
+            <FiPlus className="w-4 h-4 shrink-0 stroke-[2.5]" />
+            <span className="truncate">Log Maintenance</span>
+          </button> */}
+        </div>
+        <div
+          className=" 1
+        "
+        >
+          {/* Mobile: Two-row floating toolbar */}
+          {/* Mobile Floating Filters - Only 2 Filters */}
+          <div className="sm:hidden fixed bottom-[max(16px,env(safe-area-inset-bottom))] left-1/2 -translate-x-1/2 z-[90] w-[calc(100%-32px)] max-w-[340px]">
+            <div className="grid grid-cols-2 gap-2 p-2 bg-white/95 backdrop-blur-xl border border-slate-200 rounded-2xl shadow-[0_8px_30px_rgba(15,23,42,0.18)]">
+              {/* Status Filter */}
+              <div className="flex items-center gap-1.5 min-w-0 px-3 py-3 bg-slate-50 border border-slate-200 rounded-xl">
+                <FiFilter className="w-3.5 h-3.5 text-slate-500 shrink-0" />
+
+                <select
+                  value={statusFilter}
+                  onChange={(e) => setStatusFilter(e.target.value)}
+                  className="w-full min-w-0 text-xs font-semibold text-slate-700 bg-transparent outline-none cursor-pointer"
+                >
+                  <option value="all">All Statuses</option>
+                  {FLEET_MAINTENANCE_STATUSES.map((st) => (
+                    <option key={st} value={st}>
+                      {st}
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              {/* Category Filter */}
+              <div className="flex items-center min-w-0 px-3 py-3 bg-slate-50 border border-slate-200 rounded-xl">
+                <select
+                  value={typeFilter}
+                  onChange={(e) => setTypeFilter(e.target.value)}
+                  className="w-full min-w-0 text-xs font-semibold text-slate-700 bg-transparent outline-none cursor-pointer"
+                >
+                  <option value="all">All Categories</option>
+                  {FLEET_MAINTENANCE_TYPES.map((tp) => (
+                    <option key={tp.type} value={tp.type}>
+                      {tp.type}
+                    </option>
+                  ))}
+                </select>
+              </div>
+            </div>
+          </div>
         </div>
       </div>
 
@@ -1181,7 +1252,7 @@ export const MaintenancePanel = React.memo(function MaintenancePanel({
               className="p-4 sm:p-5 rounded-2xl border border-slate-200/80 bg-white hover:border-slate-300 hover:shadow-xs transition-all space-y-3.5 cursor-pointer"
             >
               {/* Card Header */}
-              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
+              <div className="flex sm:items-center justify-between gap-2.5">
                 <div className="flex items-center gap-3">
                   <div className="w-10 h-10 rounded-xl bg-amber-50 text-amber-600 border border-amber-200/70 flex items-center justify-center font-bold shrink-0">
                     <FiTool className="w-5 h-5" />
@@ -1352,40 +1423,8 @@ export const MaintenancePanel = React.memo(function MaintenancePanel({
             </div>
           )}
         </div>
-      ) : (
-        /* Empty State */
-        <div className="py-14 text-center flex flex-col items-center justify-center bg-white rounded-2xl border border-slate-200/80 shadow-xs">
-          <div className="w-16 h-16 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mb-3">
-            <FiTool className="w-8 h-8" />
-          </div>
-          <h4 className="text-sm font-bold text-slate-800">
-            No Maintenance Records Found
-          </h4>
-          <p className="text-xs text-slate-500 max-w-sm mt-1 mb-4">
-            {statusFilter !== "all" || typeFilter !== "all" || searchQuery
-              ? "No maintenance records match your current filter criteria."
-              : `Keep vehicle ${fleet?.vehicle_number} in peak operational shape by logging regular services, repairs, and inspections.`}
-          </p>
-          <div className="flex items-center gap-3 flex-wrap justify-center">
-            <button
-              type="button"
-              onClick={() => setIsQuickReportOpen(true)}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white text-xs font-bold rounded-xl shadow-xs transition-all cursor-pointer"
-            >
-              <FiCamera className="w-4 h-4" />
-              <span>Quick Report (V2)</span>
-            </button>
-            <button
-              type="button"
-              onClick={() => setIsAddModalOpen(true)}
-              className="inline-flex items-center gap-2 px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-xl shadow-xs transition-colors cursor-pointer"
-            >
-              <FiPlus className="w-4 h-4" />
-              <span>Log Standard Maintenance</span>
-            </button>
-          </div>
-        </div>
-      )}
+      ) : /* Empty State */
+      null}
 
       {/* Quick Report V2 Modal */}
       {isQuickReportOpen && (
