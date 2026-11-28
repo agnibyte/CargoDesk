@@ -223,6 +223,11 @@ export const FLEET_MAINTENANCE_TYPES = [
     text: "", //"Tyre puncture / flat tyre",
   },
   {
+    label: "📝Other",
+    type: "Other",
+    text: "", //"Other problem (details below)",
+  },
+  {
     label: "🛑Brakes",
     type: "Brakes",
     text: "", //"Brakes not working properly / strange noise",
@@ -256,11 +261,6 @@ export const FLEET_MAINTENANCE_TYPES = [
     label: "🚨Breakdown",
     type: "Breakdown",
     text: "", //"Vehicle breakdown / stopped on road",
-  },
-  {
-    label: "📝Other",
-    type: "Other",
-    text: "", //"Other problem (details below)",
   },
 ];
 

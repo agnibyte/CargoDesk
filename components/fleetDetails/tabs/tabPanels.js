@@ -1,4 +1,10 @@
-import React, { useState, useEffect, useCallback, useRef, useMemo } from "react";
+import React, {
+  useState,
+  useEffect,
+  useCallback,
+  useRef,
+  useMemo,
+} from "react";
 import moment from "moment";
 import {
   FiFileText,
@@ -25,6 +31,7 @@ import {
   FiCamera,
   FiDownload,
   FiPrinter,
+  FiChevronDown,
 } from "react-icons/fi";
 import {
   exportVehicleOverviewCsv,
@@ -36,7 +43,9 @@ import { HiOutlineTruck, HiOutlineDocumentText } from "react-icons/hi";
 import { ImSpinner9 } from "react-icons/im";
 import CommonModal from "../../common/commonModal";
 import CommonConfirmation from "../../common/items/commonConfirmation";
-import MaintenanceForm, { MaintenanceFormV2 } from "../../fleetMaintenance/maintenanceForm";
+import MaintenanceForm, {
+  MaintenanceFormV2,
+} from "../../fleetMaintenance/maintenanceForm";
 import MaintenanceDetailsModal from "../../fleetMaintenance/maintenanceDetailsModal";
 import {
   FLEET_MAINTENANCE_TYPES,
@@ -44,12 +53,21 @@ import {
 } from "@/utilities/masterData";
 import { showToast } from "@/utilities/toastService";
 import { useOrganizationSettings } from "@/hooks/useOrganizationSettings";
-import { postApiData, swrPostApiData, invalidateApiCache } from "@/utilities/services/apiService";
+import {
+  postApiData,
+  swrPostApiData,
+  invalidateApiCache,
+} from "@/utilities/services/apiService";
 
 /**
  * Overview Tab Panel
  */
-export const OverviewPanel = React.memo(function OverviewPanel({ fleet, summary = {}, onNavigateTab, onAddDocument }) {
+export const OverviewPanel = React.memo(function OverviewPanel({
+  fleet,
+  summary = {},
+  onNavigateTab,
+  onAddDocument,
+}) {
   const status = (fleet?.status || "Active").toLowerCase();
 
   const loggedInUser =
@@ -57,34 +75,47 @@ export const OverviewPanel = React.memo(function OverviewPanel({ fleet, summary 
       ? window.__NEXT_DATA__?.props?.pageData?.user
       : null;
 
-  const exportSummary = useMemo(() => ({
-    ...summary,
-    orgName:
-      loggedInUser?.orgName ||
-      loggedInUser?.organization_name ||
-      fleet?.organization_name ||
-      fleet?.orgName ||
-      fleet?.orgCode ||
-      summary?.orgName ||
-      "",
-    organization_name:
-      loggedInUser?.orgName ||
-      loggedInUser?.organization_name ||
-      fleet?.organization_name ||
-      fleet?.orgName ||
-      fleet?.orgCode ||
-      summary?.organization_name ||
-      "",
-  }), [summary, fleet?.organization_name, fleet?.orgName, fleet?.orgCode, loggedInUser?.orgName, loggedInUser?.organization_name]);
+  const exportSummary = useMemo(
+    () => ({
+      ...summary,
+      orgName:
+        loggedInUser?.orgName ||
+        loggedInUser?.organization_name ||
+        fleet?.organization_name ||
+        fleet?.orgName ||
+        fleet?.orgCode ||
+        summary?.orgName ||
+        "",
+      organization_name:
+        loggedInUser?.orgName ||
+        loggedInUser?.organization_name ||
+        fleet?.organization_name ||
+        fleet?.orgName ||
+        fleet?.orgCode ||
+        summary?.organization_name ||
+        "",
+    }),
+    [
+      summary,
+      fleet?.organization_name,
+      fleet?.orgName,
+      fleet?.orgCode,
+      loggedInUser?.orgName,
+      loggedInUser?.organization_name,
+    ],
+  );
 
   return (
     <div className="space-y-6">
       {/* Top Overview Bar with Export Options */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 bg-white p-4 rounded-2xl border border-slate-200/80 shadow-2xs">
         <div>
-          <h3 className="text-sm font-bold text-slate-900">Vehicle Overview & Health</h3>
+          <h3 className="text-sm font-bold text-slate-900">
+            Vehicle Overview & Health
+          </h3>
           <p className="text-xs text-slate-500 mt-0.5">
-            Operational profile and technical specifications for {fleet?.vehicle_number || "this vehicle"}.
+            Operational profile and technical specifications for{" "}
+            {fleet?.vehicle_number || "this vehicle"}.
           </p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
@@ -92,7 +123,10 @@ export const OverviewPanel = React.memo(function OverviewPanel({ fleet, summary 
             type="button"
             onClick={() => {
               exportVehicleOverviewCsv(fleet, exportSummary);
-              showToast({ message: "Vehicle overview CSV downloaded", type: "success" });
+              showToast({
+                message: "Vehicle overview CSV downloaded",
+                type: "success",
+              });
             }}
             className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl transition-colors cursor-pointer"
             title="Download CSV / Excel report"
@@ -187,22 +221,26 @@ export const OverviewPanel = React.memo(function OverviewPanel({ fleet, summary 
             View EMI schedule <FiArrowRight className="w-3 h-3" />
           </button>
         </div>
-        {fleet?.gps_tracking_id && <div className="bg-white p-2 md:p-4 rounded-2xl border border-slate-200/80 shadow-2xs overflow-x-hidden">
-          <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
-              GPS Tracking ID
-            </span>
-            <FiCreditCard className="w-4 h-4 text-indigo-500" />
+        {fleet?.gps_tracking_id && (
+          <div className="bg-white p-2 md:p-4 rounded-2xl border border-slate-200/80 shadow-2xs overflow-x-hidden">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                GPS Tracking ID
+              </span>
+              <FiCreditCard className="w-4 h-4 text-indigo-500" />
+            </div>
+            <div className="mt-2 text-xl font-bold text-slate-900">
+              {fleet?.gps_tracking_id}
+            </div>
           </div>
-          <div className="mt-2 text-xl font-bold text-slate-900">
-            {fleet?.gps_tracking_id}
-          </div>
-        </div>}
+        )}
       </div>
 
       {/* Vehicle Operational Notes */}
       <div className="bg-white p-5 rounded-2xl border border-slate-200/80 shadow-xs">
-        <h3 className="text-sm font-bold text-slate-900 mb-2">Fleet Vehicle Overview & Notes</h3>
+        <h3 className="text-sm font-bold text-slate-900 mb-2">
+          Fleet Vehicle Overview & Notes
+        </h3>
         <p className="text-xs sm:text-sm text-slate-600 leading-relaxed">
           {fleet?.notes ||
             "Assigned for commercial logistics operations. All regular services, insurance, and fitness compliance certificates are monitored under CargoDesk fleet system."}
@@ -215,7 +253,11 @@ export const OverviewPanel = React.memo(function OverviewPanel({ fleet, summary 
 /**
  * Documents Tab Panel
  */
-export const DocumentsPanel = React.memo(function DocumentsPanel({ fleet, onAddDocument, onEditDocument }) {
+export const DocumentsPanel = React.memo(function DocumentsPanel({
+  fleet,
+  onAddDocument,
+  onEditDocument,
+}) {
   const documents = Array.isArray(fleet?.documents) ? fleet.documents : [];
 
   return (
@@ -223,13 +265,16 @@ export const DocumentsPanel = React.memo(function DocumentsPanel({ fleet, onAddD
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 pb-4 border-b border-slate-100">
         <div>
           <div className="flex items-center gap-2">
-            <h3 className="text-base font-bold text-slate-900">Vehicle Documents</h3>
+            <h3 className="text-base font-bold text-slate-900">
+              Vehicle Documents
+            </h3>
             <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-blue-50 text-blue-700 border border-blue-200">
               {documents.length}
             </span>
           </div>
           <p className="text-xs text-slate-500 mt-0.5">
-            Compliance certificates, insurance, PUC, permit, and fitness records for vehicle {fleet?.vehicle_number || ""}.
+            Compliance certificates, insurance, PUC, permit, and fitness records
+            for vehicle {fleet?.vehicle_number || ""}.
           </p>
         </div>
         <button
@@ -247,8 +292,11 @@ export const DocumentsPanel = React.memo(function DocumentsPanel({ fleet, onAddD
           {documents.map((doc) => {
             const expMoment = doc.expiryDate ? moment(doc.expiryDate) : null;
             const isExpired = expMoment && expMoment.isBefore(moment(), "day");
-            const daysLeft = expMoment ? expMoment.diff(moment(), "days") : null;
-            const isExpiringSoon = daysLeft !== null && daysLeft >= 0 && daysLeft <= 30;
+            const daysLeft = expMoment
+              ? expMoment.diff(moment(), "days")
+              : null;
+            const isExpiringSoon =
+              daysLeft !== null && daysLeft >= 0 && daysLeft <= 30;
 
             const docTypeUpper = (doc.documentType || "DOCUMENT").toUpperCase();
 
@@ -263,8 +311,12 @@ export const DocumentsPanel = React.memo(function DocumentsPanel({ fleet, onAddD
                       <FiFileText className="w-5 h-5" />
                     </div>
                     <div>
-                      <h4 className="text-sm font-bold text-slate-900">{docTypeUpper}</h4>
-                      <p className="text-xs text-slate-500">Doc ID: #{doc.id}</p>
+                      <h4 className="text-sm font-bold text-slate-900">
+                        {docTypeUpper}
+                      </h4>
+                      <p className="text-xs text-slate-500">
+                        Doc ID: #{doc.id}
+                      </p>
                     </div>
                   </div>
 
@@ -289,16 +341,24 @@ export const DocumentsPanel = React.memo(function DocumentsPanel({ fleet, onAddD
 
                 <div className="pt-2 border-t border-slate-200/60 grid grid-cols-2 gap-2 text-xs">
                   <div>
-                    <span className="text-slate-400 block text-[11px]">Expiry Date</span>
+                    <span className="text-slate-400 block text-[11px]">
+                      Expiry Date
+                    </span>
                     <span className="font-semibold text-slate-800 flex items-center gap-1 mt-0.5">
                       <FiCalendar className="w-3 h-3 text-slate-400" />
-                      {expMoment ? expMoment.format("DD MMM YYYY") : "Permanent / None"}
+                      {expMoment
+                        ? expMoment.format("DD MMM YYYY")
+                        : "Permanent / None"}
                     </span>
                   </div>
                   <div>
-                    <span className="text-slate-400 block text-[11px]">Alert Threshold</span>
+                    <span className="text-slate-400 block text-[11px]">
+                      Alert Threshold
+                    </span>
                     <span className="font-semibold text-slate-700 mt-0.5 block">
-                      {doc.alertDate ? moment(doc.alertDate).format("DD MMM YYYY") : "30 Days Prior"}
+                      {doc.alertDate
+                        ? moment(doc.alertDate).format("DD MMM YYYY")
+                        : "30 Days Prior"}
                     </span>
                   </div>
                 </div>
@@ -317,9 +377,12 @@ export const DocumentsPanel = React.memo(function DocumentsPanel({ fleet, onAddD
           <div className="w-14 h-14 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mb-3">
             <FiFileText className="w-7 h-7" />
           </div>
-          <h4 className="text-sm font-bold text-slate-800">No Documents Uploaded Yet</h4>
+          <h4 className="text-sm font-bold text-slate-800">
+            No Documents Uploaded Yet
+          </h4>
           <p className="text-xs text-slate-500 max-w-sm mt-1 mb-4">
-            Upload vehicle registration, insurance, PUC, permit, or fitness certificates for vehicle {fleet?.vehicle_number}.
+            Upload vehicle registration, insurance, PUC, permit, or fitness
+            certificates for vehicle {fleet?.vehicle_number}.
           </p>
           <button
             type="button"
@@ -346,13 +409,16 @@ export const EmiPanel = React.memo(function EmiPanel({ fleet }) {
       <div className="flex items-center justify-between pb-4 border-b border-slate-100">
         <div>
           <div className="flex items-center gap-2">
-            <h3 className="text-base font-bold text-slate-900">Loan & EMI Financing</h3>
+            <h3 className="text-base font-bold text-slate-900">
+              Loan & EMI Financing
+            </h3>
             <span className="px-2 py-0.5 rounded-full text-xs font-bold bg-indigo-50 text-indigo-700 border border-indigo-200">
               {emis.length} Active
             </span>
           </div>
           <p className="text-xs text-slate-500 mt-0.5">
-            Active finance plans, monthly installments, and payment schedules for {fleet?.vehicle_number}.
+            Active finance plans, monthly installments, and payment schedules
+            for {fleet?.vehicle_number}.
           </p>
         </div>
       </div>
@@ -376,7 +442,9 @@ export const EmiPanel = React.memo(function EmiPanel({ fleet }) {
                       <h4 className="text-sm font-bold text-slate-900">
                         {emi.loan_name || emi.bank_name || "Vehicle Finance"}
                       </h4>
-                      <p className="text-xs text-slate-500">A/C: {emi.loan_account_no || "N/A"}</p>
+                      <p className="text-xs text-slate-500">
+                        A/C: {emi.loan_account_no || "N/A"}
+                      </p>
                     </div>
                   </div>
                   <span
@@ -392,26 +460,36 @@ export const EmiPanel = React.memo(function EmiPanel({ fleet }) {
 
                 <div className="pt-2 border-t border-slate-200/60 grid grid-cols-2 gap-3 text-xs">
                   <div>
-                    <span className="text-slate-400 block text-[11px]">Monthly EMI</span>
+                    <span className="text-slate-400 block text-[11px]">
+                      Monthly EMI
+                    </span>
                     <span className="text-sm font-bold text-slate-900 mt-0.5 block">
                       ₹{Number(emi.emi_amount || 0).toLocaleString("en-IN")}
                     </span>
                   </div>
                   <div>
-                    <span className="text-slate-400 block text-[11px]">Total Loan</span>
+                    <span className="text-slate-400 block text-[11px]">
+                      Total Loan
+                    </span>
                     <span className="text-sm font-bold text-slate-700 mt-0.5 block">
                       ₹{Number(emi.loan_amount || 0).toLocaleString("en-IN")}
                     </span>
                   </div>
                   <div>
-                    <span className="text-slate-400 block text-[11px]">Due Date</span>
+                    <span className="text-slate-400 block text-[11px]">
+                      Due Date
+                    </span>
                     <span className="font-semibold text-slate-800 flex items-center gap-1 mt-0.5">
                       <FiCalendar className="w-3 h-3 text-slate-400" />
-                      {emi.due_date ? moment(emi.due_date).format("DD MMM YYYY") : "Monthly"}
+                      {emi.due_date
+                        ? moment(emi.due_date).format("DD MMM YYYY")
+                        : "Monthly"}
                     </span>
                   </div>
                   <div>
-                    <span className="text-slate-400 block text-[11px]">Tenure Progress</span>
+                    <span className="text-slate-400 block text-[11px]">
+                      Tenure Progress
+                    </span>
                     <span className="font-semibold text-slate-700 mt-0.5 block">
                       {emi.emis_paid || 0} / {emi.tenure_months || 0} Months
                     </span>
@@ -426,9 +504,12 @@ export const EmiPanel = React.memo(function EmiPanel({ fleet }) {
           <div className="w-14 h-14 rounded-2xl bg-slate-100 text-slate-400 flex items-center justify-center mb-3">
             <FiCreditCard className="w-7 h-7" />
           </div>
-          <h4 className="text-sm font-bold text-slate-800">No EMI Records Found</h4>
+          <h4 className="text-sm font-bold text-slate-800">
+            No EMI Records Found
+          </h4>
           <p className="text-xs text-slate-500 max-w-sm mt-1">
-            No active finance or EMI loans linked to vehicle {fleet?.vehicle_number}.
+            No active finance or EMI loans linked to vehicle{" "}
+            {fleet?.vehicle_number}.
           </p>
         </div>
       )}
@@ -439,14 +520,20 @@ export const EmiPanel = React.memo(function EmiPanel({ fleet }) {
 /**
  * Driver Tab Panel
  */
-export const DriverPanel = React.memo(function DriverPanel({ fleet, onAssignDriver, onUnassignDriver }) {
+export const DriverPanel = React.memo(function DriverPanel({
+  fleet,
+  onAssignDriver,
+  onUnassignDriver,
+}) {
   const hasDriver = Boolean(fleet?.driver_name);
 
   return (
     <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-5 sm:p-6 space-y-4">
       <div className="flex items-center justify-between pb-4 border-b border-slate-100">
         <div>
-          <h3 className="text-base font-bold text-slate-900">Assigned Driver</h3>
+          <h3 className="text-base font-bold text-slate-900">
+            Assigned Driver
+          </h3>
           <p className="text-xs text-slate-500 mt-0.5">
             Primary driver allocated to operate vehicle {fleet?.vehicle_number}.
           </p>
@@ -482,7 +569,9 @@ export const DriverPanel = React.memo(function DriverPanel({ fleet, onAssignDriv
             </div>
             <div>
               <div className="flex items-center gap-2">
-                <h4 className="text-base font-bold text-slate-900">{fleet.driver_name}</h4>
+                <h4 className="text-base font-bold text-slate-900">
+                  {fleet.driver_name}
+                </h4>
                 <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-100 text-emerald-800">
                   Active On Fleet
                 </span>
@@ -505,9 +594,12 @@ export const DriverPanel = React.memo(function DriverPanel({ fleet, onAssignDriv
           <div className="w-14 h-14 rounded-2xl bg-purple-50 text-purple-600 flex items-center justify-center mb-3">
             <FiUser className="w-7 h-7" />
           </div>
-          <h4 className="text-sm font-bold text-slate-800">No Driver Currently Assigned</h4>
+          <h4 className="text-sm font-bold text-slate-800">
+            No Driver Currently Assigned
+          </h4>
           <p className="text-xs text-slate-500 max-w-sm mt-1 mb-4">
-            Vehicle {fleet?.vehicle_number} does not have an active driver assigned to it.
+            Vehicle {fleet?.vehicle_number} does not have an active driver
+            assigned to it.
           </p>
           <button
             type="button"
@@ -527,7 +619,10 @@ export const DriverPanel = React.memo(function DriverPanel({ fleet, onAssignDriv
  * Maintenance Tab Panel
  * Complete maintenance history, summary metrics, filtering, and media management for the vehicle.
  */
-export const MaintenancePanel = React.memo(function MaintenancePanel({ fleet, onRefreshFleet }) {
+export const MaintenancePanel = React.memo(function MaintenancePanel({
+  fleet,
+  onRefreshFleet,
+}) {
   const [records, setRecords] = useState([]);
   const [summary, setSummary] = useState({
     total_records: 0,
@@ -548,7 +643,8 @@ export const MaintenancePanel = React.memo(function MaintenancePanel({ fleet, on
   const [isQuickReportOpen, setIsQuickReportOpen] = useState(false);
   // The fleet's organization decides whether a service log needs GPS coordinates.
   const { settings: orgSettings } = useOrganizationSettings(fleet?.orgId);
-  const [selectedRecordForDetails, setSelectedRecordForDetails] = useState(null);
+  const [selectedRecordForDetails, setSelectedRecordForDetails] =
+    useState(null);
   const [selectedRecordForEdit, setSelectedRecordForEdit] = useState(null);
   const [recordToDelete, setRecordToDelete] = useState(null);
   const [exportMenuOpen, setExportMenuOpen] = useState(false);
@@ -636,7 +732,7 @@ export const MaintenancePanel = React.memo(function MaintenancePanel({ fleet, on
         }
       }
     },
-    [fleet?.id, statusFilter, typeFilter, debouncedSearch]
+    [fleet?.id, statusFilter, typeFilter, debouncedSearch],
   );
 
   // Trigger fetch when vehicle, filters, or debounced search change (resets to page 1)
@@ -661,9 +757,14 @@ export const MaintenancePanel = React.memo(function MaintenancePanel({ fleet, on
     const deletedCost = Number(recordToDelete.cost || 0);
 
     try {
-      const json = await postApiData("DELETE_MAINTENANCE_RECORD", { id: deletedId });
+      const json = await postApiData("DELETE_MAINTENANCE_RECORD", {
+        id: deletedId,
+      });
       if (json?.status) {
-        showToast({ message: "Maintenance record deleted successfully", type: "success" });
+        showToast({
+          message: "Maintenance record deleted successfully",
+          type: "success",
+        });
 
         // Optimistically remove from state
         setRecords((prev) => prev.filter((r) => r.id !== deletedId));
@@ -672,7 +773,10 @@ export const MaintenancePanel = React.memo(function MaintenancePanel({ fleet, on
         setSummary((prev) => ({
           ...prev,
           total_records: Math.max(0, (Number(prev.total_records) || 0) - 1),
-          total_expenditure: Math.max(0, (Number(prev.total_expenditure) || 0) - deletedCost),
+          total_expenditure: Math.max(
+            0,
+            (Number(prev.total_expenditure) || 0) - deletedCost,
+          ),
         }));
 
         if (selectedRecordForDetails?.id === deletedId) {
@@ -681,11 +785,17 @@ export const MaintenancePanel = React.memo(function MaintenancePanel({ fleet, on
         setRecordToDelete(null);
         invalidateApiCache("GET_VEHICLE_MAINTENANCE");
       } else {
-        showToast({ message: json?.message || "Failed to delete record", type: "error" });
+        showToast({
+          message: json?.message || "Failed to delete record",
+          type: "error",
+        });
       }
     } catch (err) {
       console.error("Error deleting record:", err);
-      showToast({ message: "Network error while deleting record", type: "error" });
+      showToast({
+        message: "Network error while deleting record",
+        type: "error",
+      });
     }
   };
 
@@ -698,11 +808,15 @@ export const MaintenancePanel = React.memo(function MaintenancePanel({ fleet, on
     }
 
     setRecords((prev) =>
-      prev.map((r) => (r.id === updatedRecord.id ? { ...r, ...updatedRecord } : r))
+      prev.map((r) =>
+        r.id === updatedRecord.id ? { ...r, ...updatedRecord } : r,
+      ),
     );
 
     if (selectedRecordForDetails?.id === updatedRecord.id) {
-      setSelectedRecordForDetails((prev) => (prev ? { ...prev, ...updatedRecord } : null));
+      setSelectedRecordForDetails((prev) =>
+        prev ? { ...prev, ...updatedRecord } : null,
+      );
     }
 
     invalidateApiCache("GET_VEHICLE_MAINTENANCE");
@@ -725,8 +839,10 @@ export const MaintenancePanel = React.memo(function MaintenancePanel({ fleet, on
     setSummary((prev) => ({
       ...prev,
       total_records: (Number(prev.total_records) || 0) + 1,
-      total_expenditure: (Number(prev.total_expenditure) || 0) + Number(newRecord.cost || 0),
-      last_maintenance_date: newRecord.maintenance_date || prev.last_maintenance_date,
+      total_expenditure:
+        (Number(prev.total_expenditure) || 0) + Number(newRecord.cost || 0),
+      last_maintenance_date:
+        newRecord.maintenance_date || prev.last_maintenance_date,
       latest_status: newRecord.status || prev.latest_status,
     }));
 
@@ -738,9 +854,11 @@ export const MaintenancePanel = React.memo(function MaintenancePanel({ fleet, on
     if (!selectedRecordForDetails?.id) return;
     const recId = selectedRecordForDetails.id;
 
-    setSelectedRecordForDetails((prev) => (prev ? { ...prev, status: newStatus } : null));
+    setSelectedRecordForDetails((prev) =>
+      prev ? { ...prev, status: newStatus } : null,
+    );
     setRecords((prev) =>
-      prev.map((r) => (r.id === recId ? { ...r, status: newStatus } : r))
+      prev.map((r) => (r.id === recId ? { ...r, status: newStatus } : r)),
     );
 
     invalidateApiCache("GET_VEHICLE_MAINTENANCE");
@@ -750,11 +868,13 @@ export const MaintenancePanel = React.memo(function MaintenancePanel({ fleet, on
   const handleDetailsRefresh = async () => {
     if (!selectedRecordForDetails?.id) return;
     try {
-      const json = await postApiData("GET_MAINTENANCE_RECORD", { id: selectedRecordForDetails.id });
+      const json = await postApiData("GET_MAINTENANCE_RECORD", {
+        id: selectedRecordForDetails.id,
+      });
       if (json?.status && json?.data) {
         setSelectedRecordForDetails(json.data);
         setRecords((prev) =>
-          prev.map((r) => (r.id === json.data.id ? json.data : r))
+          prev.map((r) => (r.id === json.data.id ? json.data : r)),
         );
       }
     } catch (_) {}
@@ -766,7 +886,10 @@ export const MaintenancePanel = React.memo(function MaintenancePanel({ fleet, on
     if (!fleet?.id) return;
     setIsExporting(true);
     try {
-      showToast({ message: `Preparing maintenance ${exportFormat.toUpperCase()} report...`, type: "info" });
+      showToast({
+        message: `Preparing maintenance ${exportFormat.toUpperCase()} report...`,
+        type: "info",
+      });
 
       let exportList = records;
       // Only hit the API if total records exceed the currently loaded page
@@ -805,13 +928,19 @@ export const MaintenancePanel = React.memo(function MaintenancePanel({ fleet, on
 
       if (exportFormat === "csv") {
         exportMaintenanceHistoryCsv(exportList, fleet, exportSummary);
-        showToast({ message: "Maintenance history CSV downloaded successfully", type: "success" });
+        showToast({
+          message: "Maintenance history CSV downloaded successfully",
+          type: "success",
+        });
       } else {
         exportMaintenanceHistoryPdf(exportList, fleet, exportSummary);
       }
     } catch (err) {
       console.error("Export error:", err);
-      showToast({ message: "Failed to export maintenance records", type: "error" });
+      showToast({
+        message: "Failed to export maintenance records",
+        type: "error",
+      });
     } finally {
       setIsExporting(false);
       setExportMenuOpen(false);
@@ -832,103 +961,112 @@ export const MaintenancePanel = React.memo(function MaintenancePanel({ fleet, on
   };
 
   const summaryCards = [
-  {
-    label: "Total Services",
-    value: summary.total_records,
-    description: "", // "Logged Entries",
-    icon: FiTool,
-    iconStyle: "bg-blue-50 text-blue-600",
-  },
-  {
-    label: "Total Expense",
-    value: `₹${Number(summary.total_expenditure || 0).toLocaleString("en-IN")}`,
-    description: "", //"Maintenance Cost",
-    icon: FiDollarSign,
-    iconStyle: "bg-emerald-50 text-emerald-600",
-  },
-  {
-    label: "Last Service",
-    value: summary.last_maintenance_date
-      ? moment(summary.last_maintenance_date).format("DD MMM YYYY")
-      : "None Recorded",
-    icon: FiCalendar,
-    iconStyle: "bg-indigo-50 text-indigo-600",
-  },
-  {
-    label: "Latest Status",
-    value: summary.latest_status || "N/A",
-    icon: FiCheckCircle,
-    iconStyle: "bg-purple-50 text-purple-600",
-    isStatus: true,
-  },
-];
+    {
+      label: "Total Services",
+      value: summary.total_records,
+      description: "", // "Logged Entries",
+      icon: FiTool,
+      iconStyle: "bg-blue-50 text-blue-600",
+    },
+    {
+      label: "Total Expense",
+      value: `₹${Number(summary.total_expenditure || 0).toLocaleString("en-IN")}`,
+      description: "", //"Maintenance Cost",
+      icon: FiDollarSign,
+      iconStyle: "bg-emerald-50 text-emerald-600",
+    },
+    {
+      label: "Last Service",
+      value: summary.last_maintenance_date
+        ? moment(summary.last_maintenance_date).format("DD MMM YYYY")
+        : "None Recorded",
+      icon: FiCalendar,
+      iconStyle: "bg-indigo-50 text-indigo-600",
+    },
+    {
+      label: "Latest Status",
+      value: summary.latest_status || "N/A",
+      icon: FiCheckCircle,
+      iconStyle: "bg-purple-50 text-purple-600",
+      isStatus: true,
+    },
+  ];
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3">
       {/* 1. Summary Cards Section */}
-     <div className="grid grid-cols-4 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-  {summaryCards.map((card, index) => {
-    const Icon = card.icon;
+      <div className="grid grid-cols-4 gap-1 md:gap-4">
+        {summaryCards.map((card, index) => {
+          const Icon = card.icon;
 
-    return (
-      <div
-        key={index}
-        className="bg-white p-2 md:p-4 rounded-2xl border border-slate-200/80 shadow-2xs overflow-x-hidden"
-      >
-        <div className="flex items-center justify-between">
-          <span className="text-[10px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">
-            {card.label}
-          </span>
+          return (
+            <div
+              key={index}
+              className="bg-white p-2 md:p-4 rounded-xl border border-slate-200/80 shadow-2xs overflow-x-hidden"
+            >
+              <div className="flex items-center justify-between">
+                <span className="text-[8px] sm:text-xs font-semibold text-slate-500 uppercase tracking-wider">
+                  {card.label}
+                </span>
 
-          <div className={`desktopOnly w-8 h-8 rounded-xl flex items-center justify-center ${card.iconStyle}`}>
-            <Icon className="w-4 h-4" />
-          </div>
-        </div>
+                <div
+                  className={`desktopOnly w-8 h-8 rounded-xl flex items-center justify-center ${card.iconStyle}`}
+                >
+                  <Icon className="w-4 h-4" />
+                </div>
+              </div>
 
-        <div className="mt-2 flex md:flex-row flex-col items-baseline gap-2">
-          {card.isStatus ? (
-            <span className={`text-[8px] md:text-[10px] px-2.5 py-1 rounded-full font-bold border ${getStatusBadge(card.value)}`}>
-              {card.value}
-            </span>
-          ) : (
-            <span className="text-2xl font-bold text-slate-900 truncate">
-              {card.value}
-            </span>
-          )}
+              <div className="mt-2 flex md:flex-row flex-col items-baseline gap-2">
+                {card.isStatus ? (
+                  <span
+                    className={`text-[8px] md:text-[10px] px-2.5 py-1 rounded-full font-bold border ${getStatusBadge(card.value)}`}
+                  >
+                    {card.value}
+                  </span>
+                ) : (
+                  <span className="text-[12px] font-bold text-slate-900 truncate">
+                    {card.value}
+                  </span>
+                )}
 
-          {card.description && (
-            <span className="desktopOnly text-xs text-slate-500 font-medium">
-              {card.description}
-            </span>
-          )}
-        </div>
+                {card.description && (
+                  <span className="desktopOnly text-xs text-slate-500 font-medium">
+                    {card.description}
+                  </span>
+                )}
+              </div>
+            </div>
+          );
+        })}
       </div>
-    );
-  })}
-</div>
 
       {/* 2. Controls & Actions Row */}
-      <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-4 sm:p-5 flex flex-col md:items-startd justify-between gap-3">
+
+      <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-3 sm:p-4 lg:p-5 flex flex-col gap-4">
         {/* Search & Filters */}
-        <div className="flex flex-wrap items-center gap-2.5 flex-1 min-w-0">
-          <form onSubmit={handleSearchSubmit} className="relative w-full sm:w-64">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-[minmax(220px,1.5fr)_minmax(150px,1fr)_minmax(150px,1fr)] gap-2.5 min-w-0">
+          {/* Search */}
+          <form
+            onSubmit={handleSearchSubmit}
+            className="relative w-full min-w-0 sm:col-span-2 lg:col-span-1"
+          >
             <input
               type="text"
               placeholder="Search description, garage, invoice..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full pl-9 pr-3 py-2 text-xs bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-500 focus:bg-white transition-all text-slate-900 font-medium"
+              className="w-full pl-9 pr-3 py-2.5 text-xs bg-slate-50 border border-slate-200 rounded-xl outline-none focus:border-blue-500 focus:bg-white transition-all text-slate-900 font-medium"
             />
             <FiSearch className="w-3.5 h-3.5 text-slate-400 absolute left-3 top-1/2 -translate-y-1/2 pointer-events-none" />
           </form>
 
           {/* Status Filter */}
-          <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5">
-            <FiFilter className="w-3 h-3 text-slate-400" />
+          <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 min-w-0">
+            <FiFilter className="w-3.5 h-3.5 text-slate-400 shrink-0" />
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value)}
-              className="text-xs font-semibold text-slate-700 bg-transparent outline-none cursor-pointer"
+              className="w-full min-w-0 text-xs font-semibold text-slate-700 bg-transparent outline-none cursor-pointer"
             >
               <option value="all">All Statuses</option>
               {FLEET_MAINTENANCE_STATUSES.map((st) => (
@@ -940,11 +1078,11 @@ export const MaintenancePanel = React.memo(function MaintenancePanel({ fleet, on
           </div>
 
           {/* Type Filter */}
-          <div className="flex items-center gap-1.5 bg-slate-50 border border-slate-200 rounded-xl px-2.5 py-1.5">
+          <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded-xl px-3 py-2.5 min-w-0">
             <select
               value={typeFilter}
               onChange={(e) => setTypeFilter(e.target.value)}
-              className="text-xs font-semibold text-slate-700 bg-transparent outline-none cursor-pointer max-w-[150px] truncate"
+              className="w-full min-w-0 text-xs font-semibold text-slate-700 bg-transparent outline-none cursor-pointer"
             >
               <option value="all">All Categories</option>
               {FLEET_MAINTENANCE_TYPES.map((tp) => (
@@ -956,15 +1094,15 @@ export const MaintenancePanel = React.memo(function MaintenancePanel({ fleet, on
           </div>
         </div>
 
-        {/* Action Buttons: Export, Quick Report V2 & Full Log Form */}
-        <div className="flex items-center gap-2">
-          {/* Export Maintenance History Dropdown */}
-          <div className="relative" ref={exportMenuRef}>
+        {/* Action Buttons */}
+        <div className="flex flex-col sm:flex-row sm:flex-wrap lg:justify-end gap-2">
+          {/* Export Dropdown */}
+          <div className="relative w-full sm:w-auto" ref={exportMenuRef}>
             <button
               type="button"
               onClick={() => setExportMenuOpen((prev) => !prev)}
               disabled={isExporting}
-              className="inline-flex items-center gap-1.5 px-3 py-2 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl border border-slate-200 transition-all cursor-pointer shrink-0 disabled:opacity-50"
+              className="inline-flex items-center justify-center gap-1.5 w-full sm:w-auto px-3.5 py-2.5 bg-slate-100 hover:bg-slate-200 text-slate-700 text-xs font-semibold rounded-xl border border-slate-200 transition-all cursor-pointer disabled:opacity-50"
               title="Export maintenance history report"
             >
               {isExporting ? (
@@ -973,49 +1111,54 @@ export const MaintenancePanel = React.memo(function MaintenancePanel({ fleet, on
                 <FiDownload className="w-3.5 h-3.5 text-slate-600" />
               )}
               <span>Export</span>
+              <FiChevronDown className="w-3 h-3" />
             </button>
 
             {exportMenuOpen && (
-              <div className="absolute right-0 mt-2 w-52 bg-white rounded-xl shadow-lg border border-slate-200/90 py-1.5 z-30 animate-in fade-in zoom-in-95 duration-100">
+              <div className="absolute right-0 bottom-full sm:bottom-auto sm:top-full mb-2 sm:mb-0 sm:mt-2 w-52 max-w-[calc(100vw-2rem)] bg-white rounded-xl shadow-lg border border-slate-200/90 py-1.5 z-30 animate-in fade-in zoom-in-95 duration-100">
                 <div className="text-[10px] font-bold text-slate-400 px-3.5 py-1 uppercase tracking-wider">
                   Maintenance Export
                 </div>
+
                 <button
                   type="button"
                   onClick={() => handleExportMaintenance("csv")}
-                  className="w-full px-3.5 py-2 text-left text-xs font-medium text-slate-700 hover:bg-slate-50 flex items-center gap-2.5 transition-colors cursor-pointer"
+                  className="w-full px-3.5 py-2.5 text-left text-xs font-medium text-slate-700 hover:bg-slate-50 flex items-center gap-2.5 transition-colors cursor-pointer"
                 >
-                  <FiFileText className="w-4 h-4 text-emerald-600" />
+                  <FiFileText className="w-4 h-4 text-emerald-600 shrink-0" />
                   <span>Export as CSV / Excel</span>
                 </button>
+
                 <button
                   type="button"
                   onClick={() => handleExportMaintenance("pdf")}
-                  className="w-full px-3.5 py-2 text-left text-xs font-medium text-slate-700 hover:bg-slate-50 flex items-center gap-2.5 transition-colors cursor-pointer"
+                  className="w-full px-3.5 py-2.5 text-left text-xs font-medium text-slate-700 hover:bg-slate-50 flex items-center gap-2.5 transition-colors cursor-pointer"
                 >
-                  <FiPrinter className="w-4 h-4 text-blue-600" />
+                  <FiPrinter className="w-4 h-4 text-blue-600 shrink-0" />
                   <span>Export as PDF (Print)</span>
                 </button>
               </div>
             )}
           </div>
 
+          {/* Quick Report */}
           <button
             type="button"
             onClick={() => setIsQuickReportOpen(true)}
-            className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white text-xs font-bold rounded-xl shadow-xs transition-all cursor-pointer shrink-0"
+            className="inline-flex items-center justify-center gap-1.5 w-full sm:w-auto px-3.5 py-2.5 bg-gradient-to-r from-amber-500 to-orange-500 hover:from-amber-600 hover:to-orange-600 text-white text-xs font-bold rounded-xl shadow-xs transition-all cursor-pointer"
             title="Ultra-simple mobile report with camera & voice"
           >
-            <FiCamera className="w-3.5 h-3.5" />
+            <FiCamera className="w-3.5 h-3.5 shrink-0" />
             <span>Quick Report (V2)</span>
           </button>
 
+          {/* Log Maintenance */}
           <button
             type="button"
             onClick={() => setIsAddModalOpen(true)}
-            className="inline-flex items-center justify-center gap-1.5 px-3.5 py-2 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-xl shadow-xs transition-colors cursor-pointer shrink-0"
+            className="inline-flex items-center justify-center gap-1.5 w-full sm:w-auto px-3.5 py-2.5 bg-blue-600 hover:bg-blue-700 text-white text-xs font-semibold rounded-xl shadow-xs transition-colors cursor-pointer"
           >
-            <FiPlus className="w-4 h-4" />
+            <FiPlus className="w-4 h-4 shrink-0" />
             <span>Log Maintenance</span>
           </button>
         </div>
@@ -1025,16 +1168,18 @@ export const MaintenancePanel = React.memo(function MaintenancePanel({ fleet, on
       {loading ? (
         <div className="py-16 text-center flex flex-col items-center justify-center bg-white rounded-2xl border border-slate-200/80">
           <ImSpinner9 className="w-7 h-7 text-blue-600 animate-spin mb-3" />
-          <p className="text-xs text-slate-500 font-medium">Loading maintenance records...</p>
+          <p className="text-xs text-slate-500 font-medium">
+            Loading maintenance records...
+          </p>
         </div>
       ) : records.length > 0 ? (
         <div className="space-y-3">
           {records.map((item) => (
             <div
-  key={item.id}
-  onClick={() => setSelectedRecordForDetails(item)}
-  className="p-4 sm:p-5 rounded-2xl border border-slate-200/80 bg-white hover:border-slate-300 hover:shadow-xs transition-all space-y-3.5 cursor-pointer"
->
+              key={item.id}
+              onClick={() => setSelectedRecordForDetails(item)}
+              className="p-4 sm:p-5 rounded-2xl border border-slate-200/80 bg-white hover:border-slate-300 hover:shadow-xs transition-all space-y-3.5 cursor-pointer"
+            >
               {/* Card Header */}
               <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2.5">
                 <div className="flex items-center gap-3">
@@ -1043,8 +1188,12 @@ export const MaintenancePanel = React.memo(function MaintenancePanel({ fleet, on
                   </div>
                   <div>
                     <div className="flex items-center gap-2">
-                      <h4 className="text-sm font-bold text-slate-900">{item.maintenance_type}</h4>
-                      <span className={`px-2 py-0.5 rounded-full text-[11px] font-bold border ${getStatusBadge(item.status)}`}>
+                      <h4 className="text-sm font-bold text-slate-900">
+                        {item.maintenance_type}
+                      </h4>
+                      <span
+                        className={`px-2 py-0.5 rounded-full text-[11px] font-bold border ${getStatusBadge(item.status)}`}
+                      >
                         {item.status}
                       </span>
                     </div>
@@ -1056,7 +1205,10 @@ export const MaintenancePanel = React.memo(function MaintenancePanel({ fleet, on
                       {item.garage_name && (
                         <>
                           <span>•</span>
-                          <span className="truncate max-w-[200px]" title={item.garage_name}>
+                          <span
+                            className="truncate max-w-[200px]"
+                            title={item.garage_name}
+                          >
                             {item.garage_name}
                           </span>
                         </>
@@ -1076,9 +1228,12 @@ export const MaintenancePanel = React.memo(function MaintenancePanel({ fleet, on
 
                   {item.odometer_reading && (
                     <div className="pl-3 border-l border-slate-200/80">
-                      <span className="text-[11px] font-semibold text-slate-400 block">Odometer</span>
+                      <span className="text-[11px] font-semibold text-slate-400 block">
+                        Odometer
+                      </span>
                       <span className="text-xs font-bold text-slate-700">
-                        {Number(item.odometer_reading).toLocaleString("en-IN")} KM
+                        {Number(item.odometer_reading).toLocaleString("en-IN")}{" "}
+                        KM
                       </span>
                     </div>
                   )}
@@ -1097,7 +1252,10 @@ export const MaintenancePanel = React.memo(function MaintenancePanel({ fleet, on
                   <div className="flex items-center gap-2 overflow-x-auto no-scrollbar py-0.5">
                     <span className="text-[11px] font-bold text-slate-500 uppercase tracking-wider shrink-0 flex items-center gap-1">
                       <FiImage className="w-3 h-3 text-blue-500" />
-                      <span>{item.media.length} Attachment{item.media.length > 1 ? "s" : ""}:</span>
+                      <span>
+                        {item.media.length} Attachment
+                        {item.media.length > 1 ? "s" : ""}:
+                      </span>
                     </span>
                     {item.media.slice(0, 4).map((m) => (
                       <button
@@ -1107,7 +1265,8 @@ export const MaintenancePanel = React.memo(function MaintenancePanel({ fleet, on
                         className="flex items-center gap-1 px-2 py-1 rounded-lg bg-slate-100 hover:bg-slate-200 text-slate-700 text-[11px] font-medium transition-colors cursor-pointer truncate max-w-[130px]"
                         title={m.file_name}
                       >
-                        {m.media_type === "video" || m.mime_type?.startsWith("video/") ? (
+                        {m.media_type === "video" ||
+                        m.mime_type?.startsWith("video/") ? (
                           <FiVideo className="w-3 h-3 text-purple-600 shrink-0" />
                         ) : (
                           <FiImage className="w-3 h-3 text-blue-600 shrink-0" />
@@ -1122,7 +1281,9 @@ export const MaintenancePanel = React.memo(function MaintenancePanel({ fleet, on
                     )}
                   </div>
                 ) : (
-                  <span className="text-[11px] text-slate-400 font-medium">No media attached</span>
+                  <span className="text-[11px] text-slate-400 font-medium">
+                    No media attached
+                  </span>
                 )}
 
                 {/* Actions */}
@@ -1138,10 +1299,10 @@ export const MaintenancePanel = React.memo(function MaintenancePanel({ fleet, on
 
                   <button
                     type="button"
-                   onClick={(e) => {
-  e.stopPropagation();
-  setSelectedRecordForEdit(item);
-}}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      setSelectedRecordForEdit(item);
+                    }}
                     className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl border border-slate-200 bg-white hover:bg-slate-50 text-slate-700 text-xs font-semibold transition-colors cursor-pointer"
                   >
                     <FiEdit className="w-3.5 h-3.5 text-slate-600" />
@@ -1197,7 +1358,9 @@ export const MaintenancePanel = React.memo(function MaintenancePanel({ fleet, on
           <div className="w-16 h-16 rounded-2xl bg-amber-50 text-amber-600 flex items-center justify-center mb-3">
             <FiTool className="w-8 h-8" />
           </div>
-          <h4 className="text-sm font-bold text-slate-800">No Maintenance Records Found</h4>
+          <h4 className="text-sm font-bold text-slate-800">
+            No Maintenance Records Found
+          </h4>
           <p className="text-xs text-slate-500 max-w-sm mt-1 mb-4">
             {statusFilter !== "all" || typeFilter !== "all" || searchQuery
               ? "No maintenance records match your current filter criteria."
@@ -1236,7 +1399,10 @@ export const MaintenancePanel = React.memo(function MaintenancePanel({ fleet, on
             preselectedVehicle={fleet}
             onClose={() => setIsQuickReportOpen(false)}
             onSuccess={handleAddSuccess}
-            requireLocationCoordinates={orgSettings["maintenance.requireLocation"]}
+            requireLocationCoordinates={
+              orgSettings["maintenance.requireLocation"]
+            }
+            className={"p-2 md:px-5"}
           />
         </CommonModal>
       )}
@@ -1320,4 +1486,3 @@ export const MaintenancePanel = React.memo(function MaintenancePanel({ fleet, on
     </div>
   );
 });
-

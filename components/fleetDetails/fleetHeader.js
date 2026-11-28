@@ -123,7 +123,7 @@ export default function FleetHeader({
       </nav>
 
       {/* Main Header Container */}
-      <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-4 sm:p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
+      <div className="bg-white rounded-2xl border border-slate-200/80 shadow-xs p-3 sm:p-5 -mx-1 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
         {/* Left Side: Truck Icon + Info */}
         <div className="flex items-start sm:items-center gap-3.5 sm:gap-4">
           {/* <div className="w-12 h-12 sm:w-14 sm:h-14 rounded-2xl bg-blue-50/80 border border-blue-100/90 flex items-center justify-center shrink-0 text-blue-600 shadow-xs">
@@ -131,7 +131,7 @@ export default function FleetHeader({
           </div> */}
 
           <div className="min-w-0">
-            <div className="flex flex-wrap items-center gap-2.5">
+            <div className="flex flex-wrap items-center gap-2.5 ">
               <h1 className="text-xl sm:text-2xl font-bold text-slate-900 tracking-tight flex items-center gap-2">
                 <span>{vehicleNo}</span>
               </h1>
@@ -159,13 +159,13 @@ export default function FleetHeader({
         </div>
 
         {/* Right Side: Action Buttons */}
-        <div className="flex items-center justify-around md:gap-2.5">
+        <div className="flex items-center justify-around md:gap-2.5 text-xs">
           {/* Export Overview Dropdown */}
           <div className="relative" ref={exportMenuRef}>
             <button
               type="button"
               onClick={() => setExportMenuOpen((prev) => !prev)}
-              className="inline-flex items-center gap-1.5 px-3.5 sm:px-4 py-2 text-sm font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 rounded-xl shadow-xs transition-all cursor-pointer"
+              className="inline-flex items-center gap-1.5 px-3.5 sm:px-4 py-2 font-semibold text-slate-700 bg-white hover:bg-slate-50 border border-slate-200 hover:border-slate-300 rounded-xl shadow-xs transition-all cursor-pointer"
               title="Export vehicle overview report"
             >
               <FiDownload className="w-4 h-4 text-slate-500" />
@@ -207,16 +207,16 @@ export default function FleetHeader({
           <button
             type="button"
             onClick={onEditFleet}
-            className="inline-flex items-center gap-2 px-3.5 sm:px-4 py-2 text-sm font-semibold text-blue-700 bg-white hover:bg-blue-50/60 border border-blue-200 hover:border-blue-300 rounded-xl shadow-xs transition-all cursor-pointer"
+            className="inline-flex items-center gap-2 px-3.5 sm:px-4 py-2 font-semibold text-blue-700 bg-white hover:bg-blue-50/60 border border-blue-200 hover:border-blue-300 rounded-xl shadow-xs transition-all cursor-pointer"
           >
-            <FiEdit2 className="w-4 h-4 text-blue-600" />
+            <FiEdit2 className="w-3 h-3 md:w-4 md:h-4 text-blue-600" />
             <span>Edit Fleet</span>
           </button>
 
           <button
             type="button"
             onClick={onAddDocument}
-            className="inline-flex items-center gap-2 px-3.5 sm:px-4 py-2 text-sm font-semibold text-white bg-blue-600 hover:bg-blue-700 border border-blue-600 rounded-xl shadow-xs transition-all cursor-pointer hover:shadow-blue-500/25 hover:shadow-sm"
+            className="inline-flex items-center gap-2 px-3.5 sm:px-4 py-2 font-semibold text-white bg-blue-600 hover:bg-blue-700 border border-blue-600 rounded-xl shadow-xs transition-all cursor-pointer hover:shadow-blue-500/25 hover:shadow-sm"
           >
             <FiPlus className="w-4 h-4 stroke-[2.5]" />
             <span>Add Document</span>

@@ -38,11 +38,11 @@ export default function EnableLocationPopup({
           <h3 className="text-base sm:text-lg font-bold text-slate-900 tracking-tight">
             Enable Location for Photo Verification
           </h3>
-          {!allowSkip && (
+          {/* {!allowSkip && (
             <p className="text-xs font-medium text-amber-800 bg-amber-50/90 py-1.5 px-3 rounded-lg border border-amber-200">
               GPS location coordinates are compulsory to submit maintenance records.
             </p>
-          )}
+          )} */}
           {/* <p className="text-xs sm:text-sm text-slate-600 leading-relaxed max-w-sm mx-auto">
             Device location is used to stamp accurate date, time, and GPS coordinates onto fleet maintenance photos.
           </p> */}

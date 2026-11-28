@@ -81,6 +81,7 @@ export default function MaintenanceFormV2({
   resetOnSuccess = false,
   submitButtonText = "Save Maintenance Record",
   userOrgId = null,
+  className = "",
   requireLocationCoordinates = REQUIRE_LOCATION_COORDINATES,
 }) {
   const router = useRouter();
@@ -162,7 +163,7 @@ export default function MaintenanceFormV2({
   );
   const [isExpenseFocused, setIsExpenseFocused] = useState(false);
 
-const isExpenseFloating = isExpenseFocused || Boolean(expenseCost);
+  const isExpenseFloating = isExpenseFocused || Boolean(expenseCost);
 
   // References
   const cameraInputRef = useRef(null);
@@ -1237,7 +1238,7 @@ const isExpenseFloating = isExpenseFocused || Boolean(expenseCost);
   };
 
   return (
-    <div className="w-full">
+    <div className={`w-full ${className}`}>
       {/* Form Body */}
       <form onSubmit={handleSubmit} className="w-full space-y-1 sm:space-y-6">
         {/* Error Alert */}
@@ -1269,7 +1270,7 @@ const isExpenseFloating = isExpenseFocused || Boolean(expenseCost);
             isVehicleDropdownOpen && !preselectedVehicle ? "z-50" : "z-10"
           }`}
         >
-          <div className="flex flex-wrap items-center justify-between gap-2">
+          <div className="flex flex-wrap items-center justify-between">
             <label
               htmlFor="vehicle_number_input"
               className="flex items-center gap-1.5 text-xs sm:text-sm font-bold text-slate-800"
@@ -1494,13 +1495,18 @@ const isExpenseFloating = isExpenseFocused || Boolean(expenseCost);
                   {selectedVehicle.vehicle_number}
                 </span>
                 <span className="text-slate-600 truncate text-[11px] hidden sm:inline">
-                  • {selectedVehicle.vehicle_model || selectedVehicle.vehicle_type || "Vehicle"}
+                  •{" "}
+                  {selectedVehicle.vehicle_model ||
+                    selectedVehicle.vehicle_type ||
+                    "Vehicle"}
                 </span>
               </div>
               <button
                 type="button"
                 onClick={() => {
-                  router.push(`/maintenance/vehicle-history/${selectedVehicle.id}`);
+                  router.push(
+                    `/maintenance/vehicle-history/${selectedVehicle.id}`,
+                  );
                 }}
                 className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-95 text-white text-xs font-bold shadow-xs transition-all cursor-pointer shrink-0 ml-auto"
                 title={`View Maintenance History for ${selectedVehicle.vehicle_number}`}
@@ -1509,7 +1515,7 @@ const isExpenseFloating = isExpenseFocused || Boolean(expenseCost);
                 <span>View Maintenance History</span>
               </button>
             </div>
-          )} 
+          )}
 
           {validationErrorField === "vehicle" && (
             <p className="text-xs font-semibold text-rose-600 mt-1 flex items-center gap-1 animate-fadeIn">
@@ -1598,83 +1604,84 @@ const isExpenseFloating = isExpenseFocused || Boolean(expenseCost);
                 : ""
             }`}
           >
-          {locationStatus.resolved ? null : locationStatus.loading ? (
-            <div className="flex items-center justify-between px-3.5 py-2.5 bg-blue-50/90 border border-blue-200 rounded-2xl text-xs text-blue-900 shadow-2xs">
-              <div className="flex items-center gap-2">
-                <ImSpinner9 className="w-3.5 h-3.5 animate-spin text-blue-600 shrink-0" />
-                <span className="font-medium">Loading...</span>
-              </div>
-              {/* <button
+            {locationStatus.resolved ? null : locationStatus.loading ? (
+              <div className="flex items-center justify-between px-3.5 py-2.5 bg-blue-50/90 border border-blue-200 rounded-2xl text-xs text-blue-900 shadow-2xs">
+                <div className="flex items-center gap-2">
+                  <ImSpinner9 className="w-3.5 h-3.5 animate-spin text-blue-600 shrink-0" />
+                  <span className="font-medium">Loading...</span>
+                </div>
+                {/* <button
                 type="button"
                 onClick={handleSetChemburLocation}
                 className="text-[11px] font-bold text-blue-700 bg-blue-100 hover:bg-blue-200 px-2.5 py-1 rounded-lg shrink-0 cursor-pointer"
               >
                 Use Chembur
               </button> */}
-            </div>
-          ) : skipWatermark && !requireLocationCoordinates ? (
-            <div className="p-2 bg-slate-50 border border-slate-200 rounded-2xl flex flex-row sm:flex-row items-center justify-between gap-3 text-xs text-slate-700 shadow-2xs">
-              <div className="flex items-start gap-2.5 min-w-0">
-                {/* <FiSlash className="w-4 h-4 text-slate-500 shrink-0 " /> */}
-                <div className="min-w-0">
-                  <span className="font-bold block text-slate-900">
-                    GPS Watermark Skipped
-                  </span>
-                  {/* <span className="text-[11px] text-slate-500 block">
+              </div>
+            ) : skipWatermark && !requireLocationCoordinates ? (
+              <div className="p-2 bg-slate-50 border border-slate-200 rounded-2xl flex flex-row sm:flex-row items-center justify-between gap-3 text-xs text-slate-700 shadow-2xs">
+                <div className="flex items-start gap-2.5 min-w-0">
+                  {/* <FiSlash className="w-4 h-4 text-slate-500 shrink-0 " /> */}
+                  <div className="min-w-0">
+                    <span className="font-bold block text-slate-900">
+                      GPS Watermark Skipped
+                    </span>
+                    {/* <span className="text-[11px] text-slate-500 block">
                     Photos will be uploaded without location watermark. You can enable device location anytime.
                   </span> */}
+                  </div>
+                </div>
+                <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
+                  <button
+                    type="button"
+                    onClick={() => setShowEnableLocationPopup(true)}
+                    className="px-3.5 py-1.5 rounded-xl bg-violet-500 hover:bg-blue-700 active:scale-95 text-white text-xs font-bold transition-all cursor-pointer shadow-xs"
+                  >
+                    Enable Location
+                  </button>
                 </div>
               </div>
-              <div className="flex items-center gap-2 shrink-0 self-end sm:self-center">
-                <button
-                  type="button"
-                  onClick={() => setShowEnableLocationPopup(true)}
-                  className="px-3.5 py-1.5 rounded-xl bg-violet-500 hover:bg-blue-700 active:scale-95 text-white text-xs font-bold transition-all cursor-pointer shadow-xs"
-                >
-                  Enable Location
-                </button>
-              </div>
-            </div>
-          ) : (
-            <div className="p-2 bg-amber-50/95 border border-amber-200/90 rounded-2xl flex flex-row sm:flex-row sm:items-center justify-between gap-3 text-xs text-amber-950 shadow-2xs">
-              <div className="flex justify-center gap-2.5 min-w-0">
-                <FiAlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
-                <div className="min-w-0">
+            ) : (
+              <div className="p-2 bg-amber-50/95 border border-amber-200/90 rounded-2xl flex flex-row sm:flex-row sm:items-center justify-between gap-3 text-xs text-amber-950 shadow-2xs">
+                <div className="flex justify-center items-center gap-2.5 min-w-0">
+                  <FiAlertCircle className="w-4 h-4 text-amber-600 shrink-0 mt-0.5" />
                   <span className="font-bold block">
                     {requireLocationCoordinates
                       ? "GPS coordinates mandatory for submission."
                       : "GPS Location needed"}
                   </span>
                 </div>
-              </div>
 
-              <div className="flex items-center gap-3 shrink-0 self-end sm:self-center">
-                {!requireLocationCoordinates && (
+                <div className="flex items-center gap-3 shrink-0 self-end sm:self-center">
+                  {!requireLocationCoordinates && (
+                    <button
+                      type="button"
+                      onClick={handleSkipFromPopup}
+                      className="px-3 py-1.5 rounded-xl border border-amber-300 hover:bg-amber-100 text-amber-900 text-xs font-semibold transition-all cursor-pointer"
+                      title="Upload photos without watermark"
+                    >
+                      Skip
+                    </button>
+                  )}
                   <button
                     type="button"
-                    onClick={handleSkipFromPopup}
-                    className="px-3 py-1.5 rounded-xl border border-amber-300 hover:bg-amber-100 text-amber-900 text-xs font-semibold transition-all cursor-pointer"
-                    title="Upload photos without watermark"
+                    onClick={() => setShowEnableLocationPopup(true)}
+                    className="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-95 text-white text-xs font-bold transition-all cursor-pointer shadow-xs"
                   >
-                    Skip
+                    Enable
                   </button>
-                )}
-                <button
-                  type="button"
-                  onClick={() => setShowEnableLocationPopup(true)}
-                  className="px-3.5 py-1.5 rounded-xl bg-blue-600 hover:bg-blue-700 active:scale-95 text-white text-xs font-bold transition-all cursor-pointer shadow-xs"
-                >
-                  Enable
-                </button>
+                </div>
               </div>
-            </div>
-          )}
+            )}
           </div>
 
           {validationErrorField === "location" && (
             <p className="text-xs font-semibold text-rose-600 mt-1 flex items-center gap-1 animate-fadeIn">
               <FiAlertCircle className="w-3.5 h-3.5 shrink-0" />
-              <span>GPS Location coordinates are compulsory. Please enable device location.</span>
+              <span>
+                GPS Location coordinates are compulsory. Please enable device
+                location.
+              </span>
             </p>
           )}
 
@@ -1869,7 +1876,7 @@ const isExpenseFloating = isExpenseFocused || Boolean(expenseCost);
 
           <div
             ref={typeSectionRef}
-            className={`flex flex-wrap content-start gap-2 gap-x-3 overflow-x-auto h-[90px] pb-1 scrollbar-none my-3 transition-all rounded-xl ${
+            className={`flex flex-wrap content-start gap-2 gap-x-2 overflow-x-auto h-[90px] pb-1 scrollbar-none my-3 -mx-1 transition-all rounded-xl ${
               validationErrorField === "type"
                 ? "border-2 border-rose-500 ring-4 ring-rose-200 p-2 bg-rose-50/40"
                 : ""
@@ -1899,7 +1906,9 @@ const isExpenseFloating = isExpenseFocused || Boolean(expenseCost);
           {validationErrorField === "type" && (
             <p className="text-xs font-semibold text-rose-600 -mt-1 mb-2 flex items-center gap-1 animate-fadeIn">
               <FiAlertCircle className="w-3.5 h-3.5 shrink-0" />
-              <span>Please select a maintenance category before submitting.</span>
+              <span>
+                Please select a maintenance category before submitting.
+              </span>
             </p>
           )}
 
@@ -1993,14 +2002,16 @@ const isExpenseFloating = isExpenseFocused || Boolean(expenseCost);
           {validationErrorField === "description" && (
             <p className="text-xs font-semibold text-rose-600 mt-1 flex items-center gap-1 animate-fadeIn">
               <FiAlertCircle className="w-3.5 h-3.5 shrink-0" />
-              <span>Please describe the problem or use the microphone to speak.</span>
+              <span>
+                Please describe the problem or use the microphone to speak.
+              </span>
             </p>
           )}
         </div>
 
         {/* 5. Expense / Cost Field (Single Simple Input) */}
 
-{/* <div className="relative">
+        {/* <div className="relative">
   <fieldset
     className={`border rounded-xl px-3.5 pb-1.5 pt-1 transition-all ${
       isExpenseFocused
@@ -2036,59 +2047,50 @@ const isExpenseFloating = isExpenseFocused || Boolean(expenseCost);
   </fieldset>
 </div> */}
 
-<div className="relative">
-  <fieldset
-    className={`border rounded-xl px-3.5 pb-2 pt-2 transition-all duration-200 ${
-      isExpenseFocused
-        ? "border-blue-500 ring-2 ring-blue-100"
-        : "border-slate-300"
-    }`}
-  >
-    <legend
-      className={`px-1 transition-all duration-200 text-sm ${
-        isExpenseFloating
-          ? " font-medium"
-          : ""
-      } ${
-        isExpenseFocused ? "text-blue-600" : "text-slate-500"
-      }`}
-    >
-      {isExpenseFloating
-        ? "Maintenance Expense / Cost (Optional)"
-        : ""}
-    </legend>
+        <div className="relative">
+          <fieldset
+            className={`border rounded-xl px-3.5 pb-2 pt-2 transition-all duration-200 ${
+              isExpenseFocused
+                ? "border-blue-500 ring-2 ring-blue-100"
+                : "border-slate-300"
+            }`}
+          >
+            <legend
+              className={`px-1 transition-all duration-200 text-sm ${
+                isExpenseFloating ? " font-medium" : ""
+              } ${isExpenseFocused ? "text-blue-600" : "text-slate-500"}`}
+            >
+              {isExpenseFloating ? "Maintenance Expense / Cost (Optional)" : ""}
+            </legend>
 
-    <div className="relative flex items-center gap-2">
-      <span className="text-sm font-semibold text-slate-500">₹</span>
+            <div className="relative flex items-center gap-2">
+              <span className="text-sm font-semibold text-slate-500">₹</span>
 
-      <input
-        id="expenseCost"
-        type="number"
-        min="0"
-        step="0.01"
-        value={expenseCost}
-        onChange={(e) => setExpenseCost(e.target.value)}
-        onFocus={() => setIsExpenseFocused(true)}
-        onBlur={() => setIsExpenseFocused(false)}
-        disabled={isSubmitting}
-        placeholder={
-          isExpenseFocused ? "Enter amount" : " "
-        }
-        className="w-full bg-transparent text-sm font-medium text-slate-900 outline-none placeholder:text-slate-400"
-      />
+              <input
+                id="expenseCost"
+                type="number"
+                min="0"
+                step="0.01"
+                value={expenseCost}
+                onChange={(e) => setExpenseCost(e.target.value)}
+                onFocus={() => setIsExpenseFocused(true)}
+                onBlur={() => setIsExpenseFocused(false)}
+                disabled={isSubmitting}
+                placeholder={isExpenseFocused ? "Enter amount" : " "}
+                className="w-full bg-transparent text-sm font-medium text-slate-900 outline-none placeholder:text-slate-400"
+              />
 
-      {!isExpenseFloating && (
-        <label
-          htmlFor="expenseCost"
-          className="absolute left-7 text-sm text-slate-400 pointer-events-none"
-        >
-          Maintenance Expense / Cost (Optional)
-        </label>
-      )}
-    </div>
-  </fieldset>
-</div>
-
+              {!isExpenseFloating && (
+                <label
+                  htmlFor="expenseCost"
+                  className="absolute left-7 text-sm text-slate-400 pointer-events-none"
+                >
+                  Maintenance Expense / Cost (Optional)
+                </label>
+              )}
+            </div>
+          </fieldset>
+        </div>
 
         {/* 6. Prominent Full-Width Submit Button */}
         <div className="pt-2 space-y-2.5">

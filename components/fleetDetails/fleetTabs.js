@@ -12,11 +12,7 @@ import {
 } from "react-icons/fi";
 import { HiOutlineDocumentText } from "react-icons/hi";
 
-export default function FleetTabs({
-  activeTab,
-  onTabChange,
-  counts = {},
-}) {
+export default function FleetTabs({ activeTab, onTabChange, counts = {} }) {
   const [moreMenuOpen, setMoreMenuOpen] = useState(false);
   const moreRef = useRef(null);
 
@@ -35,6 +31,19 @@ export default function FleetTabs({
   }, [moreMenuOpen]);
 
   const tabs = [
+    {
+      id: "history",
+      name: "All Activity History",
+      icon: FiClock,
+      isPrimary: true,
+    },
+    {
+      id: "maintenance",
+      name: "Maintenance",
+      icon: FiTool,
+      count: counts.maintenance,
+      countColor: "bg-amber-100 text-amber-700",
+    },
     {
       id: "overview",
       name: "Overview",
@@ -61,19 +70,6 @@ export default function FleetTabs({
       count: counts.driver,
       countColor: "bg-emerald-100 text-emerald-700",
     },
-    {
-      id: "maintenance",
-      name: "Maintenance",
-      icon: FiTool,
-      count: counts.maintenance,
-      countColor: "bg-amber-100 text-amber-700",
-    },
-    {
-      id: "history",
-      name: "All Activity History",
-      icon: FiClock,
-      isPrimary: true,
-    },
   ];
 
   const moreTabs = [
@@ -84,7 +80,7 @@ export default function FleetTabs({
   const isMoreActive = moreTabs.some((t) => t.id === activeTab);
 
   return (
-    <div className="relative border-b border-slate-200/90 mb-5 flex items-center justify-between gap-1 select-none"> 
+    <div className="relative border-b border-slate-200/90 mb-5 flex items-center justify-between gap-1 select-none">
       {/* Scrollable Main Tabs Container  z-30 removed*/}
       <div className="flex items-center gap-1 sm:gap-2 overflow-x-auto no-scrollbar pb-0.5 flex-1 min-w-0">
         {tabs.map((tab) => {
@@ -104,7 +100,9 @@ export default function FleetTabs({
             >
               <Icon
                 className={`w-4 h-4 transition-colors ${
-                  isActive ? "text-blue-600" : "text-slate-400 group-hover:text-slate-600"
+                  isActive
+                    ? "text-blue-600"
+                    : "text-slate-400 group-hover:text-slate-600"
                 }`}
               />
               <span>{tab.name}</span>
@@ -114,7 +112,8 @@ export default function FleetTabs({
                   className={`inline-flex items-center justify-center px-1.5 py-0.5 min-w-[20px] text-xs font-bold rounded-full transition-colors ${
                     isActive
                       ? "bg-blue-600 text-white"
-                      : tab.countColor || "bg-slate-100 text-slate-700 group-hover:bg-slate-200"
+                      : tab.countColor ||
+                        "bg-slate-100 text-slate-700 group-hover:bg-slate-200"
                   }`}
                 >
                   {tab.count}

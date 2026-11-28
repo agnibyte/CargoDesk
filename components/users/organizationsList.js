@@ -36,7 +36,9 @@ export default function OrganizationsList({
               Tenant Organizations & Administrator Allocation
             </h4>
             <p className="text-xs text-slate-500 mt-0.5 leading-relaxed">
-              Super Admin can create distinct Organizations (companies/depots). Each organization has its own designated Administrators, Operations Staff, and Fleet Maintenance Personnel.
+              Super Admin can create distinct Organizations (companies/depots).
+              Each organization has its own designated Administrators,
+              Operations Staff, and Fleet Maintenance Personnel.
             </p>
           </div>
         </div>
@@ -54,9 +56,12 @@ export default function OrganizationsList({
       {organizations.length === 0 ? (
         <div className="py-12 text-center bg-slate-50 rounded-2xl border border-dashed border-slate-200 p-6">
           <FiBriefcase className="w-8 h-8 text-slate-400 mx-auto mb-2" />
-          <h4 className="text-sm font-bold text-slate-700">No organizations registered yet</h4>
+          <h4 className="text-sm font-bold text-slate-700">
+            No organizations registered yet
+          </h4>
           <p className="text-xs text-slate-500 mt-1 max-w-sm mx-auto">
-            Click &quot;New Organization&quot; above to create your first company or depot.
+            Click &quot;New Organization&quot; above to create your first
+            company or depot.
           </p>
         </div>
       ) : (
@@ -69,9 +74,16 @@ export default function OrganizationsList({
             return (
               <div
                 key={org.orgId}
-                className="bg-white rounded-2xl border border-slate-200/80 shadow-xs hover:shadow-md transition-all p-5 flex flex-col justify-between"
+                className="relative bg-white rounded-2xl border border-slate-200/80 shadow-xs hover:shadow-md hover:border-purple-200 transition-all p-5 flex flex-col justify-between group"
               >
-                <div>
+                {/* Full Card Clickable Overlay */}
+                <Link
+                  href={`/organizations/${org.orgId}`}
+                  aria-label={`View ${org.orgName} details`}
+                  className="absolute inset-0 z-0 rounded-2xl focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-purple-500"
+                />
+
+                <div className="relative z-10 pointer-events-none">
                   {/* Top: Icon + Code + Status */}
                   <div className="flex items-center justify-between mb-3">
                     <div className="flex items-center gap-2.5">
@@ -84,6 +96,7 @@ export default function OrganizationsList({
                         </span>
                       </div>
                     </div>
+
                     <span
                       className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${
                         isActive
@@ -96,13 +109,11 @@ export default function OrganizationsList({
                   </div>
 
                   {/* Title & Address */}
-                  <Link
-                    href={`/organizations/${org.orgId}`}
-                    className="group flex items-center justify-between text-base font-bold text-slate-800 hover:text-purple-700 tracking-tight transition-colors"
-                  >
+                  <div className="flex items-center justify-between text-base font-bold text-slate-800 group-hover:text-purple-700 tracking-tight transition-colors">
                     <span>{org.orgName}</span>
                     <FiArrowRight className="w-4 h-4 text-purple-600 opacity-0 group-hover:opacity-100 -translate-x-1 group-hover:translate-x-0 transition-all" />
-                  </Link>
+                  </div>
+
                   {org.address && (
                     <p className="text-xs text-slate-500 mt-1 flex items-start gap-1.5 leading-relaxed">
                       <FiMapPin className="w-3.5 h-3.5 text-slate-400 shrink-0 mt-0.5" />
@@ -110,7 +121,7 @@ export default function OrganizationsList({
                     </p>
                   )}
 
-                  {/* Contact info */}
+                  {/* Contact Info */}
                   <div className="mt-3 pt-3 border-t border-slate-100 space-y-1 text-xs text-slate-600">
                     {org.contactEmail && (
                       <p className="flex items-center gap-2 truncate text-slate-500">
@@ -118,6 +129,7 @@ export default function OrganizationsList({
                         <span className="truncate">{org.contactEmail}</span>
                       </p>
                     )}
+
                     {org.contactPhone && (
                       <p className="flex items-center gap-2 text-slate-500">
                         <FiPhone className="w-3.5 h-3.5 text-slate-400 shrink-0" />
@@ -137,31 +149,40 @@ export default function OrganizationsList({
                         {Number(org.fleetCount) || 0}
                       </p>
                     </div>
+
                     <div>
                       <p className="text-[10px] font-bold text-purple-700 uppercase flex items-center justify-center gap-1">
                         <FiShield className="w-3 h-3" />
                         Admins
                       </p>
-                      <p className="text-sm sm:text-base font-bold text-slate-800 mt-0.5">{adminCount}</p>
+                      <p className="text-sm sm:text-base font-bold text-slate-800 mt-0.5">
+                        {adminCount}
+                      </p>
                     </div>
+
                     <div>
                       <p className="text-[10px] font-bold text-slate-600 uppercase flex items-center justify-center gap-1">
                         <FiUsers className="w-3 h-3" />
                         Staff
                       </p>
-                      <p className="text-sm sm:text-base font-bold text-slate-800 mt-0.5">{memberCount}</p>
+                      <p className="text-sm sm:text-base font-bold text-slate-800 mt-0.5">
+                        {memberCount}
+                      </p>
                     </div>
                   </div>
 
-                  {/* Module Access Provisioning Indicator */}
+                  {/* Module Access Provisioning */}
                   <div className="mt-2.5 flex items-center justify-between text-[11px] bg-slate-50 px-3 py-1.5 rounded-xl border border-slate-100">
                     <span className="font-semibold text-slate-600 flex items-center gap-1.5">
                       <FiLayers className="w-3.5 h-3.5 text-purple-600" />
                       Module Access:
                     </span>
-                    {Array.isArray(org.allowedModules) && org.allowedModules.length < 9 ? (
+
+                    {Array.isArray(org.allowedModules) &&
+                    org.allowedModules.length < 9 ? (
                       <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-rose-50 text-rose-700 border border-rose-200">
-                        {org.allowedModules.length}/9 Active (Blocked {9 - org.allowedModules.length})
+                        {org.allowedModules.length}/9 Active (Blocked{" "}
+                        {9 - org.allowedModules.length})
                       </span>
                     ) : (
                       <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200">
@@ -172,7 +193,7 @@ export default function OrganizationsList({
                 </div>
 
                 {/* Footer Actions */}
-                <div className="mt-5 pt-3 border-t border-slate-100 flex items-center gap-2">
+                <div className="relative z-20 mt-5 pt-3 border-t border-slate-100 flex items-center gap-2">
                   <Link
                     href={`/organizations/${org.orgId}`}
                     className="flex-1 py-1.5 px-2.5 bg-purple-50 hover:bg-purple-100 text-purple-700 text-xs font-bold rounded-lg transition-colors flex items-center justify-center gap-1.5"
@@ -181,21 +202,29 @@ export default function OrganizationsList({
                     <span>View Details</span>
                     <FiArrowRight className="w-3.5 h-3.5" />
                   </Link>
+
                   <button
-                    onClick={() => onAddAdminToOrg && onAddAdminToOrg(org.orgId)}
+                    type="button"
+                    onClick={() =>
+                      onAddAdminToOrg && onAddAdminToOrg(org.orgId)
+                    }
                     className="p-1.5 text-blue-600 hover:text-blue-800 hover:bg-blue-50 rounded-lg transition-colors"
                     title="Assign an Administrator"
                   >
                     <FiUserPlus className="w-4 h-4" />
                   </button>
+
                   <button
+                    type="button"
                     onClick={() => onOpenEdit && onOpenEdit(org)}
                     className="p-1.5 text-slate-500 hover:text-slate-800 hover:bg-slate-100 rounded-lg transition-colors"
                     title="Edit Organization"
                   >
                     <FiEdit2 className="w-3.5 h-3.5" />
                   </button>
+
                   <button
+                    type="button"
                     onClick={() => onDelete && onDelete(org)}
                     className="p-1.5 text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
                     title="Delete Organization"

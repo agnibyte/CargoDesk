@@ -257,7 +257,7 @@ export default function FleetDetailsWrapper({
   }
 
   return (
-    <div className="pb-12">
+    <div className="pb-12 -mx-2">
       {/* Top Fleet Header with Breadcrumbs and Action Buttons */}
       <FleetHeader
         fleet={fleet}
